@@ -310,6 +310,80 @@ body { overflow-x: hidden; }
 @media (min-width: 1100px) { .wrap { max-width: 1040px; } .s3d { max-height: 72vh; } }
 button, .gtile { touch-action: manipulation; }
 
+/* ================= one-screen layout ================= */
+/* Home: games on the left, the play card on the right (wide screens); on small screens the play card floats at the bottom. */
+@media (min-width: 900px) {
+  .wrap { max-width: 1280px; }
+  .home { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 16px 20px; align-items: start; }
+  .home .gamegrid { grid-column: 1; grid-row: 1 / span 4; }
+  .home > .panel { grid-column: 2; }
+  .home .gamepanel { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow: auto; z-index: 5; border-color: var(--gold); background: var(--room); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  .gp-actions { flex-direction: column; align-items: stretch; }
+  .gp-actions .solo { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .gp-actions .hostform { display: flex; flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 899px) {
+  .home .gamepanel { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 30; max-height: 48dvh; overflow: auto; background: var(--room); border-color: var(--gold); box-shadow: 0 -6px 28px rgba(0,0,0,.6); padding: 10px 12px; }
+  .home:has(.gamepanel:not([hidden])) { padding-bottom: 46dvh; }
+  .gp-head h2 { font-size: 18px; }
+  .gp-actions .hostform, #createNote { display: none; }
+  .gp-actions .solo { display: flex; gap: 10px; align-items: flex-end; }
+  .gp-actions .solo .b { flex: 1; }
+}
+.gp-close { display: none; }
+
+/* Room: everything inside one screen. Table fills the space, controls sit in a slim bar, notes sit beside (or behind a button). */
+body:has(#room:not([hidden])) .top, body:has(#room:not([hidden])) footer { display: none; }
+body:has(#room:not([hidden])) { overflow: hidden; }
+body:has(#room:not([hidden])) .wrap { max-width: none; height: 100dvh; padding-block: 6px; padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right)); gap: 0; }
+#room:not([hidden]) { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr) auto; gap: 6px; }
+#room > .below { display: none; }
+#stage { min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+#stage > .table, #stage > section { flex: 1 1 auto; }
+.controls { padding: 8px 10px; gap: 6px; min-height: 0; max-height: 32dvh; overflow: auto; border-radius: 14px; }
+.roombar b { font-size: 16px; } .roombar .ghost { padding: 6px 10px; font-size: 13px; }
+.table:has(.s3dbox) { flex: 1; min-height: 0; padding: 6px; gap: 6px; border-width: 4px; border-radius: 22px; }
+.table:has(.s3dbox) .s3dbox { flex: 1; min-height: 0; }
+.table:has(.s3dbox) .s3d { max-width: none; height: 100%; aspect-ratio: auto; max-height: none; }
+.table:has(.s3dbox) .plate .style { display: none; }
+.table:has(.s3dbox) .banner { min-height: 0; }
+#infoBtn { display: inline-block; }
+@media (min-width: 1000px) {
+  #room:not([hidden]) { grid-template-columns: minmax(0, 1fr) 290px; }
+  #room > * { grid-column: 1; }
+  #room > .below { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / -1; overflow: auto; gap: 10px; padding-left: 4px; }
+  #infoBtn { display: none; }
+}
+@media (max-width: 999px) {
+  #room.showinfo > .below { display: flex; flex-direction: column; position: fixed; inset: 8px; z-index: 40; background: var(--room); border: 2px solid var(--gold); border-radius: 16px; padding: 12px; overflow: auto; gap: 10px; }
+}
+#infoClose { display: none; } #room.showinfo #infoClose { display: inline-block; }
+#stage > .s3dbox { flex: 1 1 0; min-height: 160px; }
+#stage > .s3dbox .s3d { max-width: none; height: 100%; aspect-ratio: auto; max-height: none; }
+#stage > .s3dbox ~ .table { flex: 0 0 auto; padding: 4px 8px; gap: 2px; border-width: 3px; border-radius: 14px; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; }
+#stage > .s3dbox ~ .table .seat { flex-direction: row; gap: 8px; }
+#stage > .s3dbox ~ .table .banner { min-height: 0; font-size: 14px; }
+#stage > .s3dbox ~ .table .bots:empty, #stage > .s3dbox ~ .table .bots[style*="height:0"] { display: none; }
+#room:not([hidden]) { gap: 0 8px; }
+#room > .roombar { grid-row: 1; margin-bottom: 6px; } #room > .notice { grid-row: 2; margin-bottom: 6px; } #room > .invite { grid-row: 3; margin-bottom: 6px; } #room > .demobar { grid-row: 4; margin-bottom: 6px; }
+#room > #stage { grid-row: 5; } #room > .controls { grid-row: 6; margin-top: 6px; }
+#room > .below { grid-row: 1 / -1; }
+body { margin: 0; }
+#stage .s3dbox { position: relative; }
+#stage .s3dbox .s3d { position: absolute; inset: 0; height: auto; width: auto; max-width: none; max-height: none; aspect-ratio: auto; }
+#stage > .s3dbox ~ .table .bots, #stage > .s3dbox ~ .table .bt-opps, #stage > .s3dbox ~ .table .tc-seats, #stage > .s3dbox ~ .table .rs-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+#stage > .s3dbox ~ .table .plate { padding: 2px 8px; max-width: 130px; }
+#stage > .s3dbox ~ .table .plate .stack { font-size: 14px; }
+#stage > .s3dbox ~ .table .center:not(:has(*)) { display: none; }
+#stage > .s3dbox ~ .table .banner:empty { display: none; }
+#stage > .s3dbox ~ .table .bt-hand:empty { display: none; }
+.table:has(.s3dbox) [id$="Seats"], .table:has(.s3dbox) .bt-opps, .table:has(.s3dbox) .bots { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 6px 10px; }
+.table:has(.s3dbox) [id$="Seats"] .seat, .table:has(.s3dbox) .bots .seat { flex-direction: row; gap: 6px; width: auto; }
+.table:has(.s3dbox) .plate { padding: 2px 8px; max-width: 150px; }
+.table:has(.s3dbox) .plate .stack { font-size: 14px; }
+.table:has(.s3dbox) .banner:empty { display: none; }
+.table:has(.s3dbox) .seat .tag, .table:has(.s3dbox) .plate { white-space: nowrap; }
+
 /* ----- Tai Ti and Colour Rush share a row of opponents and a hand of tappable cards ----- */
 .bt-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(8px, 2vw, 20px); }
 .bt-opps .seat { flex: 1 1 96px; max-width: 170px; }
@@ -618,6 +692,23 @@ button, .gtile { touch-action: manipulation; }
 .cue-svg.carrom { max-width: 460px; margin: 0 auto; }
 .betrow input[type=range] { flex: 1; min-width: 120px; accent-color: var(--gold, #f2b441); }
 
+/* hand overlay: my own cards, large and clear, along the bottom of the 3D view */
+.s3d-hint { top: 8px; bottom: auto; left: auto; right: 8px; max-width: 52%; font-size: 12.5px; padding: 5px 9px; }
+.s3d-hand { position: absolute; left: 0; right: 0; bottom: 6px; z-index: 3; display: flex; justify-content: center; align-items: flex-end; gap: 14px; padding: 0 8px; pointer-events: none; }
+.s3d-hand .hg { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 100%; pointer-events: auto; background: rgba(12,8,20,.55); border-radius: 12px; padding: 4px 8px 6px; backdrop-filter: blur(3px); }
+.s3d-hand .hl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #f2b441; font-weight: 700; }
+.s3d-hand .hr { --cw: clamp(46px, 11vh, 84px); display: flex; gap: 6px; padding-top: 22px; max-width: 100%; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+.s3d-hand .hr > .cards, .s3d-hand .hr .bt-hand { display: flex; gap: 6px; min-height: 0; }
+.s3d-hand .card { box-shadow: 0 3px 8px rgba(0,0,0,.55); animation: none; transition: transform .16s ease, box-shadow .16s ease; }
+.s3d-hand button { padding: 0; border: 0; background: none; cursor: pointer; display: flex; flex: none; border-radius: calc(var(--cw) * .12); }
+.s3d-hand button:hover .card, .s3d-hand button:hover { transform: translateY(-10px); }
+.s3d-hand .sel, .s3d-hand .held, .s3d-hand .ok.sel, .s3d-hand [aria-pressed="true"] { transform: translateY(-22px) scale(1.06); filter: drop-shadow(0 8px 10px rgba(0,0,0,.6)); }
+.s3d-hand .sel .card, .s3d-hand .held .card { box-shadow: 0 0 0 3px #f2b441, 0 8px 14px rgba(0,0,0,.55); }
+.s3d-hand .dense .hr { gap: 0; } .s3d-hand .dense .hr > * { margin-left: calc(var(--cw) * -.4); } .s3d-hand .dense .hr > :first-child { margin-left: 0; }
+.s3d-hand .bt-card { flex: none; }
+.s3d-hand .card.back { border-width: 2px; }
+@media (max-width: 640px) { .s3d-hint { display: none; } } .plate { max-width: 170px; }
+
 </style>
 <div class="wrap">
   <header class="top">
@@ -684,7 +775,7 @@ button, .gtile { touch-action: manipulation; }
   <section id="room" hidden>
     <div class="roombar">
       <div><b id="roomName"></b><span id="roomSub"></span></div>
-      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
     </div>
     <div class="notice" id="notice" hidden></div>
     <div class="invite" id="invite" hidden>
@@ -728,6 +819,7 @@ button, .gtile { touch-action: manipulation; }
 
     <div class="below">
       <section class="panel">
+        <button type="button" class="ghost" id="infoClose" style="align-self:flex-end">Close</button>
         <h2>This round</h2>
         <ol id="log"></ol>
       </section>
@@ -1006,7 +1098,7 @@ const T3 = (() => {
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(o.fov || 45, 1.6, 0.1, 400);
+    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(o.fov || 45, 1.6, 0.6, 300);
     let fovMul = 1;
     const s = { scene, camera, renderer, wrap, cv, hooks: [], tweens: [], people: [], clouds: [], views: {}, view: '', S: null, t: 0, dead: false, sway: 0 };
     const tgt = { pos: new THREE.Vector3(0, 8, 8), look: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0), fov: o.fov || 45 };
@@ -1020,16 +1112,23 @@ const T3 = (() => {
       if (snap) { camera.position.copy(tgt.pos); curLook.copy(tgt.look); curUp.copy(tgt.up); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); }
     };
     s.setViews = (views, pick, snap) => {
-      s.views = views; const names = Object.keys(views);
+      s.views = views; const names = Object.keys(views); s.base = pick || names[0]; s.manual = false;
       bar.innerHTML = names.map(k => `<button type="button" data-v="${k}" aria-pressed="false">${views[k].label || k}</button>`).join('');
       s.setView(views[s.view] ? s.view : (pick || names[0]), snap);
     };
     s.setView = (name, snap) => {
-      if (!s.views[name]) return; s.view = name; s.goto(s.views[name], snap);
+      if (!s.views[name]) return; s.view = name; s.manual = !!s.base && name !== s.base; s.zoomed = false; s.goto(s.views[name], snap);
       bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === name));
       if (s.onView) s.onView(name);
     };
     bar.onclick = e => { const b = e.target.closest('[data-v]'); if (b) s.setView(b.dataset.v); };
+    // Zoom in a little when it is the player's turn, and back out afterwards (unless they chose another view themselves).
+    s.autoZoom = on => {
+      const v = s.views[s.base]; if (!v || s.manual || !!on === !!s.zoomed) return; s.zoomed = !!on;
+      if (!on) { s.goto(v); return; }
+      const k = v.zoom === undefined ? 0.24 : v.zoom, p = v.pos.map((x, i) => x + (v.look[i] - x) * k);
+      s.goto({ pos: p, look: v.look, up: v.up, fov: Math.max(30, (v.fov || 45) - 4), sway: 0 });
+    };
     s.on = fn => { s.hooks.push(fn); };
     s.tween = (ms, fn, done) => { const t = { ms, t: 0, fn, done }; s.tweens.push(t); return t; };
     s.addPerson = p => { s.people.push(p); return p; };
@@ -1071,22 +1170,44 @@ const T3 = (() => {
   }
 
   // wrap a 2D screen: keep its seats, banners and controls, and swap its board for a 3D scene
+  // Your own cards, big and crisp, along the bottom of the 3D view. They mirror the 2D hand: tapping a card taps the real one
+  // (so it lifts up when picked, just like picking a card up off the table).
+  function hud(s, finders) {
+    const root = document.createElement('div'); root.className = 's3d-hand'; root.hidden = true; s.wrap.appendChild(root);
+    let last = '', cur = [];
+    const sync = () => {
+      let found = []; try { found = (finders() || []).filter(f => f && f.el && !f.el.hidden && f.el.querySelector('.card, .bt-card, .vp-card, button')); } catch (e) { found = []; }
+      const key = found.map(f => f.label + '|' + f.el.innerHTML).join('§'); if (key === last) return; last = key; cur = found;
+      root.hidden = !found.length;
+      root.innerHTML = found.map((f, g) => `<div class="hg${f.el.querySelectorAll('.card').length > 6 ? ' dense' : ''}" data-g="${g}">${f.label ? `<span class="hl">${f.label}</span>` : ''}<div class="hr">${f.el.innerHTML}</div></div>`).join('');
+    };
+    root.onclick = e => {
+      const grp = e.target.closest('.hg'); if (!grp) return; const f = cur[+grp.dataset.g]; if (!f || !f.el) return;
+      const all = [...grp.querySelector('.hr').querySelectorAll('*')], i = all.indexOf(e.target); if (i < 0) return;
+      let o = f.el.querySelectorAll('*')[i]; if (!o) return;
+      let b = o; while (b && b !== f.el && b.tagName !== 'BUTTON' && !b.dataset.c && !b.dataset.i && !b.dataset.h) b = b.parentElement; if (b && b !== f.el) o = b;
+      o.click(); setTimeout(sync, 30); setTimeout(sync, 250);
+    };
+    s.hud = { sync }; return root;
+  }
+
   function wrapUi(ui2d, o) {
-    let sc = null, box = null, hidden = [];
+    let sc = null, box = null, hidden = [], stEl = null, lastS = null;
     return {
       mount(stageEl, ctl, S) {
-        ui2d.mount(stageEl, ctl, S); sc = null; hidden = [];
+        ui2d.mount(stageEl, ctl, S); sc = null; hidden = []; stEl = stageEl;
         try {
           const slot = o.slot(stageEl); box = document.createElement('div'); box.className = 's3dbox';
           slot.before.parentNode.insertBefore(box, slot.before);
           (slot.hide || []).forEach(e => { if (e) { e.style.display = 'none'; hidden.push(e); } });
           sc = o.make(box, S);
+          if (o.hands && sc && sc.wrap) hud(sc, () => o.hands(stEl, lastS));
         } catch (e) {
           lastErr = String(e && e.stack || e); console.error(lastErr);
           hidden.forEach(h => { h.style.display = ''; }); if (box) box.remove(); sc = null; try { window.__errs && window.__errs.push('3D: ' + lastErr); } catch (x) {}
         }
       },
-      update(S) { const r = ui2d.update(S); if (sc && sc.sync) { try { sc.sync(S); } catch (e) { lastErr = String(e && e.stack || e); console.error(lastErr); try { window.__errs && window.__errs.push('3D sync: ' + lastErr); } catch (x) {} } } return r; },
+      update(S) { lastS = S; const r = ui2d.update(S); if (sc && sc.autoZoom) sc.autoZoom(!!S.turn); if (sc && sc.hud) sc.hud.sync(); if (sc && sc.sync) { try { sc.sync(S); } catch (e) { lastErr = String(e && e.stack || e); console.error(lastErr); try { window.__errs && window.__errs.push('3D sync: ' + lastErr); } catch (x) {} } } return r; },
     };
   }
 
@@ -1133,7 +1254,7 @@ const T3 = (() => {
     return g;
   }
 
-  return { has, on, setPref, mat, mk, BOX, CYL, SPH, canvasTex, speckle, label, person, lounge, outdoor, stage, wrapUi, card3, chips, ease, err: () => lastErr };
+  return { has, on, setPref, hud, mat, mk, BOX, CYL, SPH, canvasTex, speckle, label, person, lounge, outdoor, stage, wrapUi, card3, chips, ease, err: () => lastErr };
 })();
 
 /* ---------- Texas Hold'em ---------- */
@@ -1534,7 +1655,7 @@ const ui = {
 function poker3d(box, S) {
   const TH = THREE, s = T3.stage(box, { fov: 44 }), sc = s.scene, TY = 2.5, AT = 7.0, BT = 4.2;
   T3.lounge(s, { w: 34, d: 28, lamps: [], ambient: 0.55, wall: '#1d2a38', bg: 0x0c1118 });
-  const key = new TH.SpotLight(0xfff0d0, 1.5, 44, 0.9, 0.6, 1.1); key.position.set(0, 13, 2); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+  const key = new TH.SpotLight(0xfff0d0, 1.5, 44, 0.9, 0.6, 1.1); key.position.set(0, 13, 2); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
   T3.mk(sc, new TH.CircleGeometry(12, 56), T3.mat('#4a1620', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
   const felt = T3.canvasTex(512, 512, T3.speckle('#1f7a4a', 40, 7000));
   const top = T3.mk(sc, new TH.CylinderGeometry(1, 1, 0.3, 72), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.15, 0); top.scale.set(AT, 1, BT);
@@ -1637,7 +1758,7 @@ Club.register({
   round, view,
   priv: (G, i) => ({ c: G.players[i].cards || [] }),
   ui,
-  ui3d: T3.wrapUi(ui, { slot: st => ({ before: st.querySelector('.table'), hide: [st.querySelector('#pkBots'), st.querySelector('#pkBoard'), st.querySelector('.pot'), st.querySelector('#pkHcards')] }), make: poker3d }),
+  ui3d: T3.wrapUi(ui, { slot: st => ({ before: st.querySelector('.table'), hide: [st.querySelector('#pkBots'), st.querySelector('#pkBoard'), st.querySelector('.pot'), st.querySelector('#pkHcards')] }), hands: st => [{ label: 'Table', el: st.querySelector('#pkBoard') }, { label: 'Your hand', el: st.querySelector('#pkHcards') }], make: poker3d }),
   _test: { evaluate, describe, botDecide },
 });
 })();
@@ -4455,24 +4576,47 @@ function clickSq(i) {
   sel = mine.some(m => m.from === i) && sel !== i ? i : -1; draw();
 }
 function makePiece(v) {
+  // Turned-wood style pieces: every kind has its own clear silhouette (pawn ball, castle, horse, mitre, crown, cross).
   const TH = THREE, t = Math.abs(v), white = v > 0, g = new TH.Group();
-  const m = T3.mat(white ? '#efe4cc' : '#2b2420', { roughness: 0.35, metalness: 0.12, side: TH.DoubleSide });
-  const lathe = pts => T3.mk(g, new TH.LatheGeometry(pts.map(p => new TH.Vector2(p[0], p[1])), 28), m, 0, 0, 0);
-  const base = [[0.001, 0], [0.36, 0], [0.38, 0.05], [0.34, 0.1], [0.26, 0.16]];
-  if (t === 1) { lathe([...base, [0.17, 0.3], [0.2, 0.42], [0.14, 0.46], [0.001, 0.46]]); T3.mk(g, T3.SPH(0.2, 16), m, 0, 0.62, 0); }
-  else if (t === 4) { lathe([...base, [0.24, 0.25], [0.22, 0.7], [0.31, 0.76], [0.31, 0.92], [0.001, 0.92]]); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; T3.mk(g, T3.BOX(0.13, 0.12, 0.13), m, Math.cos(a) * 0.25, 0.98, Math.sin(a) * 0.25); } }
-  else if (t === 3) { lathe([...base, [0.2, 0.3], [0.14, 0.62], [0.24, 0.72], [0.18, 0.9], [0.001, 1.02]]); T3.mk(g, T3.SPH(0.07, 10), m, 0, 1.07, 0); }
-  else if (t === 5) { lathe([...base, [0.22, 0.3], [0.15, 0.85], [0.3, 1.0], [0.22, 1.08], [0.001, 1.08]]); T3.mk(g, T3.SPH(0.1, 12), m, 0, 1.2, 0); }
-  else if (t === 6) { lathe([...base, [0.22, 0.3], [0.16, 0.9], [0.3, 1.05], [0.2, 1.12], [0.001, 1.12]]); T3.mk(g, T3.BOX(0.1, 0.36, 0.1), m, 0, 1.3, 0); T3.mk(g, T3.BOX(0.28, 0.1, 0.1), m, 0, 1.34, 0); }
-  else {
-    lathe([...base, [0.24, 0.3], [0.2, 0.4], [0.001, 0.4]]);
-    const k = new TH.Group(); g.add(k);
-    const neck = T3.mk(k, T3.BOX(0.32, 0.55, 0.26), m, 0, 0.62, -0.02); neck.rotation.x = -0.2;
-    const head = T3.mk(k, T3.BOX(0.26, 0.26, 0.5), m, 0, 0.93, 0.16); head.rotation.x = 0.35;
-    T3.mk(k, T3.BOX(0.2, 0.2, 0.12), m, 0, 0.8, 0.42).rotation.x = 0.35;
-    for (const sx of [-1, 1]) T3.mk(k, new TH.ConeGeometry(0.05, 0.16, 6), m, sx * 0.08, 1.12, -0.04);
-    k.rotation.y = white ? Math.PI : 0;
+  const m = T3.mat(white ? '#fff3dc' : '#241a16', { roughness: 0.4, metalness: 0.05, side: TH.DoubleSide });
+  const gold = T3.mat('#d9a93c', { roughness: 0.3, metalness: 0.45 }), ink = T3.mat('#14100e', { roughness: 0.5 });
+  const lathe = (pts, mt) => T3.mk(g, new TH.LatheGeometry(pts.map(p => new TH.Vector2(p[0], p[1])), 32), mt || m, 0, 0, 0);
+  const base = [[0.001, 0], [0.4, 0], [0.43, 0.04], [0.43, 0.09], [0.36, 0.14], [0.3, 0.2], [0.3, 0.24]];
+  const ring = (y, r) => T3.mk(g, new TH.TorusGeometry(r, 0.035, 8, 28), m, 0, y, 0).rotation.x = Math.PI / 2;
+  if (t === 1) {                                   // pawn: small, round head on a short stem
+    lathe([...base, [0.2, 0.34], [0.14, 0.5], [0.2, 0.58], [0.001, 0.58]]); ring(0.57, 0.19);
+    T3.mk(g, T3.SPH(0.21, 20), m, 0, 0.76, 0);
+  } else if (t === 4) {                            // rook: tower with battlements
+    lathe([...base, [0.26, 0.34], [0.23, 0.78], [0.33, 0.86], [0.35, 0.92], [0.35, 1.06], [0.001, 1.06]]);
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; const b = T3.mk(g, T3.BOX(0.16, 0.2, 0.13), m, Math.cos(a) * 0.27, 1.14, Math.sin(a) * 0.27); b.rotation.y = -a; }
+  } else if (t === 3) {                            // bishop: mitre with a slit and a ball
+    lathe([...base, [0.2, 0.36], [0.12, 0.7], [0.22, 0.78], [0.12, 0.86], [0.001, 0.86]]); ring(0.78, 0.2);
+    const h = T3.mk(g, T3.SPH(0.2, 20), m, 0, 1.08, 0); h.scale.y = 1.55;
+    const cut = T3.mk(g, T3.BOX(0.34, 0.05, 0.05), ink, 0.02, 1.14, 0.17); cut.rotation.z = 0.7;
+    T3.mk(g, T3.SPH(0.07, 12), gold, 0, 1.46, 0);
+  } else if (t === 5) {                            // queen: tall, with a crown of points
+    lathe([...base, [0.22, 0.38], [0.13, 0.85], [0.17, 1.0], [0.3, 1.16], [0.24, 1.24], [0.001, 1.24]]); ring(0.98, 0.17);
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; const c = T3.mk(g, new TH.ConeGeometry(0.05, 0.24, 8), m, Math.cos(a) * 0.23, 1.34, Math.sin(a) * 0.23); c.rotation.z = -Math.cos(a) * 0.25; c.rotation.x = Math.sin(a) * 0.25; T3.mk(g, T3.SPH(0.045, 8), gold, Math.cos(a) * 0.26, 1.48, Math.sin(a) * 0.26); }
+    T3.mk(g, T3.SPH(0.11, 14), gold, 0, 1.4, 0);
+  } else if (t === 6) {                            // king: crown band with a cross
+    lathe([...base, [0.22, 0.38], [0.14, 0.9], [0.18, 1.04], [0.3, 1.2], [0.25, 1.3], [0.001, 1.3]]); ring(1.02, 0.18);
+    T3.mk(g, new TH.TorusGeometry(0.22, 0.045, 8, 28), gold, 0, 1.33, 0).rotation.x = Math.PI / 2;
+    T3.mk(g, T3.BOX(0.11, 0.42, 0.11), gold, 0, 1.62, 0); T3.mk(g, T3.BOX(0.32, 0.11, 0.11), gold, 0, 1.68, 0);
+  } else {                                         // knight: a real horse-head profile
+    lathe([...base, [0.24, 0.3], [0.001, 0.3]]);
+    const sh = new TH.Shape();
+    sh.moveTo(-0.26, 0.28); sh.lineTo(-0.28, 0.62); sh.quadraticCurveTo(-0.3, 0.95, -0.12, 1.14);      // back of the neck and mane
+    sh.lineTo(-0.06, 1.3); sh.lineTo(0.04, 1.16);                                                          // ear
+    sh.quadraticCurveTo(0.22, 1.14, 0.36, 0.9); sh.lineTo(0.5, 0.74); sh.quadraticCurveTo(0.54, 0.64, 0.46, 0.6); // forehead, nose
+    sh.lineTo(0.3, 0.62); sh.quadraticCurveTo(0.14, 0.62, 0.1, 0.52); sh.quadraticCurveTo(0.2, 0.4, 0.26, 0.28); sh.lineTo(-0.26, 0.28);
+    const geo = new TH.ExtrudeGeometry(sh, { depth: 0.26, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 3, curveSegments: 10 });
+    geo.translate(0, 0, -0.13);
+    const k = new TH.Group(); g.add(k); T3.mk(k, geo, m, 0, 0, 0);
+    for (const sz of [-1, 1]) T3.mk(k, T3.SPH(0.035, 8), ink, 0.3, 0.92, sz * 0.17);
+    T3.mk(k, T3.BOX(0.07, 0.5, 0.05), ink, -0.3, 0.88, 0).rotation.z = 0.12;                              // mane stripe
+    k.rotation.y = white ? Math.PI / 2 - 0.8 : -Math.PI / 2 + 0.8;
   }
+  g.scale.setScalar(1.08);
   g.traverse(o => { o.castShadow = true; });
   return g;
 }
@@ -4490,7 +4634,7 @@ function chess3d(box, S) {
   const sqV = i => new TH.Vector3((i & 7) - 3.5, 0.2, (i >> 3) - 3.5);
   for (let i = 0; i < 64; i++) {
     const dark = ((i >> 3) + (i & 7)) % 2 === 1, v = sqV(i);
-    const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#8d5a2f' : '#ecd9b0', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
+    const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#7d4c28' : '#dcc08e', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
     const o = T3.mk(bd, new TH.PlaneGeometry(0.96, 0.96), new TH.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0, depthWrite: false }), v.x, 0.208, v.z, { noCast: true, noRecv: true }); o.rotation.x = -Math.PI / 2; ov.push(o);
     const mkr = T3.mk(bd, new TH.CircleGeometry(0.17, 20), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.85, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
   }
@@ -6937,7 +7081,7 @@ const CUE = (() => {
   function pool3d(box, S0) {
     const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.16;
     T3.lounge(s, { w: 34, d: 28, lamps: [], ambient: 0.55, wall: '#1d2a38', bg: 0x0c1118 });
-    const key = new TH.SpotLight(0xfff0d0, 1.6, 44, 0.9, 0.55, 1.1); key.position.set(0, 13, 0); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.6, 44, 0.9, 0.55, 1.1); key.position.set(0, 13, 0); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(12, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
     const felt = T3.canvasTex(512, 256, T3.speckle('#1f7a4a', 36, 6000));
     T3.mk(sc, T3.BOX(16.2, 0.2, 8.2), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.1, 0, { noCast: true });
@@ -6956,7 +7100,7 @@ const CUE = (() => {
     const ring = T3.mk(sc, new TH.TorusGeometry(BRW * 1.25, 0.03, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), 0, TY + 0.02, 0, { noCast: true }); ring.rotation.x = Math.PI / 2; ring.visible = false;
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -3.4); sc.add(msg.sprite);
     const spots = [[0, 6.4, Math.PI], [0, -6.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', cur = null, play = null, seq = -1, wasMine = false;
-    s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, 6.6], look: [0, 2.3, 0.7], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, end: { label: 'End', pos: [-11.5, 6.5, 2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true);
+    s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, 6.6], look: [0, 2.3, 0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, end: { label: 'End', pos: [-11.5, 6.5, 2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true);
     const place = (m, b) => { m.position.set(wx(b.x), TY + BRW, wz(b.y)); };
     const setBall = (i, b, instant) => {
       if (!balls[i]) { balls[i] = mkBall(b.id); }
@@ -7008,7 +7152,7 @@ const CUE = (() => {
       cur = true;
       const me = S.me; S.V.seats.forEach((st, i) => { pe.tags[i] && pe.tags[i].set(`${S.nameOf(i)} · ${fmt(st.stack)}`, g.turn === i ? '#f2b441' : '#f7f0e1'); });
       msg.set(g.over ? '' : g.msg, '#f7f0e1'); s.onView(s.view);
-      if (S.me === 1) { if (!s._flip) { s._flip = true; s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, -6.6], look: [0, 2.3, -0.7], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, 1], fov: 42 }, end: { label: 'End', pos: [11.5, 6.5, -2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true); } }
+      if (S.me === 1) { if (!s._flip) { s._flip = true; s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, -6.6], look: [0, 2.3, -0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, 1], fov: 42 }, end: { label: 'End', pos: [11.5, 6.5, -2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true); } }
       s.hint(S.turn ? (S.turn.data.inHand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball.' : 'Tap the table to aim, set power below, then Shoot.') : '');
     };
     return s;
@@ -7017,9 +7161,9 @@ const CUE = (() => {
   function carrom3d(box, S0) {
     const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.11;
     T3.lounge(s, { w: 30, d: 26, lamps: [], ambient: 0.62, wall: '#2a1d14', bg: 0x0d0a08 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 40, 0.9, 0.55, 1.1); key.position.set(0, 13, 1); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.5, 40, 0.9, 0.55, 1.1); key.position.set(0, 13, 1); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(11, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    T3.mk(sc, T3.BOX(2.6, TY - 0.5, 2.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0); T3.mk(sc, T3.BOX(13, 0.5, 13), T3.mat('#6b4423', { roughness: 0.5 }), 0, TY - 0.25, 0);
+    T3.mk(sc, T3.BOX(2.6, TY - 0.5, 2.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0); T3.mk(sc, T3.BOX(13, 0.5, 13), T3.mat('#6b4423', { roughness: 0.5 }), 0, TY - 0.33, 0);
     const tex = T3.canvasTex(1024, 1024, (g, w, h) => {
       g.fillStyle = '#e2bd7e'; g.fillRect(0, 0, w, h); g.strokeStyle = '#7a4a22'; g.lineWidth = 4; const q = v => v * w / 100;
       g.beginPath(); g.arc(q(50), q(50), q(12), 0, 7); g.stroke(); g.beginPath(); g.arc(q(50), q(50), q(2), 0, 7); g.fillStyle = 'rgba(214,69,61,.6)'; g.fill();
@@ -7038,7 +7182,7 @@ const CUE = (() => {
     const dots = []; for (let i = 0; i < 18; i++) dots.push(T3.mk(sc, T3.SPH(0.03, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + 0.1, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -2.6); sc.add(msg.sprite);
     const spots = [[0, 7.4, Math.PI], [0, -7.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', play = null, seq = -1, flip = false, first = true; s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
-    const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
+    const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
     s.setViews(views(false), 'seat', true);
     s.onTap(e => { const h = s.pick(e, [plane])[0]; if (!h) return; carromUI.tap(h.point.x / K + 50, h.point.z / K + 50); setTimeout(() => s.sync(SS), 20); });
     const putCoins = g => { g.coins.forEach((c, i) => { if (!coins[i]) coins[i] = mkCoin(c); const m = coins[i]; m.visible = c.alive; m.position.set(wx(c.x), TY, wz(c.y)); }); };
@@ -7135,7 +7279,7 @@ const CUE = (() => {
   function casino3(box, S0, cfg) {
     const TH = THREE, s = T3.stage(box, { fov: 44 }), sc = s.scene;
     T3.lounge(s, { w: 36, d: 30, lamps: [], ambient: 0.6, wall: '#2a1424', bg: 0x0c0810 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 46, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.5, 46, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(13, 56), T3.mat('#3a1220', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
     const felt = T3.canvasTex(512, 512, T3.speckle(cfg.felt || '#1f7a4a', 40, 7000));
     const top = T3.mk(sc, new TH.CylinderGeometry(1, 1, 0.3, 72), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.15, 0); top.scale.set(TA, 1, TB);
@@ -7217,7 +7361,7 @@ const CUE = (() => {
       const nn = V.seats.length, big = nn > 3;
       V.seats.forEach((st, i) => {
         const p = (g.ps && g.ps[i]) || {};
-        const faces = cfg.cards ? cfg.cards(S, i) : [];
+        const faces = cfg.cards && !(cfg._hud && i === me) ? cfg.cards(S, i) : [];
         const sz = cfg.size ? cfg.size(S, i, faces) : null, cw = sz ? sz[0] : faces.length > 3 && big ? 0.5 : big ? 0.62 : 0.78;
         setCards(seatG[i], faces, cw, sz ? sz[1] : cw * 0.82, inst, cfg.held ? cfg.held(S, i) : null);
         const amt = cfg.bet ? cfg.bet(S, i) : 0, bl = cfg.betText ? cfg.betText(S, i) : (amt ? fmt(amt) : '');
@@ -7412,10 +7556,19 @@ const CUE = (() => {
     ['videopoker', CF.videopoker, []], ['roulette', CF.roulette, ['#rlBall']], ['sicbo', CF.sicbo, ['#sicDice', '#sicTot']],
     ['craps', CF.craps, ['#crPuck', '#crDice', '#crTot']], ['slots', CF.slots, []], ['keno', CF.keno, ['#knGrid']],
   ];
+  // default hand overlay: the shared / dealer cards, then my own cards
+  const defHands = (st, S) => {
+    const me = S ? S.me : -1, L = [], sh = st.querySelector('#csDealer, #lrComm, #bjDcards, #rdCards');
+    if (sh) L.push({ label: sh.id === 'lrComm' ? 'Community' : sh.id === 'rdCards' ? 'Spread' : 'Dealer', el: sh });
+    const mine = st.querySelector('#bjSeats .seat.me .cards') || (me >= 0 && st.querySelector(`.tc-seats > .seat:nth-child(${me + 1}) .cards`));
+    if (mine) L.push({ label: 'You', el: mine });
+    return L;
+  };
   const attach = (id, cfg, hide) => {
+    cfg._hud = id !== 'baccarat';
     const D = Club.games[id]; if (!D) return;
     const m2 = D.ui.mount; D.ui.mount = function (st, ctl, S) { st.classList.remove('c3d'); return m2.call(this, st, ctl, S); };
-    const w = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => casino3(box, S, cfg) });
+    const w = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), hands: cfg.hands || defHands, make: (box, S) => casino3(box, S, cfg) });
     D.ui3d = { mount(st, ctl, S) { w.mount(st, ctl, S); if (st.querySelector('.s3dbox')) st.classList.add('c3d'); }, update: w.update };
   };
   T3.casino3 = casino3; T3.attach3 = attach;
@@ -7822,6 +7975,8 @@ const CUE = (() => {
     },
   };
 
+  bigtwo.hands = st => [{ label: 'Your hand', el: st.querySelector('#btHand') }];
+  rush.hands = st => [{ label: 'Your hand', el: st.querySelector('#rsHand') }];
   T3.attach3('bigtwo', bigtwo, ['#btHand', '#btLead']);
   T3.attach3('rush', rush, ['#rsHand', '.rs-mid']);
 })();
@@ -8841,6 +8996,10 @@ $('dmNext').onclick = () => { if (demo && demo.i < demo.steps.length - 1) { demo
 $('dmPlay').onclick = () => { if (!demo) return; const g = demo.gid; leaveRoom(); startSolo(g, +$('soloN').value || undefined); };
 $('hMin').onchange = () => { if (+$('hMin').value > +$('hMax').value) $('hMax').value = $('hMin').value; };
 $('hMax').onchange = () => { if (+$('hMax').value < +$('hMin').value) $('hMin').value = $('hMax').value; };
+
+// Info panel (round log + rules): beside the table on wide screens, a pop-over on small ones.
+$('infoBtn').onclick = () => $('room').classList.add('showinfo');
+$('infoClose').onclick = () => $('room').classList.remove('showinfo');
 
 </script>
 

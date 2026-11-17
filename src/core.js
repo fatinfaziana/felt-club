@@ -658,3 +658,7 @@ $('dmNext').onclick = () => { if (demo && demo.i < demo.steps.length - 1) { demo
 $('dmPlay').onclick = () => { if (!demo) return; const g = demo.gid; leaveRoom(); startSolo(g, +$('soloN').value || undefined); };
 $('hMin').onchange = () => { if (+$('hMin').value > +$('hMax').value) $('hMax').value = $('hMin').value; };
 $('hMax').onchange = () => { if (+$('hMax').value < +$('hMin').value) $('hMin').value = $('hMax').value; };
+
+// Info panel (round log + rules): beside the table on wide screens, a pop-over on small ones.
+$('infoBtn').onclick = () => $('room').classList.add('showinfo');
+$('infoClose').onclick = () => $('room').classList.remove('showinfo');

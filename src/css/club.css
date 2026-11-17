@@ -297,3 +297,77 @@ body { overflow-x: hidden; }
 .wrap { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 @media (min-width: 1100px) { .wrap { max-width: 1040px; } .s3d { max-height: 72vh; } }
 button, .gtile { touch-action: manipulation; }
+
+/* ================= one-screen layout ================= */
+/* Home: games on the left, the play card on the right (wide screens); on small screens the play card floats at the bottom. */
+@media (min-width: 900px) {
+  .wrap { max-width: 1280px; }
+  .home { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 16px 20px; align-items: start; }
+  .home .gamegrid { grid-column: 1; grid-row: 1 / span 4; }
+  .home > .panel { grid-column: 2; }
+  .home .gamepanel { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow: auto; z-index: 5; border-color: var(--gold); background: var(--room); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  .gp-actions { flex-direction: column; align-items: stretch; }
+  .gp-actions .solo { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .gp-actions .hostform { display: flex; flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 899px) {
+  .home .gamepanel { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 30; max-height: 48dvh; overflow: auto; background: var(--room); border-color: var(--gold); box-shadow: 0 -6px 28px rgba(0,0,0,.6); padding: 10px 12px; }
+  .home:has(.gamepanel:not([hidden])) { padding-bottom: 46dvh; }
+  .gp-head h2 { font-size: 18px; }
+  .gp-actions .hostform, #createNote { display: none; }
+  .gp-actions .solo { display: flex; gap: 10px; align-items: flex-end; }
+  .gp-actions .solo .b { flex: 1; }
+}
+.gp-close { display: none; }
+
+/* Room: everything inside one screen. Table fills the space, controls sit in a slim bar, notes sit beside (or behind a button). */
+body:has(#room:not([hidden])) .top, body:has(#room:not([hidden])) footer { display: none; }
+body:has(#room:not([hidden])) { overflow: hidden; }
+body:has(#room:not([hidden])) .wrap { max-width: none; height: 100dvh; padding-block: 6px; padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right)); gap: 0; }
+#room:not([hidden]) { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr) auto; gap: 6px; }
+#room > .below { display: none; }
+#stage { min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+#stage > .table, #stage > section { flex: 1 1 auto; }
+.controls { padding: 8px 10px; gap: 6px; min-height: 0; max-height: 32dvh; overflow: auto; border-radius: 14px; }
+.roombar b { font-size: 16px; } .roombar .ghost { padding: 6px 10px; font-size: 13px; }
+.table:has(.s3dbox) { flex: 1; min-height: 0; padding: 6px; gap: 6px; border-width: 4px; border-radius: 22px; }
+.table:has(.s3dbox) .s3dbox { flex: 1; min-height: 0; }
+.table:has(.s3dbox) .s3d { max-width: none; height: 100%; aspect-ratio: auto; max-height: none; }
+.table:has(.s3dbox) .plate .style { display: none; }
+.table:has(.s3dbox) .banner { min-height: 0; }
+#infoBtn { display: inline-block; }
+@media (min-width: 1000px) {
+  #room:not([hidden]) { grid-template-columns: minmax(0, 1fr) 290px; }
+  #room > * { grid-column: 1; }
+  #room > .below { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / -1; overflow: auto; gap: 10px; padding-left: 4px; }
+  #infoBtn { display: none; }
+}
+@media (max-width: 999px) {
+  #room.showinfo > .below { display: flex; flex-direction: column; position: fixed; inset: 8px; z-index: 40; background: var(--room); border: 2px solid var(--gold); border-radius: 16px; padding: 12px; overflow: auto; gap: 10px; }
+}
+#infoClose { display: none; } #room.showinfo #infoClose { display: inline-block; }
+#stage > .s3dbox { flex: 1 1 0; min-height: 160px; }
+#stage > .s3dbox .s3d { max-width: none; height: 100%; aspect-ratio: auto; max-height: none; }
+#stage > .s3dbox ~ .table { flex: 0 0 auto; padding: 4px 8px; gap: 2px; border-width: 3px; border-radius: 14px; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; }
+#stage > .s3dbox ~ .table .seat { flex-direction: row; gap: 8px; }
+#stage > .s3dbox ~ .table .banner { min-height: 0; font-size: 14px; }
+#stage > .s3dbox ~ .table .bots:empty, #stage > .s3dbox ~ .table .bots[style*="height:0"] { display: none; }
+#room:not([hidden]) { gap: 0 8px; }
+#room > .roombar { grid-row: 1; margin-bottom: 6px; } #room > .notice { grid-row: 2; margin-bottom: 6px; } #room > .invite { grid-row: 3; margin-bottom: 6px; } #room > .demobar { grid-row: 4; margin-bottom: 6px; }
+#room > #stage { grid-row: 5; } #room > .controls { grid-row: 6; margin-top: 6px; }
+#room > .below { grid-row: 1 / -1; }
+body { margin: 0; }
+#stage .s3dbox { position: relative; }
+#stage .s3dbox .s3d { position: absolute; inset: 0; height: auto; width: auto; max-width: none; max-height: none; aspect-ratio: auto; }
+#stage > .s3dbox ~ .table .bots, #stage > .s3dbox ~ .table .bt-opps, #stage > .s3dbox ~ .table .tc-seats, #stage > .s3dbox ~ .table .rs-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+#stage > .s3dbox ~ .table .plate { padding: 2px 8px; max-width: 130px; }
+#stage > .s3dbox ~ .table .plate .stack { font-size: 14px; }
+#stage > .s3dbox ~ .table .center:not(:has(*)) { display: none; }
+#stage > .s3dbox ~ .table .banner:empty { display: none; }
+#stage > .s3dbox ~ .table .bt-hand:empty { display: none; }
+.table:has(.s3dbox) [id$="Seats"], .table:has(.s3dbox) .bt-opps, .table:has(.s3dbox) .bots { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 6px 10px; }
+.table:has(.s3dbox) [id$="Seats"] .seat, .table:has(.s3dbox) .bots .seat { flex-direction: row; gap: 6px; width: auto; }
+.table:has(.s3dbox) .plate { padding: 2px 8px; max-width: 150px; }
+.table:has(.s3dbox) .plate .stack { font-size: 14px; }
+.table:has(.s3dbox) .banner:empty { display: none; }
+.table:has(.s3dbox) .seat .tag, .table:has(.s3dbox) .plate { white-space: nowrap; }

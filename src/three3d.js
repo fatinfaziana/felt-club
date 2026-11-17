@@ -131,7 +131,7 @@ const T3 = (() => {
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(o.fov || 45, 1.6, 0.1, 400);
+    const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(o.fov || 45, 1.6, 0.6, 300);
     let fovMul = 1;
     const s = { scene, camera, renderer, wrap, cv, hooks: [], tweens: [], people: [], clouds: [], views: {}, view: '', S: null, t: 0, dead: false, sway: 0 };
     const tgt = { pos: new THREE.Vector3(0, 8, 8), look: new THREE.Vector3(), up: new THREE.Vector3(0, 1, 0), fov: o.fov || 45 };
@@ -145,16 +145,23 @@ const T3 = (() => {
       if (snap) { camera.position.copy(tgt.pos); curLook.copy(tgt.look); curUp.copy(tgt.up); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); }
     };
     s.setViews = (views, pick, snap) => {
-      s.views = views; const names = Object.keys(views);
+      s.views = views; const names = Object.keys(views); s.base = pick || names[0]; s.manual = false;
       bar.innerHTML = names.map(k => `<button type="button" data-v="${k}" aria-pressed="false">${views[k].label || k}</button>`).join('');
       s.setView(views[s.view] ? s.view : (pick || names[0]), snap);
     };
     s.setView = (name, snap) => {
-      if (!s.views[name]) return; s.view = name; s.goto(s.views[name], snap);
+      if (!s.views[name]) return; s.view = name; s.manual = !!s.base && name !== s.base; s.zoomed = false; s.goto(s.views[name], snap);
       bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === name));
       if (s.onView) s.onView(name);
     };
     bar.onclick = e => { const b = e.target.closest('[data-v]'); if (b) s.setView(b.dataset.v); };
+    // Zoom in a little when it is the player's turn, and back out afterwards (unless they chose another view themselves).
+    s.autoZoom = on => {
+      const v = s.views[s.base]; if (!v || s.manual || !!on === !!s.zoomed) return; s.zoomed = !!on;
+      if (!on) { s.goto(v); return; }
+      const k = v.zoom === undefined ? 0.24 : v.zoom, p = v.pos.map((x, i) => x + (v.look[i] - x) * k);
+      s.goto({ pos: p, look: v.look, up: v.up, fov: Math.max(30, (v.fov || 45) - 4), sway: 0 });
+    };
     s.on = fn => { s.hooks.push(fn); };
     s.tween = (ms, fn, done) => { const t = { ms, t: 0, fn, done }; s.tweens.push(t); return t; };
     s.addPerson = p => { s.people.push(p); return p; };
@@ -196,22 +203,44 @@ const T3 = (() => {
   }
 
   // wrap a 2D screen: keep its seats, banners and controls, and swap its board for a 3D scene
+  // Your own cards, big and crisp, along the bottom of the 3D view. They mirror the 2D hand: tapping a card taps the real one
+  // (so it lifts up when picked, just like picking a card up off the table).
+  function hud(s, finders) {
+    const root = document.createElement('div'); root.className = 's3d-hand'; root.hidden = true; s.wrap.appendChild(root);
+    let last = '', cur = [];
+    const sync = () => {
+      let found = []; try { found = (finders() || []).filter(f => f && f.el && !f.el.hidden && f.el.querySelector('.card, .bt-card, .vp-card, button')); } catch (e) { found = []; }
+      const key = found.map(f => f.label + '|' + f.el.innerHTML).join('§'); if (key === last) return; last = key; cur = found;
+      root.hidden = !found.length;
+      root.innerHTML = found.map((f, g) => `<div class="hg${f.el.querySelectorAll('.card').length > 6 ? ' dense' : ''}" data-g="${g}">${f.label ? `<span class="hl">${f.label}</span>` : ''}<div class="hr">${f.el.innerHTML}</div></div>`).join('');
+    };
+    root.onclick = e => {
+      const grp = e.target.closest('.hg'); if (!grp) return; const f = cur[+grp.dataset.g]; if (!f || !f.el) return;
+      const all = [...grp.querySelector('.hr').querySelectorAll('*')], i = all.indexOf(e.target); if (i < 0) return;
+      let o = f.el.querySelectorAll('*')[i]; if (!o) return;
+      let b = o; while (b && b !== f.el && b.tagName !== 'BUTTON' && !b.dataset.c && !b.dataset.i && !b.dataset.h) b = b.parentElement; if (b && b !== f.el) o = b;
+      o.click(); setTimeout(sync, 30); setTimeout(sync, 250);
+    };
+    s.hud = { sync }; return root;
+  }
+
   function wrapUi(ui2d, o) {
-    let sc = null, box = null, hidden = [];
+    let sc = null, box = null, hidden = [], stEl = null, lastS = null;
     return {
       mount(stageEl, ctl, S) {
-        ui2d.mount(stageEl, ctl, S); sc = null; hidden = [];
+        ui2d.mount(stageEl, ctl, S); sc = null; hidden = []; stEl = stageEl;
         try {
           const slot = o.slot(stageEl); box = document.createElement('div'); box.className = 's3dbox';
           slot.before.parentNode.insertBefore(box, slot.before);
           (slot.hide || []).forEach(e => { if (e) { e.style.display = 'none'; hidden.push(e); } });
           sc = o.make(box, S);
+          if (o.hands && sc && sc.wrap) hud(sc, () => o.hands(stEl, lastS));
         } catch (e) {
           lastErr = String(e && e.stack || e); console.error(lastErr);
           hidden.forEach(h => { h.style.display = ''; }); if (box) box.remove(); sc = null; try { window.__errs && window.__errs.push('3D: ' + lastErr); } catch (x) {}
         }
       },
-      update(S) { const r = ui2d.update(S); if (sc && sc.sync) { try { sc.sync(S); } catch (e) { lastErr = String(e && e.stack || e); console.error(lastErr); try { window.__errs && window.__errs.push('3D sync: ' + lastErr); } catch (x) {} } } return r; },
+      update(S) { lastS = S; const r = ui2d.update(S); if (sc && sc.autoZoom) sc.autoZoom(!!S.turn); if (sc && sc.hud) sc.hud.sync(); if (sc && sc.sync) { try { sc.sync(S); } catch (e) { lastErr = String(e && e.stack || e); console.error(lastErr); try { window.__errs && window.__errs.push('3D sync: ' + lastErr); } catch (x) {} } } return r; },
     };
   }
 
@@ -258,5 +287,5 @@ const T3 = (() => {
     return g;
   }
 
-  return { has, on, setPref, mat, mk, BOX, CYL, SPH, canvasTex, speckle, label, person, lounge, outdoor, stage, wrapUi, card3, chips, ease, err: () => lastErr };
+  return { has, on, setPref, hud, mat, mk, BOX, CYL, SPH, canvasTex, speckle, label, person, lounge, outdoor, stage, wrapUi, card3, chips, ease, err: () => lastErr };
 })();

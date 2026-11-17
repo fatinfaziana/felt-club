@@ -147,7 +147,7 @@
   function pool3d(box, S0) {
     const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.16;
     T3.lounge(s, { w: 34, d: 28, lamps: [], ambient: 0.55, wall: '#1d2a38', bg: 0x0c1118 });
-    const key = new TH.SpotLight(0xfff0d0, 1.6, 44, 0.9, 0.55, 1.1); key.position.set(0, 13, 0); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.6, 44, 0.9, 0.55, 1.1); key.position.set(0, 13, 0); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(12, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
     const felt = T3.canvasTex(512, 256, T3.speckle('#1f7a4a', 36, 6000));
     T3.mk(sc, T3.BOX(16.2, 0.2, 8.2), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.1, 0, { noCast: true });
@@ -166,7 +166,7 @@
     const ring = T3.mk(sc, new TH.TorusGeometry(BRW * 1.25, 0.03, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), 0, TY + 0.02, 0, { noCast: true }); ring.rotation.x = Math.PI / 2; ring.visible = false;
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -3.4); sc.add(msg.sprite);
     const spots = [[0, 6.4, Math.PI], [0, -6.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', cur = null, play = null, seq = -1, wasMine = false;
-    s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, 6.6], look: [0, 2.3, 0.7], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, end: { label: 'End', pos: [-11.5, 6.5, 2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true);
+    s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, 6.6], look: [0, 2.3, 0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, end: { label: 'End', pos: [-11.5, 6.5, 2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true);
     const place = (m, b) => { m.position.set(wx(b.x), TY + BRW, wz(b.y)); };
     const setBall = (i, b, instant) => {
       if (!balls[i]) { balls[i] = mkBall(b.id); }
@@ -218,7 +218,7 @@
       cur = true;
       const me = S.me; S.V.seats.forEach((st, i) => { pe.tags[i] && pe.tags[i].set(`${S.nameOf(i)} · ${fmt(st.stack)}`, g.turn === i ? '#f2b441' : '#f7f0e1'); });
       msg.set(g.over ? '' : g.msg, '#f7f0e1'); s.onView(s.view);
-      if (S.me === 1) { if (!s._flip) { s._flip = true; s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, -6.6], look: [0, 2.3, -0.7], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, 1], fov: 42 }, end: { label: 'End', pos: [11.5, 6.5, -2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true); } }
+      if (S.me === 1) { if (!s._flip) { s._flip = true; s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, -6.6], look: [0, 2.3, -0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, 1], fov: 42 }, end: { label: 'End', pos: [11.5, 6.5, -2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true); } }
       s.hint(S.turn ? (S.turn.data.inHand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball.' : 'Tap the table to aim, set power below, then Shoot.') : '');
     };
     return s;
@@ -227,9 +227,9 @@
   function carrom3d(box, S0) {
     const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.11;
     T3.lounge(s, { w: 30, d: 26, lamps: [], ambient: 0.62, wall: '#2a1d14', bg: 0x0d0a08 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 40, 0.9, 0.55, 1.1); key.position.set(0, 13, 1); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.5, 40, 0.9, 0.55, 1.1); key.position.set(0, 13, 1); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(11, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    T3.mk(sc, T3.BOX(2.6, TY - 0.5, 2.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0); T3.mk(sc, T3.BOX(13, 0.5, 13), T3.mat('#6b4423', { roughness: 0.5 }), 0, TY - 0.25, 0);
+    T3.mk(sc, T3.BOX(2.6, TY - 0.5, 2.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0); T3.mk(sc, T3.BOX(13, 0.5, 13), T3.mat('#6b4423', { roughness: 0.5 }), 0, TY - 0.33, 0);
     const tex = T3.canvasTex(1024, 1024, (g, w, h) => {
       g.fillStyle = '#e2bd7e'; g.fillRect(0, 0, w, h); g.strokeStyle = '#7a4a22'; g.lineWidth = 4; const q = v => v * w / 100;
       g.beginPath(); g.arc(q(50), q(50), q(12), 0, 7); g.stroke(); g.beginPath(); g.arc(q(50), q(50), q(2), 0, 7); g.fillStyle = 'rgba(214,69,61,.6)'; g.fill();
@@ -248,7 +248,7 @@
     const dots = []; for (let i = 0; i < 18; i++) dots.push(T3.mk(sc, T3.SPH(0.03, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + 0.1, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -2.6); sc.add(msg.sprite);
     const spots = [[0, 7.4, Math.PI], [0, -7.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', play = null, seq = -1, flip = false, first = true; s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
-    const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
+    const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
     s.setViews(views(false), 'seat', true);
     s.onTap(e => { const h = s.pick(e, [plane])[0]; if (!h) return; carromUI.tap(h.point.x / K + 50, h.point.z / K + 50); setTimeout(() => s.sync(SS), 20); });
     const putCoins = g => { g.coins.forEach((c, i) => { if (!coins[i]) coins[i] = mkCoin(c); const m = coins[i]; m.visible = c.alive; m.position.set(wx(c.x), TY, wz(c.y)); }); };

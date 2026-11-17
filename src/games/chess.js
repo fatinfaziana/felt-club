@@ -204,24 +204,47 @@ function clickSq(i) {
   sel = mine.some(m => m.from === i) && sel !== i ? i : -1; draw();
 }
 function makePiece(v) {
+  // Turned-wood style pieces: every kind has its own clear silhouette (pawn ball, castle, horse, mitre, crown, cross).
   const TH = THREE, t = Math.abs(v), white = v > 0, g = new TH.Group();
-  const m = T3.mat(white ? '#efe4cc' : '#2b2420', { roughness: 0.35, metalness: 0.12, side: TH.DoubleSide });
-  const lathe = pts => T3.mk(g, new TH.LatheGeometry(pts.map(p => new TH.Vector2(p[0], p[1])), 28), m, 0, 0, 0);
-  const base = [[0.001, 0], [0.36, 0], [0.38, 0.05], [0.34, 0.1], [0.26, 0.16]];
-  if (t === 1) { lathe([...base, [0.17, 0.3], [0.2, 0.42], [0.14, 0.46], [0.001, 0.46]]); T3.mk(g, T3.SPH(0.2, 16), m, 0, 0.62, 0); }
-  else if (t === 4) { lathe([...base, [0.24, 0.25], [0.22, 0.7], [0.31, 0.76], [0.31, 0.92], [0.001, 0.92]]); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; T3.mk(g, T3.BOX(0.13, 0.12, 0.13), m, Math.cos(a) * 0.25, 0.98, Math.sin(a) * 0.25); } }
-  else if (t === 3) { lathe([...base, [0.2, 0.3], [0.14, 0.62], [0.24, 0.72], [0.18, 0.9], [0.001, 1.02]]); T3.mk(g, T3.SPH(0.07, 10), m, 0, 1.07, 0); }
-  else if (t === 5) { lathe([...base, [0.22, 0.3], [0.15, 0.85], [0.3, 1.0], [0.22, 1.08], [0.001, 1.08]]); T3.mk(g, T3.SPH(0.1, 12), m, 0, 1.2, 0); }
-  else if (t === 6) { lathe([...base, [0.22, 0.3], [0.16, 0.9], [0.3, 1.05], [0.2, 1.12], [0.001, 1.12]]); T3.mk(g, T3.BOX(0.1, 0.36, 0.1), m, 0, 1.3, 0); T3.mk(g, T3.BOX(0.28, 0.1, 0.1), m, 0, 1.34, 0); }
-  else {
-    lathe([...base, [0.24, 0.3], [0.2, 0.4], [0.001, 0.4]]);
-    const k = new TH.Group(); g.add(k);
-    const neck = T3.mk(k, T3.BOX(0.32, 0.55, 0.26), m, 0, 0.62, -0.02); neck.rotation.x = -0.2;
-    const head = T3.mk(k, T3.BOX(0.26, 0.26, 0.5), m, 0, 0.93, 0.16); head.rotation.x = 0.35;
-    T3.mk(k, T3.BOX(0.2, 0.2, 0.12), m, 0, 0.8, 0.42).rotation.x = 0.35;
-    for (const sx of [-1, 1]) T3.mk(k, new TH.ConeGeometry(0.05, 0.16, 6), m, sx * 0.08, 1.12, -0.04);
-    k.rotation.y = white ? Math.PI : 0;
+  const m = T3.mat(white ? '#fff3dc' : '#241a16', { roughness: 0.4, metalness: 0.05, side: TH.DoubleSide });
+  const gold = T3.mat('#d9a93c', { roughness: 0.3, metalness: 0.45 }), ink = T3.mat('#14100e', { roughness: 0.5 });
+  const lathe = (pts, mt) => T3.mk(g, new TH.LatheGeometry(pts.map(p => new TH.Vector2(p[0], p[1])), 32), mt || m, 0, 0, 0);
+  const base = [[0.001, 0], [0.4, 0], [0.43, 0.04], [0.43, 0.09], [0.36, 0.14], [0.3, 0.2], [0.3, 0.24]];
+  const ring = (y, r) => T3.mk(g, new TH.TorusGeometry(r, 0.035, 8, 28), m, 0, y, 0).rotation.x = Math.PI / 2;
+  if (t === 1) {                                   // pawn: small, round head on a short stem
+    lathe([...base, [0.2, 0.34], [0.14, 0.5], [0.2, 0.58], [0.001, 0.58]]); ring(0.57, 0.19);
+    T3.mk(g, T3.SPH(0.21, 20), m, 0, 0.76, 0);
+  } else if (t === 4) {                            // rook: tower with battlements
+    lathe([...base, [0.26, 0.34], [0.23, 0.78], [0.33, 0.86], [0.35, 0.92], [0.35, 1.06], [0.001, 1.06]]);
+    for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3; const b = T3.mk(g, T3.BOX(0.16, 0.2, 0.13), m, Math.cos(a) * 0.27, 1.14, Math.sin(a) * 0.27); b.rotation.y = -a; }
+  } else if (t === 3) {                            // bishop: mitre with a slit and a ball
+    lathe([...base, [0.2, 0.36], [0.12, 0.7], [0.22, 0.78], [0.12, 0.86], [0.001, 0.86]]); ring(0.78, 0.2);
+    const h = T3.mk(g, T3.SPH(0.2, 20), m, 0, 1.08, 0); h.scale.y = 1.55;
+    const cut = T3.mk(g, T3.BOX(0.34, 0.05, 0.05), ink, 0.02, 1.14, 0.17); cut.rotation.z = 0.7;
+    T3.mk(g, T3.SPH(0.07, 12), gold, 0, 1.46, 0);
+  } else if (t === 5) {                            // queen: tall, with a crown of points
+    lathe([...base, [0.22, 0.38], [0.13, 0.85], [0.17, 1.0], [0.3, 1.16], [0.24, 1.24], [0.001, 1.24]]); ring(0.98, 0.17);
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; const c = T3.mk(g, new TH.ConeGeometry(0.05, 0.24, 8), m, Math.cos(a) * 0.23, 1.34, Math.sin(a) * 0.23); c.rotation.z = -Math.cos(a) * 0.25; c.rotation.x = Math.sin(a) * 0.25; T3.mk(g, T3.SPH(0.045, 8), gold, Math.cos(a) * 0.26, 1.48, Math.sin(a) * 0.26); }
+    T3.mk(g, T3.SPH(0.11, 14), gold, 0, 1.4, 0);
+  } else if (t === 6) {                            // king: crown band with a cross
+    lathe([...base, [0.22, 0.38], [0.14, 0.9], [0.18, 1.04], [0.3, 1.2], [0.25, 1.3], [0.001, 1.3]]); ring(1.02, 0.18);
+    T3.mk(g, new TH.TorusGeometry(0.22, 0.045, 8, 28), gold, 0, 1.33, 0).rotation.x = Math.PI / 2;
+    T3.mk(g, T3.BOX(0.11, 0.42, 0.11), gold, 0, 1.62, 0); T3.mk(g, T3.BOX(0.32, 0.11, 0.11), gold, 0, 1.68, 0);
+  } else {                                         // knight: a real horse-head profile
+    lathe([...base, [0.24, 0.3], [0.001, 0.3]]);
+    const sh = new TH.Shape();
+    sh.moveTo(-0.26, 0.28); sh.lineTo(-0.28, 0.62); sh.quadraticCurveTo(-0.3, 0.95, -0.12, 1.14);      // back of the neck and mane
+    sh.lineTo(-0.06, 1.3); sh.lineTo(0.04, 1.16);                                                          // ear
+    sh.quadraticCurveTo(0.22, 1.14, 0.36, 0.9); sh.lineTo(0.5, 0.74); sh.quadraticCurveTo(0.54, 0.64, 0.46, 0.6); // forehead, nose
+    sh.lineTo(0.3, 0.62); sh.quadraticCurveTo(0.14, 0.62, 0.1, 0.52); sh.quadraticCurveTo(0.2, 0.4, 0.26, 0.28); sh.lineTo(-0.26, 0.28);
+    const geo = new TH.ExtrudeGeometry(sh, { depth: 0.26, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 3, curveSegments: 10 });
+    geo.translate(0, 0, -0.13);
+    const k = new TH.Group(); g.add(k); T3.mk(k, geo, m, 0, 0, 0);
+    for (const sz of [-1, 1]) T3.mk(k, T3.SPH(0.035, 8), ink, 0.3, 0.92, sz * 0.17);
+    T3.mk(k, T3.BOX(0.07, 0.5, 0.05), ink, -0.3, 0.88, 0).rotation.z = 0.12;                              // mane stripe
+    k.rotation.y = white ? Math.PI / 2 - 0.8 : -Math.PI / 2 + 0.8;
   }
+  g.scale.setScalar(1.08);
   g.traverse(o => { o.castShadow = true; });
   return g;
 }
@@ -239,7 +262,7 @@ function chess3d(box, S) {
   const sqV = i => new TH.Vector3((i & 7) - 3.5, 0.2, (i >> 3) - 3.5);
   for (let i = 0; i < 64; i++) {
     const dark = ((i >> 3) + (i & 7)) % 2 === 1, v = sqV(i);
-    const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#8d5a2f' : '#ecd9b0', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
+    const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#7d4c28' : '#dcc08e', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
     const o = T3.mk(bd, new TH.PlaneGeometry(0.96, 0.96), new TH.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0, depthWrite: false }), v.x, 0.208, v.z, { noCast: true, noRecv: true }); o.rotation.x = -Math.PI / 2; ov.push(o);
     const mkr = T3.mk(bd, new TH.CircleGeometry(0.17, 20), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.85, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
   }

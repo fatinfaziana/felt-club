@@ -38,7 +38,7 @@
   function casino3(box, S0, cfg) {
     const TH = THREE, s = T3.stage(box, { fov: 44 }), sc = s.scene;
     T3.lounge(s, { w: 36, d: 30, lamps: [], ambient: 0.6, wall: '#2a1424', bg: 0x0c0810 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 46, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+    const key = new TH.SpotLight(0xfff0d0, 1.5, 46, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
     T3.mk(sc, new TH.CircleGeometry(13, 56), T3.mat('#3a1220', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
     const felt = T3.canvasTex(512, 512, T3.speckle(cfg.felt || '#1f7a4a', 40, 7000));
     const top = T3.mk(sc, new TH.CylinderGeometry(1, 1, 0.3, 72), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.15, 0); top.scale.set(TA, 1, TB);
@@ -120,7 +120,7 @@
       const nn = V.seats.length, big = nn > 3;
       V.seats.forEach((st, i) => {
         const p = (g.ps && g.ps[i]) || {};
-        const faces = cfg.cards ? cfg.cards(S, i) : [];
+        const faces = cfg.cards && !(cfg._hud && i === me) ? cfg.cards(S, i) : [];
         const sz = cfg.size ? cfg.size(S, i, faces) : null, cw = sz ? sz[0] : faces.length > 3 && big ? 0.5 : big ? 0.62 : 0.78;
         setCards(seatG[i], faces, cw, sz ? sz[1] : cw * 0.82, inst, cfg.held ? cfg.held(S, i) : null);
         const amt = cfg.bet ? cfg.bet(S, i) : 0, bl = cfg.betText ? cfg.betText(S, i) : (amt ? fmt(amt) : '');
@@ -315,10 +315,19 @@
     ['videopoker', CF.videopoker, []], ['roulette', CF.roulette, ['#rlBall']], ['sicbo', CF.sicbo, ['#sicDice', '#sicTot']],
     ['craps', CF.craps, ['#crPuck', '#crDice', '#crTot']], ['slots', CF.slots, []], ['keno', CF.keno, ['#knGrid']],
   ];
+  // default hand overlay: the shared / dealer cards, then my own cards
+  const defHands = (st, S) => {
+    const me = S ? S.me : -1, L = [], sh = st.querySelector('#csDealer, #lrComm, #bjDcards, #rdCards');
+    if (sh) L.push({ label: sh.id === 'lrComm' ? 'Community' : sh.id === 'rdCards' ? 'Spread' : 'Dealer', el: sh });
+    const mine = st.querySelector('#bjSeats .seat.me .cards') || (me >= 0 && st.querySelector(`.tc-seats > .seat:nth-child(${me + 1}) .cards`));
+    if (mine) L.push({ label: 'You', el: mine });
+    return L;
+  };
   const attach = (id, cfg, hide) => {
+    cfg._hud = id !== 'baccarat';
     const D = Club.games[id]; if (!D) return;
     const m2 = D.ui.mount; D.ui.mount = function (st, ctl, S) { st.classList.remove('c3d'); return m2.call(this, st, ctl, S); };
-    const w = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => casino3(box, S, cfg) });
+    const w = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), hands: cfg.hands || defHands, make: (box, S) => casino3(box, S, cfg) });
     D.ui3d = { mount(st, ctl, S) { w.mount(st, ctl, S); if (st.querySelector('.s3dbox')) st.classList.add('c3d'); }, update: w.update };
   };
   T3.casino3 = casino3; T3.attach3 = attach;

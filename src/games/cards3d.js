@@ -49,6 +49,8 @@
     },
   };
 
+  bigtwo.hands = st => [{ label: 'Your hand', el: st.querySelector('#btHand') }];
+  rush.hands = st => [{ label: 'Your hand', el: st.querySelector('#rsHand') }];
   T3.attach3('bigtwo', bigtwo, ['#btHand', '#btLead']);
   T3.attach3('rush', rush, ['#rsHand', '.rs-mid']);
 })();

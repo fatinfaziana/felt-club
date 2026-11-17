@@ -305,3 +305,20 @@
 .cue-svg { width: 100%; height: auto; display: block; border-radius: 12px; touch-action: manipulation; cursor: crosshair; }
 .cue-svg.carrom { max-width: 460px; margin: 0 auto; }
 .betrow input[type=range] { flex: 1; min-width: 120px; accent-color: var(--gold, #f2b441); }
+
+/* hand overlay: my own cards, large and clear, along the bottom of the 3D view */
+.s3d-hint { top: 8px; bottom: auto; left: auto; right: 8px; max-width: 52%; font-size: 12.5px; padding: 5px 9px; }
+.s3d-hand { position: absolute; left: 0; right: 0; bottom: 6px; z-index: 3; display: flex; justify-content: center; align-items: flex-end; gap: 14px; padding: 0 8px; pointer-events: none; }
+.s3d-hand .hg { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 100%; pointer-events: auto; background: rgba(12,8,20,.55); border-radius: 12px; padding: 4px 8px 6px; backdrop-filter: blur(3px); }
+.s3d-hand .hl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #f2b441; font-weight: 700; }
+.s3d-hand .hr { --cw: clamp(46px, 11vh, 84px); display: flex; gap: 6px; padding-top: 22px; max-width: 100%; overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+.s3d-hand .hr > .cards, .s3d-hand .hr .bt-hand { display: flex; gap: 6px; min-height: 0; }
+.s3d-hand .card { box-shadow: 0 3px 8px rgba(0,0,0,.55); animation: none; transition: transform .16s ease, box-shadow .16s ease; }
+.s3d-hand button { padding: 0; border: 0; background: none; cursor: pointer; display: flex; flex: none; border-radius: calc(var(--cw) * .12); }
+.s3d-hand button:hover .card, .s3d-hand button:hover { transform: translateY(-10px); }
+.s3d-hand .sel, .s3d-hand .held, .s3d-hand .ok.sel, .s3d-hand [aria-pressed="true"] { transform: translateY(-22px) scale(1.06); filter: drop-shadow(0 8px 10px rgba(0,0,0,.6)); }
+.s3d-hand .sel .card, .s3d-hand .held .card { box-shadow: 0 0 0 3px #f2b441, 0 8px 14px rgba(0,0,0,.55); }
+.s3d-hand .dense .hr { gap: 0; } .s3d-hand .dense .hr > * { margin-left: calc(var(--cw) * -.4); } .s3d-hand .dense .hr > :first-child { margin-left: 0; }
+.s3d-hand .bt-card { flex: none; }
+.s3d-hand .card.back { border-width: 2px; }
+@media (max-width: 640px) { .s3d-hint { display: none; } } .plate { max-width: 170px; }

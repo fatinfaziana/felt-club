@@ -396,7 +396,7 @@ const ui = {
 function poker3d(box, S) {
   const TH = THREE, s = T3.stage(box, { fov: 44 }), sc = s.scene, TY = 2.5, AT = 7.0, BT = 4.2;
   T3.lounge(s, { w: 34, d: 28, lamps: [], ambient: 0.55, wall: '#1d2a38', bg: 0x0c1118 });
-  const key = new TH.SpotLight(0xfff0d0, 1.5, 44, 0.9, 0.6, 1.1); key.position.set(0, 13, 2); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
+  const key = new TH.SpotLight(0xfff0d0, 1.5, 44, 0.9, 0.6, 1.1); key.position.set(0, 13, 2); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
   T3.mk(sc, new TH.CircleGeometry(12, 56), T3.mat('#4a1620', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
   const felt = T3.canvasTex(512, 512, T3.speckle('#1f7a4a', 40, 7000));
   const top = T3.mk(sc, new TH.CylinderGeometry(1, 1, 0.3, 72), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.15, 0); top.scale.set(AT, 1, BT);
@@ -499,7 +499,7 @@ Club.register({
   round, view,
   priv: (G, i) => ({ c: G.players[i].cards || [] }),
   ui,
-  ui3d: T3.wrapUi(ui, { slot: st => ({ before: st.querySelector('.table'), hide: [st.querySelector('#pkBots'), st.querySelector('#pkBoard'), st.querySelector('.pot'), st.querySelector('#pkHcards')] }), make: poker3d }),
+  ui3d: T3.wrapUi(ui, { slot: st => ({ before: st.querySelector('.table'), hide: [st.querySelector('#pkBots'), st.querySelector('#pkBoard'), st.querySelector('.pot'), st.querySelector('#pkHcards')] }), hands: st => [{ label: 'Table', el: st.querySelector('#pkBoard') }, { label: 'Your hand', el: st.querySelector('#pkHcards') }], make: poker3d }),
   _test: { evaluate, describe, botDecide },
 });
 })();
