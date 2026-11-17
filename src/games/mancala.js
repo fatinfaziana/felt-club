@@ -1,0 +1,92 @@
+/* ---------- Mancala (Kalah) ---------- */
+(function () {
+const ANTE = 20;
+// pits: seat s owns indices s*7 .. s*7+5, store at s*7+6
+const store = s => s * 7 + 6;
+function sow(b, s, p) {        // returns { again, extra }
+  let seeds = b[s * 7 + p]; b[s * 7 + p] = 0; let i = s * 7 + p;
+  const skip = store(1 - s);
+  while (seeds > 0) { i = (i + 1) % 14; if (i === skip) continue; b[i]++; seeds--; }
+  if (i === store(s)) return { again: true, cap: 0 };
+  let cap = 0;
+  if (i >= s * 7 && i <= s * 7 + 5 && b[i] === 1) {
+    const opp = (1 - s) * 7 + (5 - (i - s * 7));
+    if (b[opp] > 0) { cap = b[opp] + 1; b[store(s)] += cap; b[opp] = 0; b[i] = 0; }
+  }
+  return { again: false, cap };
+}
+const legal = (b, s) => [0, 1, 2, 3, 4, 5].filter(p => b[s * 7 + p] > 0);
+function finish(b) {
+  for (const s of [0, 1]) if (legal(b, s).length === 0) { for (const t of [0, 1]) { for (let p = 0; p < 6; p++) { b[store(t)] += b[t * 7 + p]; b[t * 7 + p] = 0; } } return true; }
+  return false;
+}
+function search(b, s, me, d) {
+  if (d === 0 || (legal(b, 0).length === 0 || legal(b, 1).length === 0)) { const c = b.slice(); finish(c); return c[store(me)] - c[store(1 - me)]; }
+  let best = s === me ? -1e9 : 1e9;
+  for (const p of legal(b, s)) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, me, d - 1); best = s === me ? Math.max(best, v) : Math.min(best, v); }
+  return best;
+}
+function botMove(b, s) {
+  const mv = legal(b, s); if (Math.random() < 0.1) return mv[rnd(mv.length)];
+  let best = mv[0], bs = -1e9;
+  for (const p of mv) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, s, 5) + Math.random() * 0.8; if (v > bs) { bs = v; best = p; } }
+  return best;
+}
+async function round(G, io) {
+  const P = G.players, b = Array(14).fill(4); b[6] = 0; b[13] = 0;
+  const M = G.mc = { b, turn: (G.round - 1) % 2, over: false, winner: -1, last: -1 };
+  io.render(); await io.sleep(400);
+  while (!M.over) {
+    const s = M.turn; io.render();
+    const mv = legal(M.b, s);
+    const a = await io.turn(P[s], {}, { auto: { t: 'sow', p: mv[0] },
+      validate: x => (x && x.t === 'sow' && Number.isInteger(x.p) && mv.includes(x.p) ? { t: 'sow', p: x.p } : null),
+      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s) }), think: 1000 + Math.random() * 500 });
+    const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
+    io.ev(P[s], r.again ? 'lands in their store and goes again' : r.cap ? `captures ${r.cap}` : 'sows seeds', r.again ? 'land in your store and go again' : r.cap ? `capture ${r.cap}` : 'sow seeds');
+    if (finish(M.b)) M.over = true; else M.turn = r.again ? s : 1 - s;
+    io.render();
+  }
+  const a = M.b[6], c = M.b[13]; M.winner = a === c ? -1 : a > c ? 0 : 1;
+  settlePot(G, ANTE, M.winner >= 0 ? [M.winner] : []); potSummary(G);
+  io.line(`Final stores: ${a} to ${c}.`, true); io.render();
+}
+function view(G) {
+  const M = G.mc;
+  if (!M) return { b: [4,4,4,4,4,4,0,4,4,4,4,4,4,0], turn: -1, over: false, winner: -1, last: -1, delta: [] };
+  return { b: M.b, turn: M.over ? -1 : M.turn, over: M.over, winner: M.winner, last: M.last, delta: G.players.map(p => (M.over ? p.delta || 0 : 0)) };
+}
+let S0 = null;
+function draw() {
+  const S = S0, g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn ? legal(g.b, me) : [];
+  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp"><b>${g.b[opp * 7 + p]}</b></div>`).join('');
+  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds"><b>${g.b[me * 7 + p]}</b></button>`).join('');
+  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store"><b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store"><b>${g.b[store(me)]}</b></div>`;
+}
+const ui = {
+  mount(stage) {
+    stage.innerHTML = `<section class="table c4wrap"><div class="bt-opps" id="mcSeats"></div><div class="mc" id="mc"></div><div class="banner" id="mcBanner" aria-live="polite"></div><p class="hint bt-hint" id="mcHint"></p></section>`;
+    $('mc').onclick = e => { const b = e.target.closest('[data-p]'); if (b && S0.turn) S0.send({ t: 'sow', p: +b.dataset.p }); };
+  },
+  update(S) {
+    S0 = S; const V = S.V, g = V.g;
+    $('mcSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Sowing…', extra: i => `Store ${g.b[store(i)]}` });
+    draw();
+    $('mcBanner').innerHTML = g.over && V.summary.length ? `<span>${g.winner >= 0 ? S.text(V.summary.find(e => e.p === g.winner) || V.summary[0]) : 'A draw. Everyone keeps their chips.'}</span>` : '';
+    $('mcHint').textContent = S.turn ? 'Your turn. Tap one of your pits (bottom row).' : '';
+    return '';
+  },
+};
+Club.register({
+  id: 'mancala', cat: 'board', name: 'Mancala', tag: 'Sow seeds around the board and capture your opponent’s.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  art: () => ['4', '4', '4'].map(c => `<div class="ltile">${c}</div>`).join(''),
+  rules: `<p><b>Goal:</b> collect more seeds in your store (the big pit on your right) than your opponent.</p>
+    <ol><li>Each player has six pits, shown on their side, with four seeds in each. Yours are the bottom row.</li>
+    <li>On your turn, tap one of your pits. Its seeds are picked up and dropped one by one into the next pits, going to the right along your row, into your store, then along your opponent’s row. You skip your opponent’s store.</li>
+    <li>If your last seed lands in <b>your store</b>, you take another turn.</li>
+    <li>If your last seed lands in an <b>empty pit on your side</b> and the pit opposite has seeds, you capture them and your last seed into your store.</li>
+    <li>When one side has no seeds left, the other player puts their remaining seeds in their store. Most seeds wins.</li>
+    <li>Each player puts in ${ANTE} chips and the winner takes both stakes. A draw returns the chips.</li></ol>`,
+  round, view, ui, _test: { sow, legal, botMove, finish },
+});
+})();

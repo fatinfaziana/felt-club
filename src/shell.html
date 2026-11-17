@@ -1,0 +1,148 @@
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand"><a href="#" id="brandLink">Felt Club</a><small id="brandSub">Card games</small></h1>
+    <div class="meta">
+      <button type="button" class="nick" id="nickBtn" aria-label="Change your name">Playing as <b id="nickName"></b><span>Change</span></button>
+      <span id="roundNo"></span>
+      <span class="free">Play chips only. No real money.</span>
+    </div>
+  </header>
+
+  <!-- lobby -->
+  <section id="home" class="home">
+    <div class="gamegrid" id="gameGrid"></div>
+
+    <section class="panel gamepanel" id="gamePanel" hidden>
+      <div class="gp-head">
+        <h2 id="gpName"></h2>
+        <p class="hint" id="gpTag"></p>
+      </div>
+      <div class="gp-actions">
+        <div class="solo">
+          <div class="field">
+            <label for="soloN">Players at the table</label>
+            <select id="soloN"></select>
+          </div>
+          <button type="button" class="b gold" id="soloBtn">Play vs computer</button>
+          <span class="kbhint">or press <kbd>Enter</kbd></span>
+        </div>
+        <form class="hostform" id="createForm" autocomplete="off">
+          <div class="field">
+            <label for="tName">Host a table for friends</label>
+            <input id="tName" maxlength="28" value="Friday night">
+          </div>
+          <div class="field"><label for="hMin">Fewest players</label><select id="hMin"></select></div>
+          <div class="field"><label for="hMax">Most players</label><select id="hMax"></select></div>
+          <button type="submit" class="b small" id="createBtn">Create table</button>
+        </form>
+      </div>
+      <p class="hint" id="createNote"></p>
+      <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
+      <details class="rules">
+        <summary>All the rules on one page</summary>
+        <div id="gpRules"></div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <h2>Join a friend</h2>
+      <form class="codeform" id="codeForm" autocomplete="off">
+        <div class="field"><label for="codeIn">Table code from your friend</label><input id="codeIn" maxlength="8" placeholder="For example K3F9A" style="text-transform:uppercase"></div>
+        <button type="submit" class="b small gold">Join</button>
+      </form>
+      <p class="hint" id="codeNote" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <h2 id="listTitle">Open tables</h2>
+      <div id="tableList"></div>
+    </section>
+  </section>
+
+  <!-- room -->
+  <section id="room" hidden>
+    <div class="roombar">
+      <div><b id="roomName"></b><span id="roomSub"></span></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+    </div>
+    <div class="notice" id="notice" hidden></div>
+    <div class="invite" id="invite" hidden>
+      <b>Invite friends</b>
+      <span class="inv-code">Code <strong id="invCode"></strong></span>
+      <input id="invLink" readonly aria-label="Invite link" onfocus="this.select()">
+      <button type="button" class="b small gold" id="invCopy">Copy link</button>
+    </div>
+
+    <div class="demobar" id="demoBar" hidden>
+      <div class="dm-top"><b>Demo</b><span id="dmStep"></span><span class="dm-note">The computer is playing your seat.</span></div>
+      <p class="dm-text" id="dmText" aria-live="polite"></p>
+      <div class="dm-btns">
+        <button type="button" class="ghost" id="dmPrev">Back</button><button type="button" class="ghost" id="dmPause">Pause</button><button type="button" class="ghost" id="dmNext">Next</button>
+        <button type="button" class="b gold small" id="dmPlay">Play for real</button>
+      </div>
+    </div>
+
+    <div id="stage"></div>
+
+    <section class="controls" aria-label="Your actions">
+      <p class="status" id="status" aria-live="polite"></p>
+      <div id="gameCtl"></div>
+      <div class="sub" id="waitPanel" hidden>
+        <div class="chips" id="seatList"></div>
+        <p class="hint" id="waitHint"></p>
+        <div class="center-row" id="hostBtns">
+          <button type="button" class="ghost" id="addBot">Add computer</button>
+          <button type="button" class="ghost" id="delBot">Remove computer</button>
+          <button type="button" class="b gold small" id="startBtn">Start game</button>
+        </div>
+      </div>
+      <div class="sub" id="watchPanel" hidden>
+        <p class="hint" id="watchText"></p>
+        <button type="button" class="b gold small" id="sitBtn">Take a seat</button>
+      </div>
+      <div class="next" id="next" hidden>
+        <button type="button" class="b gold" id="nextBtn">Next round now</button>
+      </div>
+    </section>
+
+    <div class="below">
+      <section class="panel">
+        <h2>This round</h2>
+        <ol id="log"></ol>
+      </section>
+      <details class="panel rules">
+        <summary>How to play</summary>
+        <div id="rulesBody"></div>
+      </details>
+    </div>
+  </section>
+
+  <div class="guide-bg" id="guide" hidden>
+    <div class="guide" role="dialog" aria-modal="true" aria-labelledby="gdTitle">
+      <button type="button" class="ghost gd-x" id="gdClose" aria-label="Close guide">Close</button>
+      <p class="gd-game" id="gdGame"></p>
+      <div class="gd-dots" id="gdDots" aria-hidden="true"></div>
+      <h2 id="gdTitle"></h2>
+      <p class="gd-text" id="gdText"></p>
+      <div class="gd-btns">
+        <button type="button" class="ghost" id="gdBack">Back</button>
+        <button type="button" class="b gold small" id="gdNext">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="guide-bg" id="nickDlg" hidden>
+    <form class="guide nickbox" id="nickForm" autocomplete="off" role="dialog" aria-modal="true" aria-labelledby="nkTitle">
+      <h2 id="nkTitle">Your name</h2>
+      <p class="gd-text">Players see this name at the table. It is random and saved on this device, so you do not need to sign up. Do not use your real name or any personal details.</p>
+      <div class="field"><label for="nickIn">Name</label><input id="nickIn" maxlength="16"></div>
+      <p class="hint" id="nickNote" aria-live="polite"></p>
+      <div class="gd-btns">
+        <button type="button" class="ghost" id="nickDice">Surprise me</button>
+        <span class="rb-btns"><button type="button" class="ghost" id="nickClose">Cancel</button><button type="submit" class="b gold small">Save</button></span>
+      </div>
+    </form>
+  </div>
+
+  <footer>Free for everyone. Chips have no cash value and can't be bought, sold or cashed out. If you run out, you get a fresh stack. At a hosted table, the host's browser runs the game, so the host keeps that tab open. It is a friendly game: cards are hidden on screen, not locked away.</footer>
+</div>
