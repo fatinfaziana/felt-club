@@ -322,3 +322,5 @@
 .s3d-hand .bt-card { flex: none; }
 .s3d-hand .card.back { border-width: 2px; }
 @media (max-width: 640px) { .s3d-hint { display: none; } } .plate { max-width: 170px; }
+.s3d-views button[data-z] { padding: 5px 9px; font-size: 14px; line-height: 1; }
+.s3d canvas { cursor: grab; } .s3d canvas:active { cursor: grabbing; }
