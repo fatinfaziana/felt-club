@@ -28,10 +28,10 @@ function search(b, who, me, d, al, be) {
   }
   return best;
 }
-function botMove(b, who) {
-  const mv = moves(b, who); if (Math.random() < 0.1) return mv[rnd(mv.length)];
+function botMove(b, who, lv = 1) {
+  const mv = moves(b, who); if (Math.random() < [0.5, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const i of mv) { const nb = b.slice(); put(nb, i, who); const v = search(nb, 1 - who, who, 2, -1e9, 1e9) + Math.random() * 4; if (v > bs) { bs = v; best = i; } }
+  for (const i of mv) { const nb = b.slice(); put(nb, i, who); const v = search(nb, 1 - who, who, [1, 2, 3][lv], -1e9, 1e9) + Math.random() * 4; if (v > bs) { bs = v; best = i; } }
   return best;
 }
 const count = b => [b.filter(v => v === 0).length, b.filter(v => v === 1).length];
@@ -49,7 +49,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(P[i], {}, { auto: { t: 'place', i: mv[0] },
       validate: x => (x && x.t === 'place' && Number.isInteger(x.i) && mv.includes(x.i) ? { t: 'place', i: x.i } : null),
-      bot: () => ({ t: 'place', i: botMove(R.b.slice(), i) }), think: 900 + Math.random() * 500 });
+      bot: () => ({ t: 'place', i: botMove(R.b.slice(), i, G.level) }), think: 900 + Math.random() * 500 });
     const k = put(R.b, a.i, i); R.last = a.i;
     io.ev(P[i], `flips ${k} disc${k === 1 ? '' : 's'}`, `flip ${k} disc${k === 1 ? '' : 's'}`);
     R.turn = 1 - i; io.render();
@@ -83,7 +83,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'reversi', cat: 'board', name: 'Reversi', tag: 'Trap your opponent’s discs between yours and flip them.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'reversi', cat: 'board', name: 'Reversi', tag: 'Trap your opponent’s discs between yours and flip them.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> have more discs than your opponent when the board is full or nobody can move.</p>
     <ol><li>Two players take turns. You are gold or cream. The game starts with two discs of each colour in the middle.</li>

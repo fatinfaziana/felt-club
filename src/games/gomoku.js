@@ -21,7 +21,7 @@ function score(b, i, who) {      // how good is a stone at i for `who`
   }
   return s;
 }
-function botMove(b, me) {
+function botMove(b, me, lv = 1) {
   const empties = []; for (let i = 0; i < N * N; i++) if (b[i] < 0) empties.push(i);
   const any = b.some(v => v >= 0), c = (N * N - 1) / 2;
   if (!any) return c;
@@ -33,7 +33,7 @@ function botMove(b, me) {
     const v = score(b, i, me) * 1.05 + score(b, i, 1 - me) + Math.random() * 3;
     if (v > bs) { bs = v; best = i; }
   }
-  return Math.random() < 0.06 ? empties[rnd(empties.length)] : best;
+  return Math.random() < [0.4, 0.06, 0][lv] ? empties[rnd(empties.length)] : best;
 }
 async function round(G, io) {
   const P = G.players;
@@ -43,7 +43,7 @@ async function round(G, io) {
     const i = F.turn, p = P[i]; io.render();
     const a = await io.turn(p, {}, { auto: { t: 'stone', i: F.b.indexOf(-1) },
       validate: x => (x && x.t === 'stone' && Number.isInteger(x.i) && x.i >= 0 && x.i < N * N && F.b[x.i] < 0 ? { t: 'stone', i: x.i } : null),
-      bot: () => ({ t: 'stone', i: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 500 });
+      bot: () => ({ t: 'stone', i: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 500 });
     F.b[a.i] = i; F.last = a.i; F.n++;
     const w = lineWin(F.b, a.i);
     if (w) { F.over = true; F.winner = i; F.line = w; io.ev(p, 'makes five in a row', 'make five in a row'); }
@@ -77,7 +77,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'gomoku', cat: 'board', name: 'Gomoku', tag: 'Five in a row wins. Easy to learn, deep to master.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'gomoku', cat: 'board', name: 'Gomoku', tag: 'Five in a row wins. Easy to learn, deep to master.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be first to line up <b>five</b> of your stones in a row.</p>
     <ol><li>Two players take turns. You are gold or cream.</li>

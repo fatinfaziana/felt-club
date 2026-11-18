@@ -110,7 +110,7 @@ const ui = {
     stage.innerHTML = `<section class="table ldwrap"><div class="bt-opps" id="ldSeats"></div>
       <div class="ldb"><svg class="ldsvg" viewBox="-1 -1 102 111" role="img" aria-label="Snakes and ladders board"><rect x="-1" y="-1" width="102" height="111" rx="3" fill="#6b4220"/>${cells}<rect x="0" y="100" width="100" height="9" fill="#2c6b50"/><text x="12" y="106.2" font-size="3" font-weight="700" fill="#cfe9d8">◀ START: tokens wait here</text><text x="95" y="3" text-anchor="end" font-size="2.2" fill="#7a5a10" font-weight="700"></text>${ladders}${snakes}<g id="ldToks">${toks}</g><g id="ldFx"></g></svg></div>
       <div class="ld-die" id="ldDie" aria-live="polite"></div><div class="banner" id="ldBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="ldAct" hidden><button type="button" class="b gold" id="ldRoll">Roll the die</button><p class="hint bt-hint">Ladders lift you up. Snakes slide you down. Roll a six to go again.</p></div>`;
+    ctl.innerHTML = `<div class="act" id="ldAct" hidden><button type="button" class="b gold" id="ldRoll">Roll the dice</button><p class="hint bt-hint">Ladders lift you up. Snakes slide you down. Roll a six to go again.</p></div>`;
     $('ldRoll').onclick = () => S0.send({ t: 'roll' });
   },
   update(S) {
@@ -136,7 +136,7 @@ Club.register({
   art: () => ['p0', 'p1', 'p2'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to land exactly on square 100.</p>
     <ol><li>Everyone starts off the board. Players take turns; your token colour is shown beside your name.</li>
-    <li>On your turn, press <b>Roll the die</b>. Your token moves that many squares.</li>
+    <li>On your turn, press <b>Roll the dice</b>. Your token moves that many squares.</li>
     <li>If you land at the bottom of a <b>ladder</b>, climb to the top. If you land on a <b>snake's head</b>, slide down to its tail.</li>
     <li>Roll a six and you roll again.</li>
     <li>You need the exact number to finish. If your roll would take you past 100, you stay where you are.</li>

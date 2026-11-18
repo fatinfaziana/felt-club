@@ -11,9 +11,9 @@ function mm(b, who, me) {                       // best outcome for `me` if `who
   for (const i of o) { b[i] = who; const v = mm(b, 1 - who, me) + (who === me ? -0.01 : 0.01); b[i] = -1; best = who === me ? Math.max(best, v) : Math.min(best, v); }
   return best;
 }
-function botMove(b, me) {
+function botMove(b, me, lv = 1) {
   const o = open(b);
-  if (Math.random() < 0.15) return o[rnd(o.length)];
+  if (Math.random() < [0.5, 0.12, 0][lv]) return o[rnd(o.length)];
   let best = o[0], bs = -99;
   for (const i of shuffle(o.slice())) { b[i] = me; const v = mm(b, 1 - me, me); b[i] = -1; if (v > bs) { bs = v; best = i; } }
   return best;
@@ -27,7 +27,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(p, {}, { auto: { t: 'mark', i: open(F.b)[0] },
       validate: x => (x && x.t === 'mark' && Number.isInteger(x.i) && x.i >= 0 && x.i < 9 && F.b[x.i] < 0 ? { t: 'mark', i: x.i } : null),
-      bot: () => ({ t: 'mark', i: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 400 });
+      bot: () => ({ t: 'mark', i: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 400 });
     F.b[a.i] = i; io.ev(p, `plays square ${a.i + 1}`, `play square ${a.i + 1}`);
     const w = winLine(F.b);
     if (w) { F.over = true; F.winner = i; F.line = w; } else if (!open(F.b).length) F.over = true; else F.turn = 1 - i;
@@ -62,7 +62,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'tictactoe', cat: 'mind', name: 'Tic-Tac-Toe', tag: 'Three in a row wins. A quick duel for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'tictactoe', cat: 'mind', name: 'Tic-Tac-Toe', tag: 'Three in a row wins. A quick duel for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['✕', '○', '✕'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> get three of your marks in a row before your opponent.</p>
     <ol><li>Two players take turns. One plays ✕ (gold), the other ○ (cream). The first player changes each game.</li>

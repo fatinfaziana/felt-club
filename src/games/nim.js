@@ -1,10 +1,10 @@
 /* ---------- Nim: a two-player thinking game ---------- */
 (function () {
 const ANTE = 20;
-function botMove(piles) {
+function botMove(piles, lv = 1) {
   const x = piles.reduce((a, b) => a ^ b, 0), moves = [];
   piles.forEach((n, i) => { for (let k = 1; k <= n; k++) moves.push({ pile: i, take: k }); });
-  if (Math.random() < 0.15) return moves[rnd(moves.length)];
+  if (Math.random() < [0.55, 0.15, 0][lv]) return moves[rnd(moves.length)];
   if (x) { const good = moves.filter(m => (piles.reduce((a, b, i) => a ^ (i === m.pile ? b - m.take : b), 0)) === 0); if (good.length) return good[rnd(good.length)]; }
   const big = piles.indexOf(Math.max(...piles)); return { pile: big, take: 1 };
 }
@@ -17,7 +17,7 @@ async function round(G, io) {
     const first = N.piles.findIndex(n => n > 0);
     const a = await io.turn(p, {}, { auto: { t: 'take', pile: first, take: 1 },
       validate: x => (x && x.t === 'take' && Number.isInteger(x.pile) && Number.isInteger(x.take) && x.pile >= 0 && x.pile < 3 && x.take >= 1 && x.take <= N.piles[x.pile] ? { t: 'take', pile: x.pile, take: x.take } : null),
-      bot: () => Object.assign({ t: 'take' }, botMove(N.piles)), think: 1000 + Math.random() * 600 });
+      bot: () => Object.assign({ t: 'take' }, botMove(N.piles, G.level)), think: 1000 + Math.random() * 600 });
     N.piles[a.pile] -= a.take; N.last = { pile: a.pile, take: a.take };
     io.ev(p, `takes ${a.take} from row ${a.pile + 1}`, `take ${a.take} from row ${a.pile + 1}`);
     if (N.piles.every(n => n === 0)) { N.over = true; N.winner = i; } else N.turn = 1 - i;
@@ -55,7 +55,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'nim', cat: 'mind', name: 'Nim', tag: 'Take the last stick. A duel of pure thinking.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'nim', cat: 'mind', name: 'Nim', tag: 'Take the last stick. A duel of pure thinking.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['┃', '┃┃', '┃┃┃'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> take the very last stick.</p>
     <ol><li>Three rows of sticks sit on the table: 3, 4 and 5.</li>

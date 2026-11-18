@@ -94,11 +94,11 @@ function search(st, d, al, be, s) {            // negamax from side s
   for (const m of mv) { const v = -search(apply(st, m), d - 1, -be, -al, 1 - s); if (v > best) best = v; if (best > al) al = best; if (al >= be) break; }
   return best;
 }
-function botMove(st) {
+function botMove(st, lv = 1) {
   const s = st.turn, mv = legal(st, s);
-  if (Math.random() < 0.07) return mv[rnd(mv.length)];
+  if (Math.random() < [0.4, 0.07, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const m of shuffle(mv.slice())) { const v = -search(apply(st, m), 3, -1e9, 1e9, 1 - s) + Math.random() * 6; if (v > bs) { bs = v; best = m; } }
+  for (const m of shuffle(mv.slice())) { const v = -search(apply(st, m), [1, 3, 3][lv], -1e9, 1e9, 1 - s) + Math.random() * 6; if (v > bs) { bs = v; best = m; } }
   return best;
 }
 const sameMove = (m, x) => m.from === x.from && m.to === x.to && (m.promo || 0) === (x.promo || 0);
@@ -120,7 +120,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(Pl[seat], {}, { timeout: 90000, auto: { t: 'move', from: mv[0].from, to: mv[0].to, promo: mv[0].promo || 0 },
       validate: x => (x && x.t === 'move' && Number.isInteger(x.from) && Number.isInteger(x.to) && mv.some(m => sameMove(m, { from: x.from, to: x.to, promo: x.promo || 0 })) ? { t: 'move', from: x.from, to: x.to, promo: x.promo || 0 } : null),
-      bot: () => { const m = botMove(C); return { t: 'move', from: m.from, to: m.to, promo: m.promo || 0 }; }, think: 1000 + Math.random() * 600 });
+      bot: () => { const m = botMove(C, G.level); return { t: 'move', from: m.from, to: m.to, promo: m.promo || 0 }; }, think: 1000 + Math.random() * 600 });
     const m = mv.find(q => sameMove(q, { from: a.from, to: a.to, promo: a.promo || 0 }));
     const piece = Math.abs(C.b[m.from]), took = C.b[m.to] || m.ep;
     const ns = apply(C, m); Object.assign(C, { b: ns.b, turn: ns.turn, cas: ns.cas, ep: ns.ep, half: ns.half, plies: ns.plies });
@@ -355,7 +355,7 @@ function chess3d(box, S) {
 }
 
 Club.register({
-  id: 'chess', cat: 'board', name: 'Chess', tag: 'The classic game of strategy. Full rules, for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'chess', cat: 'board', name: 'Chess', tag: 'The classic game of strategy. Full rules, for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['♞', '♚', '♜'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> trap your opponent’s king so it cannot escape capture. This is called <b>checkmate</b>.</p>
     <ol><li>Two players take turns. White moves first. You are shown which colour you play, and your pieces start at the bottom.</li>

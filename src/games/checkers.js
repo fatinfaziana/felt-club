@@ -68,14 +68,14 @@ function search(b, s, depth, alpha, beta) {
   }
   return best;
 }
-function botMove(b, s) {
+function botMove(b, s, lv = 1) {
   const mv = legalMoves(b, s);
   if (mv.length === 1) return mv[0];
-  if (Math.random() < 0.08) return mv[rnd(mv.length)];
+  if (Math.random() < [0.4, 0.08, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
   for (const m of mv) {
     const nb = b.slice(); apply(nb, m);
-    const v = -search(nb, 1 - s, 4, -1e9, 1e9) + Math.random() * 2;
+    const v = -search(nb, 1 - s, [2, 4, 6][lv], -1e9, 1e9) + Math.random() * 2;
     if (v > bs) { bs = v; best = m; }
   }
   return best;
@@ -97,7 +97,7 @@ async function round(G, io) {
         if (!x || x.t !== 'move' || !Number.isInteger(x.from) || !Array.isArray(x.path) || x.path.length > 12 || !x.path.every(Number.isInteger)) return null;
         const m = mv.find(q => same(q, x)); return m ? { t: 'move', from: m.from, path: m.path } : null;
       },
-      bot: () => { const m = botMove(F.b.slice(), i); return { t: 'move', from: m.from, path: m.path }; }, think: 900 + Math.random() * 600,
+      bot: () => { const m = botMove(F.b.slice(), i, G.level); return { t: 'move', from: m.from, path: m.path }; }, think: 900 + Math.random() * 600,
     });
     const m = mv.find(q => same(q, a));
     const wasMan = !isK(F.b[m.from]);
@@ -179,7 +179,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'checkers', cat: 'board', name: 'Checkers', tag: 'Jump your opponent’s pieces and crown your kings.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'checkers', cat: 'board', name: 'Checkers', tag: 'Jump your opponent’s pieces and crown your kings.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> capture all of your opponent’s pieces, or leave them with no move.</p>
     <ol><li>Two players take turns. Each starts with 12 pieces on the dark squares. You are gold or cream; yours start at the bottom of your screen.</li>

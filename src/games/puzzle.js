@@ -36,8 +36,10 @@ const GAMES = {
     art: () => ['T', 'A', 'C'].map(l => `<div class="ltile">${l}</div>`).join(''),
     rules: `<p><b>Goal:</b> unscramble the letters to make a real word. Everyone gets the same word, one turn each.</p>
       <ol><li>The scrambled letters appear on the table.</li><li>When it is your turn, type the word and press <b>Submit</b>. You get two tries.</li><li>Stuck? Press <b>Skip</b>.</li><li>Everyone puts in ${ANTE} chips. People who solve it split the pot. If nobody solves it, everyone gets their chips back.</li></ol>`,
-    make() {
-      const word = WORDS[rnd(WORDS.length)]; let letters;
+    make(G) {
+      const lv = G && G.level != null ? G.level : 1;
+      const pool = WORDS.filter(w => (lv === 0 ? w.length <= 5 : lv === 2 ? w.length >= 7 : true));
+      const word = (pool.length ? pool : WORDS)[rnd((pool.length ? pool : WORDS).length)]; let letters;
       do { letters = shuffle(word.split('')); } while (letters.join('') === word);
       return { pub: { label: 'Unscramble this word', tiles: letters.map(l => l.toUpperCase()), note: `${word.length} letters` }, word };
     },
@@ -117,7 +119,7 @@ function makeRound(def) {
         const a = await io.turn(p, { kind: 'solve', tries: 2 - t }, {
           auto: { t: 'skip' },
           validate: x => (x && x.t === 'skip' ? { t: 'skip' } : x && x.t === 'answer' && typeof x.text === 'string' ? { t: 'answer', text: x.text.slice(0, 60) } : null),
-          bot: () => (Math.random() < def.botSkill ? { t: 'answer', text: def.solve(z) } : { t: 'skip' }),
+          bot: () => (Math.random() < Math.min(0.97, def.botSkill + [-0.25, 0, 0.12][G.level == null ? 1 : G.level]) ? { t: 'answer', text: def.solve(z) } : { t: 'skip' }),
           think: 1800 + Math.random() * 2200, timeout: 60000,
         });
         if (a.t === 'skip') skipped = true;
@@ -189,7 +191,7 @@ function makeUI(def) {
 
 for (const [id, def] of Object.entries(GAMES)) {
   Club.register({
-    id, cat: def.cat, cats: def.cats, name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Round',
+    levels: true, id, cat: def.cat, cats: def.cats, name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Round',
     art: def.art, rules: def.rules,
     round: makeRound(def), view: makeView, ui: makeUI(def),
     _test: id === 'make24' ? { parseExpr, solve24, check: def.check } : {},

@@ -148,8 +148,8 @@ const fishUI = {
   },
   update(S) {
     F0 = S; const V = S.V, g = V.g, hand = S.my && S.my.h ? S.my.h : [], my = !!S.turn;
-    $('gfOpps').innerHTML = oppsHTML(S, g, i => `Books: ${g.books[i].length}`);
-    $('gfMsg').innerHTML = `${esc(g.last || 'Ask a player for a card rank you hold.')}<br><small>Cards left to fish: ${g.left}. Your books: ${S.me >= 0 ? g.books[S.me].map(r => LAB[r]).join(' ') || 'none' : ''}</small>`;
+    $('gfOpps').innerHTML = oppsHTML(S, g, i => `Books: ${(g.books[i] || []).length}`);
+    $('gfMsg').innerHTML = `${esc(g.last || 'Ask a player for a card rank you hold.')}<br><small>Cards left to fish: ${g.left}. Your books: ${S.me >= 0 ? (g.books[S.me] || []).map(r => LAB[r]).join(' ') || 'none' : ''}</small>`;
     $('gfBan').innerHTML = banner(V, S);
     $('gfHand').hidden = S.me < 0; $('gfHand').classList.toggle('turn', my); $('gfHand').innerHTML = handHTML(hand, () => my, c => fSel === rank(c));
     $('gfAct').hidden = !my; if (!my) { fSel = null; return ''; }

@@ -16,13 +16,15 @@ Works on laptops, tablets and phones, in any modern browser.
 ## Games
 
 - **Cards:** Texas Hold'em, Dai Di (Big Two), Uno, Crazy Eights, Go Fish, Old Maid, Cheat, Blackjack, Higher or Lower and more
-- **Board:** Chess, Checkers, Reversi, Gomoku, Connect Four, Tic-Tac-Toe, Mancala, Dots and Boxes, Snakes and Ladders
-- **Dice:** Pig, Bank, Shut the Box, Liar's Dice, Craps, Sic Bo
+- **Board:** Chess, Checkers, Reversi, Gomoku, Connect Four, Tic-Tac-Toe, Mancala, Dots and Boxes, Snakes and Ladders, Property Tycoon (Monopoly-style)
+- **Dice:** Pig, Shut the Box, Liar's Dice, Craps, Sic Bo
 - **Casino-style (chips only):** Roulette, Baccarat, Video Poker, Slot Machine, Keno, Let It Ride and others
 - **Aim:** Eight-Ball Pool, Carrom, Mini Golf, Archery, Darts
 - **Word:** Scrabble, Hangman, Word Scramble
 - **Maths:** 2048, Make 24, Quick Sums, Number Patterns
 - **Mind:** Sudoku, Mastermind, Memory, Simon, Nim, Trivia Quiz
+- **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch (keyboard, mouse and touch)
+- Most games have **Easy, Medium and Hard** levels.
 
 ## Run locally
 

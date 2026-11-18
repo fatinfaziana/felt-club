@@ -33,7 +33,7 @@ function makeGame(o) {
   const G = { id: o.id, name: o.name, game: o.game, hostId: o.hostId, mode: '', max: o.max || D.max, minP: o.min || D.min, status: o.status, players: [],
     round: 0, done: false, summary: [], log: [], seq: Date.now(), prompt: null, waitHuman: false, pendingHuman: null,
     dl: 0, nextAt: 0, fast: false, closed: false, joinSet: new Set(), startResolve: null, nextResolve: null,
-    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [] };
+    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [], level: o.level == null ? 1 : o.level };
   G.nicks[o.hostId] = myNick;
   G.players.push(mkPlayer({ uid: o.hostId, human: true }));
   for (let i = 0; i < (o.bots || 0); i++) { const b = mkBot(G); if (b) G.players.push(b); }
@@ -45,7 +45,7 @@ function makeGame(o) {
 function buildView(G) {
   const hold = G.done || G.status === 'waiting' || G.round === 0;
   return {
-    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [],
+    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [], lv: G.level,
     seats: G.players.map(p => ({ u: p.human ? p.uid : null, nm: p.human ? (G.nicks[p.uid] || '') : '', w: p.wins || 0, n: p.human ? '' : p.name, st: p.human ? '' : p.style, stack: p.stack })),
     g: G.players.length ? gameOf(G).view(G) : {},
     prompt: G.prompt, dl: G.dl, wait: G.waitHuman, done: G.done, summary: G.summary,
@@ -215,7 +215,7 @@ function goHome() {
 function startSolo(gid, count) {
   const D = Club.games[gid];
   const n = Math.max(D.min, Math.min(D.max, count || D.soloBots + 1));
-  const G = makeGame({ id: 'solo', name: D.name, game: gid, hostId: myUid, bots: n - 1, status: 'playing' });
+  const G = makeGame({ id: 'solo', name: D.name, game: gid, hostId: myUid, bots: n - 1, status: 'playing', level: gpLevel });
   G.mode = 'solo'; G.joinOk();
   const sv = (store.load()[gid]) || {};
   if (sv.stack > 0) G.players[0].stack = sv.stack;
@@ -228,7 +228,7 @@ async function createTable(gid, opt) {
   const name = (opt.name || $('tName').value.trim() || 'Card night').slice(0, 28);
   const id = 't' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
   const mx = opt.max || +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, opt.min || +$('hMin').value || Club.games[gid].min);
-  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [] });
+  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [], level: gpLevel });
   G.mode = 'host';
   const ref = DB.doc('tables/' + id);
   $('createBtn').disabled = true;
@@ -243,7 +243,7 @@ async function resumeTable(id) {
   let V;
   try { const s = await DB.doc('tables/' + id).get(); if (!s.exists) return; V = s.data(); } catch { return; }
   if (!Club.games[V.game]) return;
-  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [] });
+  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [], level: V.lv });
   G.mode = 'host';
   G.players = V.seats.map((s, i) => {
     const p = s.u ? mkPlayer({ uid: s.u, human: true }) : (mkBot(G, s.n) || mkPlayer({ name: s.n, style: s.st }));
@@ -324,11 +324,12 @@ function selectGame(gid) {
   try { if (location.hash.slice(1) !== (selGame || '')) location.hash = selGame || ''; } catch {}
   renderHome();
 }
-const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games']];
+const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games'], ['arcade', 'Arcade']];
 let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(id, c))) || [null])[0];
 function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
 const inCat = inCatEarly;
-let gpMode = 'solo', frN = 0, soloC = -1;
+let gpMode = 'solo', frN = 0, soloC = -1, gpLevel = 1;
+const LEVELS = ['Easy', 'Medium', 'Hard'];
 const lc = t => cleanNick(t).toLowerCase();
 const getFriends = () => { const f = store.load().friends; return Array.isArray(f) ? f.map(cleanNick).filter(x => x.length >= 2).slice(0, 40) : []; };
 const setFriends = f => { const s = store.load(); s.friends = f; store.save(s); };
@@ -365,6 +366,7 @@ function renderHome() {
       const opts = (a, b, sl) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sl ? ' selected' : ''}>${k}</option>`).join('');
       $('hMin').innerHTML = opts(D.min, D.max, D.min); hm.innerHTML = opts(D.min, D.max, D.max);
     }
+    $('lvlRow').hidden = !D.levels; $('lvlChips').innerHTML = chipsHTML([0, 1, 2], gpLevel, v => LEVELS[v]);
     $('gpCover').outerHTML = coverHTML(selGame).replace('class="cover"', 'class="cover big" id="gpCover" aria-hidden="true"');
     $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
     document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
@@ -410,7 +412,7 @@ function renderRoom() {
   if (!c || $('room').hidden) return;
   const V = c.V, D = Club.games[c.game];
   $('roomName').textContent = c.mode === 'solo' ? D.name : V ? V.name : 'Table';
-  $('roomSub').textContent = c.mode === 'solo' ? (c.demo ? 'demo' : 'vs computer') : V ? D.name + ' · Host: ' + (V.hostId === c.uid ? 'you' : hostName(V)) : D.name;
+  $('roomSub').textContent = c.mode === 'solo' ? (c.demo ? 'demo' : 'vs computer' + (D.levels ? ' · ' + LEVELS[c.G && c.G.level != null ? c.G.level : 1] : '')) : V ? D.name + ' · Host: ' + (V.hostId === c.uid ? 'you' : hostName(V)) : D.name;
   const warn = [];
   if (c.gone) warn.push('This table has closed.');
   else if (c.err) warn.push('Lost the connection to the table. Trying again.');
@@ -527,6 +529,7 @@ $('startBtn').onclick = () => {
 $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value); };
 $('backBtn').onclick = () => selectGame(null);
 $('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
+$('lvlChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { gpLevel = +b.dataset.v; renderHome(); } };
 $('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
 $('frList').onclick = e => {
   const x = e.target.closest('[data-frx]'); if (x) { setFriends(getFriends().filter(f => f !== x.dataset.frx)); renderHome(); return; }

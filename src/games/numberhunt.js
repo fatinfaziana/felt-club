@@ -10,7 +10,7 @@ async function round(G, io) {
     const mid = Math.floor((H.lo + H.hi) / 2);
     const a = await io.turn(p, { lo: H.lo, hi: H.hi }, { auto: { t: 'guess', n: mid },
       validate: x => (x && x.t === 'guess' && Number.isInteger(x.n) && x.n >= H.lo && x.n <= H.hi ? { t: 'guess', n: x.n } : null),
-      bot: () => ({ t: 'guess', n: Math.max(H.lo, Math.min(H.hi, mid + Math.round((Math.random() - 0.5) * Math.max(1, (H.hi - H.lo) * 0.3)))) }), think: 900 + Math.random() * 600 });
+      bot: () => ({ t: 'guess', n: Math.max(H.lo, Math.min(H.hi, mid + Math.round((Math.random() - 0.5) * Math.max(1, (H.hi - H.lo) * [0.7, 0.3, 0.04][G.level == null ? 1 : G.level])))) }), think: 900 + Math.random() * 600 });
     const r = a.n === H.secret ? 'hit' : a.n < H.secret ? 'higher' : 'lower';
     H.hist.push({ p: i, n: a.n, r });
     if (r === 'hit') { H.over = true; H.winner = i; io.ev(p, `guesses ${a.n}. That is it`, `guess ${a.n}. That is it`); }
@@ -50,6 +50,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'numberhunt', cat: 'math', name: 'Guess the Number', tag: 'A big-group game: find the secret number first.', min: 2, max: 10, soloBots: 3, roundWord: 'Game',
   art: () => ['?', '42', '?'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who guesses the secret number. Works for a big group, up to 10 players.</p>

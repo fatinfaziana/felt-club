@@ -833,6 +833,56 @@ body { margin: 0; }
 .scwrap{height:100%}
 .scb{flex:1 1 0;min-height:0;width:auto;height:auto;max-width:100%;aspect-ratio:1}
 .scwrap .bt-opps,.scwrap .screk,.scwrap .pz-label,.scwrap .banner{flex:0 0 auto}
+.hm-clue{font:700 15px var(--body);color:var(--gold);margin:4px 0;min-height:20px}
+.lvlrow{margin:8px 0 2px}.lvlrow h3{margin:0 0 6px}
+
+.mc { position: relative; } .stone.fly { z-index: 9; transform: translate(-50%,-50%); transition-property: left, top; transition-timing-function: cubic-bezier(.3,.1,.4,1); box-shadow: 0 6px 8px rgba(0,0,0,.5); pointer-events: none; }
+
+/* ---- Property Tycoon ---- */
+.mowrap{display:flex;flex-direction:column;min-height:0;height:100%;align-items:center;gap:6px;position:relative}
+.mowrap .bt-opps{flex:0 0 auto;flex-wrap:nowrap;justify-content:center;gap:6px}.mowrap .bt-opps .seat{min-width:0;flex:0 1 120px}.mowrap .bt-opps .plate{padding:4px 8px}
+.mob{flex:1 1 0;min-height:0;width:100%;display:flex;justify-content:center;container-type:size}
+.mobd{position:relative;width:min(100cqw,100cqh);height:min(100cqw,100cqh);display:grid;gap:0;background:#cfe6d2;border:3px solid #1d3a28;border-radius:6px;container-type:inline-size;box-shadow:0 8px 18px rgba(0,0,0,.45);color:#1b2a20}
+.msq{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid rgba(20,50,30,.55);background:#e9f4e6;overflow:hidden;cursor:pointer;min-width:0;min-height:0;font-size:max(5.5px,1.45cqw);line-height:1.1;padding:1px}
+.msq:hover,.msq.sel{background:#fff7c8}.msq.mort{filter:grayscale(.8) brightness(.9)}
+.mo-bar{position:absolute;display:block}.s-b .mo-bar{top:0;left:0;right:0;height:22%}.s-t .mo-bar{bottom:0;left:0;right:0;height:22%}.s-l .mo-bar{right:0;top:0;bottom:0;width:22%}.s-r .mo-bar{left:0;top:0;bottom:0;width:22%}
+.s-b .mo-nm{margin-top:20%}.s-t .mo-nm{margin-bottom:20%}.s-l .mo-nm{margin-right:20%}.s-r .mo-nm{margin-left:20%}
+.mo-nm{font-weight:700;display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;word-break:break-word}.mo-pr{font-weight:600;opacity:.75}
+.mo-ic{font-size:max(9px,2.5cqw);line-height:1}.k-go,.k-jail,.k-free,.k-gojail{background:#f6e7b8}.k-go .mo-nm,.k-jail .mo-nm,.k-free .mo-nm,.k-gojail .mo-nm{font-size:max(6px,1.6cqw)}
+.k-chance{background:#ffd9b0}.k-luck{background:#d9c8f5}.k-tax{background:#f4d0d0}.k-rail,.k-util{background:#e4e4e4}
+.mo-hs{position:absolute;bottom:1px;left:0;right:0;font-size:max(6px,1.5cqw);line-height:1;text-align:center}.s-t .mo-hs{top:1px;bottom:auto}
+.mo-own{position:absolute;top:2px;right:2px;width:max(5px,1.3cqw);height:max(5px,1.3cqw);border-radius:50%;border:1px solid #000;display:block}
+.mo-mort{position:absolute;top:1px;left:2px;font-style:normal;font-weight:800;color:#a00;font-size:max(6px,1.4cqw)}
+.mo-c{grid-row:2/11;grid-column:2/11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2cqw;padding:1.5cqw;background:radial-gradient(circle,#e6f5e1,#c4dfc8);text-align:center;min-height:0;min-width:0;overflow:hidden}
+.mo-title{font:800 5.2cqw/1 var(--display,serif);color:#1d6b3a;letter-spacing:.2cqw;text-shadow:0 .3cqw 0 rgba(0,0,0,.15)}
+.mo-dice{min-height:7cqw;display:flex;gap:1.2cqw;align-items:center}.mo-dice .dieface{width:7cqw;height:7cqw;padding:1.1cqw;gap:.3cqw;margin:0;border-radius:1.2cqw}
+.mo-card{min-height:0;width:100%;display:flex;justify-content:center}.cardx{display:flex;flex-direction:column;gap:.5cqw;padding:1.3cqw 1.8cqw;border-radius:1.2cqw;max-width:92%;font-size:max(8px,2.1cqw);box-shadow:0 .5cqw 1.2cqw rgba(0,0,0,.3);animation:cardin .5s ease-out}
+.cardx b{font-size:max(9px,2.5cqw)}.cardx.ch{background:#ffb866;border:.3cqw solid #b86a12}.cardx.lk{background:#c3a6f0;border:.3cqw solid #6a3fb8}
+@keyframes cardin{from{transform:rotateY(90deg) scale(.7);opacity:0}to{transform:none;opacity:1}}
+.deed{background:#fff;border:.3cqw solid #222;border-radius:.8cqw;width:min(78%,30cqw);font-size:max(7px,1.8cqw);overflow:hidden}.dd-bar{padding:.8cqw;font-weight:800;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.6);text-align:center}.dd-bar.rail{background:#555}
+.dd-rows{display:grid;grid-template-columns:1fr auto;gap:.2cqw 1cqw;padding:.8cqw 1.2cqw}.dd-rows b{text-align:right}.dd-p{margin:0;padding:.5cqw 1cqw 1cqw;text-align:center}
+.mo-note{font:700 max(8px,2cqw)/1.2 var(--display,sans-serif);min-height:2.4cqw}
+.mo-tk{position:absolute;inset:0;pointer-events:none}
+.mo-t{position:absolute;width:3.4cqw;height:3.4cqw;margin:-1.7cqw 0 0 -1.7cqw;border-radius:50%;background:var(--tc);border:.25cqw solid #111;display:grid;place-items:center;font-size:2.3cqw;line-height:1;transition:left .2s,top .2s,transform .2s;box-shadow:0 .4cqw .6cqw rgba(0,0,0,.45);z-index:3}
+.mo-t.hop{transform:translateY(-1.2cqw) scale(1.2)}.mo-t.fly{transform:scale(1.5);z-index:5}.mo-t.out{opacity:.25;filter:grayscale(1)}
+.mofx{position:absolute;font:800 2.6cqw var(--display,sans-serif);transform:translate(-50%,-50%);animation:fxup2 1.4s ease-out forwards;paint-order:stroke;-webkit-text-stroke:.5cqw #000;z-index:6}.mofx.up{color:#9af0a0}.mofx.dn{color:#ff9a90}
+@keyframes fxup2{from{opacity:1;margin-top:0}to{opacity:0;margin-top:-6cqw}}
+.mo-rd{font:700 14px var(--display);opacity:.85}.mowrap .banner{flex:0 0 auto}
+.mo-owe{color:#ff9a90;font-weight:700;align-self:center}
+.mo-mng{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:20;padding:8px}.mo-mng[hidden]{display:none}
+.mo-sheet{background:#1f2e25;color:var(--cream);border:2px solid var(--gold);border-radius:12px;max-width:560px;width:100%;max-height:100%;display:flex;flex-direction:column;overflow:hidden}
+.mo-sh-h{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.15)}
+.mo-list{overflow:auto;padding:6px 10px;display:flex;flex-direction:column;gap:6px}.mo-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.mo-sw{width:12px;height:22px;border-radius:3px;flex:0 0 auto}.mo-rn{flex:1 1 120px;font-weight:700;font-size:14px}.mo-rn em{font-weight:400;opacity:.7}
+.mo-b{border:0;border-radius:8px;padding:5px 9px;font:700 12px var(--display);background:#3b8a5a;color:#fff;cursor:pointer}.mo-b:disabled{opacity:.3;cursor:default}.mo-empty{padding:12px}
+#moAct{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#moAct .b{flex:1 1 130px;padding:8px 10px;min-height:0}#moAct .bt-hint{flex:1 0 100%;margin:0}
+
+/* ---- Arcade ---- */
+.arwrap{display:flex;flex-direction:column;align-items:center;min-height:0;height:100%;gap:6px}.arwrap .bt-opps{flex:0 0 auto;flex-wrap:nowrap;justify-content:center;gap:6px}.arwrap .bt-opps .seat{min-width:0;flex:0 1 110px}.arwrap .bt-opps .plate{padding:4px 8px}
+.arbox{position:relative;flex:1 1 0;min-height:0;width:100%;display:flex;justify-content:center;container-type:size}
+.arcv{display:block;touch-action:none;user-select:none;-webkit-user-select:none;width:min(100cqw,calc(100cqh*0.75));height:min(100cqh,calc(100cqw*1.3333));aspect-ratio:3/4;background:#000;border-radius:10px;box-shadow:0 8px 18px rgba(0,0,0,.45);border:2px solid #000}
+.arover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer}.arover[hidden]{display:none}
+.arcard{background:rgba(15,20,25,.9);border:2px solid var(--gold);border-radius:14px;padding:14px 18px;text-align:center;max-width:300px;color:var(--cream);display:flex;flex-direction:column;gap:6px;align-items:center}.arcard p{margin:0;font-size:14px}.arcard small{opacity:.7}.arbig{font-size:44px;line-height:1}
+.arwrap .banner{flex:0 0 auto}
 
 </style>
 <div class="wrap">
@@ -877,6 +927,8 @@ body { margin: 0; }
           <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
         </div>
       </div>
+
+      <div class="lvlrow" id="lvlRow" hidden><h3>Level</h3><div class="chips-pick" id="lvlChips" role="group" aria-label="Difficulty level"></div></div>
 
       <div class="modes" id="modes" role="group" aria-label="How do you want to play?">
         <button type="button" class="mode" data-mode="solo" aria-pressed="true"><b>Solo</b><span>Play with computers</span></button>
@@ -1071,6 +1123,7 @@ function syncSeats(G) {
 /* ---------- word list and pot settling for the board, word and maths games ---------- */
 const WORDS = ('garden planet window pencil rabbit bridge castle dragon forest guitar island jungle kitten ladder magnet orange pirate rocket school tunnel violin wizard yellow zebra anchor basket candle desert engine flower hammer jacket kettle lemon mirror needle ocean pepper quilt river saddle table umbrella valley whistle button cotton dinner family garlic honey insect jelly kernel lizard muffin napkin office parcel puzzle ribbon candy shadow spider summer sunset thunder turtle winter wonder animal banana butter camera carpet circle cookie doctor dolphin eagle farmer finger glasses harbor helmet iceberg jigsaw kitchen lantern marble monkey mountain nature orchid palace penguin pillow pocket pumpkin rainbow sailor season silver sponge stream sweater theater ticket tomato travel trophy unicorn volcano walnut weather yogurt zipper blanket compass diamond feather giraffe hamster lemonade orchard pancake rainbow squirrel teapot').split(' ');
 
+const CLUES = {anchor:'Holds a ship in place',animal:'A living creature that is not a plant',banana:'A long yellow fruit',basket:'Woven container for carrying things',blanket:'Keeps you warm on a bed',bridge:'Lets you cross a river',butter:'Spread made from cream',button:'Fastens a shirt',camera:'Takes photographs',candle:'Wax stick with a flame',candy:'Sweet treat',carpet:'Soft covering for a floor',castle:'Home of a king or queen',circle:'A perfectly round shape',compass:'Needle that points north',cookie:'Sweet baked treat',cotton:'Soft plant fibre used for clothes',desert:'Hot, dry, sandy place',diamond:'Sparkling precious gem',dinner:'Evening meal',doctor:'Helps sick people get well',dolphin:'Clever sea mammal that clicks and whistles',dragon:'Fire-breathing creature in stories',eagle:'Large bird of prey',engine:'Makes a car or train go',family:'Parents, children and relatives',farmer:'Grows crops and keeps animals',feather:"Light part of a bird's coat",finger:'Part of your hand',flower:'Colourful part of a plant',forest:'Lots of trees together',garden:'Place where flowers and vegetables grow',garlic:'Smelly bulb used in cooking',giraffe:'Tallest animal',glasses:'Help you see better',guitar:'Stringed instrument you strum',hammer:'Tool for hitting nails',hamster:'Small pet that runs on a wheel',harbor:'Where ships dock',helmet:'Protects your head',honey:'Sweet food made by bees',iceberg:'Huge floating chunk of ice',insect:'Small animal with six legs',island:'Land surrounded by water',jacket:'Short coat',jelly:'Wobbly fruit dessert',jigsaw:'Puzzle made of interlocking pieces',jungle:'Thick tropical forest',kernel:'Seed inside a nut or a grain of corn',kettle:'Boils water for tea',kitchen:'Room where food is cooked',kitten:'Baby cat',ladder:'Climb up it step by step',lantern:'Portable light with a handle',lemon:'Sour yellow fruit',lemonade:'Sweet and sour drink',lizard:'Small scaly reptile',magnet:'Pulls iron towards it',marble:'Small glass ball, or smooth stone',mirror:'Shows your reflection',monkey:'Swings in trees and loves bananas',mountain:'Very high hill',muffin:'Small round cake',napkin:'Wipes your mouth at dinner',nature:'The outdoors: plants, animals and weather',needle:'Sewing tool with a tiny hole',ocean:'Huge body of salt water',office:'Place where people work at desks',orange:'Round citrus fruit and a colour',orchard:'Place where fruit trees grow',orchid:'Delicate, fancy flower',palace:'Where royalty lives',pancake:'Flat breakfast cake flipped in a pan',parcel:'Package sent in the mail',pencil:'Writing tool you can erase',penguin:'Black and white bird that cannot fly',pepper:'Spicy seasoning',pillow:'Rest your head on it in bed',pirate:'Sailor who searches for treasure',planet:'Earth is one',pocket:'Small pouch sewn into trousers',pumpkin:'Big orange vegetable at Halloween',puzzle:'A problem to solve',quilt:'Patchwork bed cover',rabbit:'Long-eared hopper',rainbow:'Colourful arc after rain',ribbon:'Thin strip used to tie gifts',river:'Flowing water heading to the sea',rocket:'Flies into space',saddle:'Seat on a horse',sailor:'Works on a ship',school:'Where children learn',season:'Spring, summer, autumn or winter',shadow:'Dark shape made when light is blocked',silver:'Shiny grey metal',spider:'Eight legs and spins webs',sponge:'Soaks up water',squirrel:'Collects acorns and has a bushy tail',stream:'A small river',summer:'The hottest season',sunset:'When the sun goes down',sweater:'Warm knitted top',table:'Has legs and a flat top for meals',teapot:'Pours hot tea',theater:'Where plays and movies are shown',thunder:'Loud rumble in a storm',ticket:'Lets you into a show or on a train',tomato:'Red fruit often used as a vegetable',travel:'Go from place to place',trophy:'Prize for the winner',tunnel:'Passage through a hill or under ground',turtle:'Reptile that carries a shell',umbrella:'Keeps you dry in the rain',unicorn:'Magical horse with one horn',valley:'Low land between mountains',violin:'Small string instrument played with a bow',volcano:'Mountain that erupts',walnut:'Wrinkly brain-shaped nut',weather:'Rain, sun, wind and snow',whistle:'Sound you blow',window:'Glass you look through in a wall',winter:'The coldest season',wizard:'Casts spells',wonder:'To think about with curiosity',yellow:'Colour of a lemon',yogurt:'Creamy fermented milk',zebra:'Striped horse-like animal',zipper:'Fastens a jacket by sliding teeth'};
 // Everyone puts in the same stake; the winners split the pot. No winners: everyone gets their stake back.
 function settlePot(G, ante, winners) {
   const P = G.players, paid = P.map(p => { const a = Math.min(ante, p.stack); p.stack -= a; return a; });
@@ -1122,7 +1175,8 @@ const COVERS = {
   memory: ['🧠', '#e0709a', '#5a1a38'], codebreaker: ['🔐', '#6b7a8a', '#222c38'], numberhunt: ['🔢', '#3aa0c8', '#123a4f'], bluffdice: ['🎲', '#b04a5a', '#4a1822'], nim: ['🥢', '#c89a3a', '#4a3410'],
   rps: ['✊✋✌️', '#d8703a', '#5a2410'], patternmem: ['🎹', '#8a5ad8', '#321a66'], sealed: ['🤫', '#5a6ad8', '#1a2060'], lowunique: ['🤫', '#5a6ad8', '#1a2060'], twothirds: ['⅔', '#4a8ad8', '#14305e'],
   hilo: ['↕️', '#c8503a', '#4a1a10'], quiz: ['❓', '#e0a02a', '#5a3a08'], reversi: ['⚪⚫', '#2f8a5a', '#0e3a24'], gomoku: ['⭕', '#9a7a3a', '#3a2c10'], mancala: ['🪨', '#a8683a', '#3f2210'],
-  dotsboxes: ['▦', '#4a7ad8', '#142a5e'], chess: ['♞', '#8d5a2f', '#2e1c0e'], sudoku: ['9', '#5a8a9a', '#1a3a46'], pig: ['🐷', '#e08aa0', '#5a2234'], shutbox: ['📦', '#a07a4a', '#3a2a14'], bankroll: ['💰', '#c8a02a', '#4a3a08'],
+  whack: ['🐭', '#5aa84a', '#1d3a18'], zombies: ['🧟', '#3d5a3a', '#101c10'], racing: ['🏎️', '#3a3a42', '#111116'], dance: ['💃', '#8a2aa0', '#2a1245'], invaders: ['🚀', '#2a2a6a', '#080a1c'], pacman: ['🟡', '#1f3fbf', '#000'], mines: ['💣', '#4a5d70', '#1a232e'], seabattle: ['🚢', '#1b6aa8', '#0a2a4a'], breakout: ['🧱', '#9a5ad8', '#10142a'], snake: ['🐍', '#2f8a3a', '#10281a'], flappy: ['🐤', '#6ec6f2', '#2a6a9a'], fruit: ['🍉', '#f29443', '#7a3a10'],
+  dotsboxes: ['▦', '#4a7ad8', '#142a5e'], chess: ['♞', '#8d5a2f', '#2e1c0e'], sudoku: ['9', '#5a8a9a', '#1a3a46'], pig: ['🐷', '#e08aa0', '#5a2234'], shutbox: ['📦', '#a07a4a', '#3a2a14'], monopoly: ['🎲🏠', '#2f9d4f', '#0f3a1c'],
   threecard: ['3♥', '#1f6a52', '#0b3326'], caribbean: ['🏝️', '#2aa5c8', '#0d3f4f'], letitride: ['🏇', '#3a8a4a', '#123d1b'], reddog: ['🐕', '#c4503a', '#4a1a10'], baccarat: ['9♦', '#8a1f2a', '#380a10'], videopoker: ['📟', '#3a5ad8', '#101e5e'],
   roulette: ['🎡', '#1a6b3a', '#0a2c18'], sicbo: ['🎲', '#8a1f2a', '#380a10'], craps: ['🎲', '#1f6a52', '#0b3326'], slots: ['🎰', '#7a2fd8', '#2a1060'], keno: ['🎱', '#2b3a6a', '#0f1630'],
   crazy8: ['8♠', '#2a6fb8', '#102a50'], gofish: ['🐟', '#2aa5c8', '#0d3f4f'], oldmaid: ['👵', '#a8508a', '#3f1634'], cheat: ['🤥', '#b8452a', '#4a1a10'], scrabble: ['Aa', '#2a7a4a', '#0e3a22'], g2048: ['2048', '#edc22e', '#6b4a10'], darts: ['🎯', '#c4372e', '#3a1210'], archery: ['🏹', '#3a8a3a', '#10381a'], minigolf: ['⛳', '#3aa04a', '#10401a'], pool: ['🎱', '#1f7a4a', '#0a3220'], carrom: ['🟤', '#d6b05a', '#5a3f10'],
@@ -2759,8 +2813,10 @@ const GAMES = {
     art: () => ['T', 'A', 'C'].map(l => `<div class="ltile">${l}</div>`).join(''),
     rules: `<p><b>Goal:</b> unscramble the letters to make a real word. Everyone gets the same word, one turn each.</p>
       <ol><li>The scrambled letters appear on the table.</li><li>When it is your turn, type the word and press <b>Submit</b>. You get two tries.</li><li>Stuck? Press <b>Skip</b>.</li><li>Everyone puts in ${ANTE} chips. People who solve it split the pot. If nobody solves it, everyone gets their chips back.</li></ol>`,
-    make() {
-      const word = WORDS[rnd(WORDS.length)]; let letters;
+    make(G) {
+      const lv = G && G.level != null ? G.level : 1;
+      const pool = WORDS.filter(w => (lv === 0 ? w.length <= 5 : lv === 2 ? w.length >= 7 : true));
+      const word = (pool.length ? pool : WORDS)[rnd((pool.length ? pool : WORDS).length)]; let letters;
       do { letters = shuffle(word.split('')); } while (letters.join('') === word);
       return { pub: { label: 'Unscramble this word', tiles: letters.map(l => l.toUpperCase()), note: `${word.length} letters` }, word };
     },
@@ -2840,7 +2896,7 @@ function makeRound(def) {
         const a = await io.turn(p, { kind: 'solve', tries: 2 - t }, {
           auto: { t: 'skip' },
           validate: x => (x && x.t === 'skip' ? { t: 'skip' } : x && x.t === 'answer' && typeof x.text === 'string' ? { t: 'answer', text: x.text.slice(0, 60) } : null),
-          bot: () => (Math.random() < def.botSkill ? { t: 'answer', text: def.solve(z) } : { t: 'skip' }),
+          bot: () => (Math.random() < Math.min(0.97, def.botSkill + [-0.25, 0, 0.12][G.level == null ? 1 : G.level]) ? { t: 'answer', text: def.solve(z) } : { t: 'skip' }),
           think: 1800 + Math.random() * 2200, timeout: 60000,
         });
         if (a.t === 'skip') skipped = true;
@@ -2912,7 +2968,7 @@ function makeUI(def) {
 
 for (const [id, def] of Object.entries(GAMES)) {
   Club.register({
-    id, cat: def.cat, cats: def.cats, name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Round',
+    levels: true, id, cat: def.cat, cats: def.cats, name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Round',
     art: def.art, rules: def.rules,
     round: makeRound(def), view: makeView, ui: makeUI(def),
     _test: id === 'make24' ? { parseExpr, solve24, check: def.check } : {},
@@ -2944,7 +3000,8 @@ function botGuess(H) {
 
 async function round(G, io) {
   const P = G.players, n = P.length;
-  const H = G.h = { word: WORDS[rnd(WORDS.length)], guessed: [], wrong: 0, turn: (G.round - 1) % n, over: false, winner: -1, lost: false };
+  const lv = G.level == null ? 1 : G.level, pool = WORDS.filter(w => lv === 0 ? w.length <= 6 : lv === 2 ? w.length >= 7 : true), word = pool[rnd(pool.length)];
+  const H = G.h = { word, hint: lv === 0 ? 1 : 0, lv, guessed: [], wrong: 0, turn: (G.round - 1) % n, over: false, winner: -1, lost: false };
   io.render();
   await io.sleep(600);
   while (!H.over) {
@@ -2954,6 +3011,7 @@ async function round(G, io) {
     const a = await io.turn(p, {}, {
       auto,
       validate: x => {
+        if (x && x.t === 'hint' && H.hint < 2) return { t: 'hint' };
         if (x && x.t === 'letter' && typeof x.ch === 'string' && x.ch.length === 1 && ABC.includes(x.ch) && !H.guessed.includes(x.ch)) return { t: 'letter', ch: x.ch };
         if (x && x.t === 'word' && typeof x.text === 'string' && /^[a-z]{2,12}$/.test(x.text.toLowerCase())) return { t: 'word', text: x.text.toLowerCase() };
         return null;
@@ -2961,7 +3019,11 @@ async function round(G, io) {
       bot: () => botGuess(H), think: 900 + Math.random() * 600,
     });
     let again = false;
-    if (a.t === 'letter') {
+    if (a.t === 'hint') {
+      if (H.hint === 0) { H.hint = 1; io.ev(p, 'asks for a clue', 'ask for a clue'); }
+      else { const hid = H.word.split('').filter(ch => !H.guessed.includes(ch)); const ch = hid[rnd(hid.length)]; H.guessed.push(ch); H.hint = 2; H.wrong++; io.ev(p, `buys a hint: letter “${ch.toUpperCase()}” (costs a wrong guess)`, `buy a hint: letter “${ch.toUpperCase()}” (costs a wrong guess)`); if (pattern(H).every(c => c)) { H.over = true; H.winner = i; } }
+      again = true;
+    } else if (a.t === 'letter') {
       H.guessed.push(a.ch);
       if (H.word.includes(a.ch)) {
         const k = H.word.split('').filter(ch => ch === a.ch).length;
@@ -2986,8 +3048,8 @@ async function round(G, io) {
 
 function view(G) {
   const H = G.h;
-  if (!H) return { pat: [], guessed: [], wrong: 0, max: MAX_WRONG, turn: -1, over: false, word: null, winner: -1, delta: [] };
-  return { pat: pattern(H), guessed: H.guessed, hits: H.guessed.filter(ch => H.word.includes(ch)), wrong: H.wrong, max: MAX_WRONG, turn: H.over ? -1 : H.turn,
+  if (!H) return { pat: [], clue: '', hint: 0, guessed: [], wrong: 0, max: MAX_WRONG, turn: -1, over: false, word: null, winner: -1, delta: [] };
+  return { pat: pattern(H), clue: H.hint >= 1 ? (CLUES[H.word] || 'A word with ' + H.word.length + ' letters') : '', hint: H.hint, guessed: H.guessed, hits: H.guessed.filter(ch => H.word.includes(ch)), wrong: H.wrong, max: MAX_WRONG, turn: H.over ? -1 : H.turn,
     over: H.over, word: H.over ? H.word : null, winner: H.winner, delta: G.players.map(p => (H.over ? p.delta || 0 : 0)) };
 }
 
@@ -3003,19 +3065,22 @@ const gallows = wrong => `<svg viewBox="0 0 160 170" class="hm-svg" role="img" a
 const ui = {
   mount(stage, ctl, S) {
     seqShown = 0;
-    stage.innerHTML = `<section class="table hm"><div class="hm-top"><div id="hmDraw"></div><div class="hm-word-wrap"><div class="hm-word" id="hmWord" aria-live="polite"></div><div class="hint" id="hmCount"></div></div></div>
+    stage.innerHTML = `<section class="table hm"><div class="hm-top"><div id="hmDraw"></div><div class="hm-word-wrap"><div class="hm-word" id="hmWord" aria-live="polite"></div><div class="hm-clue" id="hmClue"></div><div class="hint" id="hmCount"></div></div></div>
       <div class="bt-opps" id="hmSeats"></div><div class="banner" id="hmBanner" aria-live="polite"></div></section>`;
     ctl.innerHTML = `<div class="act" id="hmAct" hidden><div class="hm-keys" id="hmKeys"></div>
       <form class="pz-form" id="hmForm" autocomplete="off"><input id="hmInput" aria-label="Guess the whole word" placeholder="Or guess the whole word" maxlength="12">
-      <button type="submit" class="b gold small">Guess</button></form><p class="hint bt-hint" id="hmHint"></p></div>`;
+      <button type="submit" class="b gold small">Guess</button><button type="button" class="ghost" id="hmHintBtn">Hint</button></form><p class="hint bt-hint" id="hmHint"></p></div>`;
     $('hmKeys').innerHTML = ABC.split('').map(ch => `<button type="button" class="hm-key" data-ch="${ch}">${ch.toUpperCase()}</button>`).join('');
     $('hmKeys').onclick = e => { const b = e.target.closest('[data-ch]'); if (b && !b.disabled) S0.send({ t: 'letter', ch: b.dataset.ch }); };
+    $('hmHintBtn').onclick = () => S0.send({ t: 'hint' });
     $('hmForm').onsubmit = e => { e.preventDefault(); const v = $('hmInput').value.trim().toLowerCase(); if (v) { $('hmInput').value = ''; S0.send({ t: 'word', text: v }); } };
   },
   update(S) {
     S0 = S;
     const V = S.V, g = V.g;
     $('hmDraw').innerHTML = gallows(g.wrong);
+    $('hmClue').textContent = g.clue ? 'Clue: ' + g.clue : '';
+    $('hmHintBtn').disabled = g.hint >= 2; $('hmHintBtn').textContent = g.hint === 0 ? 'Show clue' : g.hint === 1 ? 'Reveal a letter (costs 1 miss)' : 'No more hints';
     const letters = g.over && g.word ? g.word.split('') : g.pat;
     $('hmWord').innerHTML = letters.map((ch, i) => `<span class="hm-l${g.over && !g.pat[i] ? ' miss' : ''}">${esc((ch || '').toUpperCase())}</span>`).join('');
     $('hmCount').textContent = `${g.max - g.wrong} wrong ${g.max - g.wrong === 1 ? 'guess' : 'guesses'} left`;
@@ -3035,17 +3100,18 @@ const ui = {
     });
     if (!S.turn) return '';
     if (seqShown !== S.turn.seq) { seqShown = S.turn.seq; }
-    $('hmHint').textContent = 'Tap a letter. A right letter lets you guess again.';
+    $('hmHint').textContent = 'Tap a letter. A right letter lets you guess again. Stuck? Use the hint button.';
     return '';
   },
 };
 
 Club.register({
-  id: 'hangman', cat: 'word', name: 'Hangman', tag: 'Guess the hidden word, one letter at a time.', min: 1, max: 6, soloBots: 2, roundWord: 'Round',
+  id: 'hangman', cat: 'word', name: 'Hangman', tag: 'Guess the hidden word, one letter at a time.', min: 1, max: 6, soloBots: 2, roundWord: 'Round', levels: true,
   art: () => ['H', '_', 'N'].map(l => `<div class="ltile">${l}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who finishes the hidden word. All players share one word and one set of ${MAX_WRONG} wrong guesses.</p>
     <ol><li>The word appears as blank spaces. Each wrong guess adds a part to the drawing.</li>
     <li>On your turn, tap a letter. If it is in the word, it fills in and <b>you guess again</b>. If not, the turn passes on.</li>
+    <li>Press <b>Hint</b> for a clue about the word. Press it again to reveal one letter, which costs you a wrong guess. Easy level shows the clue from the start; hard level uses longer words.</li>
     <li>You can also type the whole word. A wrong whole-word guess counts as a wrong guess.</li>
     <li>Whoever completes the word wins the pot (everyone put in ${ANTE} chips). If the drawing is finished first, everyone gets their chips back.</li></ol>`,
   round, view, ui,
@@ -3100,13 +3166,13 @@ function search(b, who, depth, alpha, beta) {
   }
   return best;
 }
-function botMove(b, who) {
+function botMove(b, who, lv = 1) {
   const mv = legal(b);
-  if (Math.random() < 0.1) return mv[rnd(mv.length)];
+  if (Math.random() < [0.45, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
   for (const c of mv) {
     const r = drop(b, c, who);
-    const v = (lineAt(b, r, c) ? 1010 : -search(b, 1 - who, 4, -1e9, 1e9)) + Math.random() * 0.6;
+    const v = (lineAt(b, r, c) ? 1010 : -search(b, 1 - who, [2, 4, 6][lv], -1e9, 1e9)) + Math.random() * 0.6;
     b[idx(r, c)] = -1;
     if (v > bs) { bs = v; best = c; }
   }
@@ -3124,7 +3190,7 @@ async function round(G, io) {
     const a = await io.turn(p, {}, {
       auto: { t: 'drop', c: legal(F.b)[0] },
       validate: x => (x && x.t === 'drop' && Number.isInteger(x.c) && x.c >= 0 && x.c < COLS && F.b[idx(0, x.c)] < 0 ? { t: 'drop', c: x.c } : null),
-      bot: () => ({ t: 'drop', c: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 500,
+      bot: () => ({ t: 'drop', c: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 500,
     });
     const r = drop(F.b, a.c, i); F.last = idx(r, a.c);
     io.ev(p, `drops a disc in column ${a.c + 1}`, `drop a disc in column ${a.c + 1}`);
@@ -3170,7 +3236,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'fourinrow', cat: 'board', name: 'Connect Four', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'fourinrow', cat: 'board', name: 'Connect Four', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to get four of your discs in a row: across, up and down, or diagonally.</p>
     <ol><li>Two players take turns. You are gold or cream; the colour is shown beside your name.</li>
@@ -3253,14 +3319,14 @@ function search(b, s, depth, alpha, beta) {
   }
   return best;
 }
-function botMove(b, s) {
+function botMove(b, s, lv = 1) {
   const mv = legalMoves(b, s);
   if (mv.length === 1) return mv[0];
-  if (Math.random() < 0.08) return mv[rnd(mv.length)];
+  if (Math.random() < [0.4, 0.08, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
   for (const m of mv) {
     const nb = b.slice(); apply(nb, m);
-    const v = -search(nb, 1 - s, 4, -1e9, 1e9) + Math.random() * 2;
+    const v = -search(nb, 1 - s, [2, 4, 6][lv], -1e9, 1e9) + Math.random() * 2;
     if (v > bs) { bs = v; best = m; }
   }
   return best;
@@ -3282,7 +3348,7 @@ async function round(G, io) {
         if (!x || x.t !== 'move' || !Number.isInteger(x.from) || !Array.isArray(x.path) || x.path.length > 12 || !x.path.every(Number.isInteger)) return null;
         const m = mv.find(q => same(q, x)); return m ? { t: 'move', from: m.from, path: m.path } : null;
       },
-      bot: () => { const m = botMove(F.b.slice(), i); return { t: 'move', from: m.from, path: m.path }; }, think: 900 + Math.random() * 600,
+      bot: () => { const m = botMove(F.b.slice(), i, G.level); return { t: 'move', from: m.from, path: m.path }; }, think: 900 + Math.random() * 600,
     });
     const m = mv.find(q => same(q, a));
     const wasMan = !isK(F.b[m.from]);
@@ -3364,7 +3430,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'checkers', cat: 'board', name: 'Checkers', tag: 'Jump your opponent’s pieces and crown your kings.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'checkers', cat: 'board', name: 'Checkers', tag: 'Jump your opponent’s pieces and crown your kings.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> capture all of your opponent’s pieces, or leave them with no move.</p>
     <ol><li>Two players take turns. Each starts with 12 pieces on the dark squares. You are gold or cream; yours start at the bottom of your screen.</li>
@@ -3490,7 +3556,7 @@ const ui = {
     stage.innerHTML = `<section class="table ldwrap"><div class="bt-opps" id="ldSeats"></div>
       <div class="ldb"><svg class="ldsvg" viewBox="-1 -1 102 111" role="img" aria-label="Snakes and ladders board"><rect x="-1" y="-1" width="102" height="111" rx="3" fill="#6b4220"/>${cells}<rect x="0" y="100" width="100" height="9" fill="#2c6b50"/><text x="12" y="106.2" font-size="3" font-weight="700" fill="#cfe9d8">◀ START: tokens wait here</text><text x="95" y="3" text-anchor="end" font-size="2.2" fill="#7a5a10" font-weight="700"></text>${ladders}${snakes}<g id="ldToks">${toks}</g><g id="ldFx"></g></svg></div>
       <div class="ld-die" id="ldDie" aria-live="polite"></div><div class="banner" id="ldBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="ldAct" hidden><button type="button" class="b gold" id="ldRoll">Roll the die</button><p class="hint bt-hint">Ladders lift you up. Snakes slide you down. Roll a six to go again.</p></div>`;
+    ctl.innerHTML = `<div class="act" id="ldAct" hidden><button type="button" class="b gold" id="ldRoll">Roll the dice</button><p class="hint bt-hint">Ladders lift you up. Snakes slide you down. Roll a six to go again.</p></div>`;
     $('ldRoll').onclick = () => S0.send({ t: 'roll' });
   },
   update(S) {
@@ -3516,7 +3582,7 @@ Club.register({
   art: () => ['p0', 'p1', 'p2'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to land exactly on square 100.</p>
     <ol><li>Everyone starts off the board. Players take turns; your token colour is shown beside your name.</li>
-    <li>On your turn, press <b>Roll the die</b>. Your token moves that many squares.</li>
+    <li>On your turn, press <b>Roll the dice</b>. Your token moves that many squares.</li>
     <li>If you land at the bottom of a <b>ladder</b>, climb to the top. If you land on a <b>snake's head</b>, slide down to its tail.</li>
     <li>Roll a six and you roll again.</li>
     <li>You need the exact number to finish. If your roll would take you past 100, you stay where you are.</li>
@@ -3539,9 +3605,9 @@ function mm(b, who, me) {                       // best outcome for `me` if `who
   for (const i of o) { b[i] = who; const v = mm(b, 1 - who, me) + (who === me ? -0.01 : 0.01); b[i] = -1; best = who === me ? Math.max(best, v) : Math.min(best, v); }
   return best;
 }
-function botMove(b, me) {
+function botMove(b, me, lv = 1) {
   const o = open(b);
-  if (Math.random() < 0.15) return o[rnd(o.length)];
+  if (Math.random() < [0.5, 0.12, 0][lv]) return o[rnd(o.length)];
   let best = o[0], bs = -99;
   for (const i of shuffle(o.slice())) { b[i] = me; const v = mm(b, 1 - me, me); b[i] = -1; if (v > bs) { bs = v; best = i; } }
   return best;
@@ -3555,7 +3621,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(p, {}, { auto: { t: 'mark', i: open(F.b)[0] },
       validate: x => (x && x.t === 'mark' && Number.isInteger(x.i) && x.i >= 0 && x.i < 9 && F.b[x.i] < 0 ? { t: 'mark', i: x.i } : null),
-      bot: () => ({ t: 'mark', i: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 400 });
+      bot: () => ({ t: 'mark', i: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 400 });
     F.b[a.i] = i; io.ev(p, `plays square ${a.i + 1}`, `play square ${a.i + 1}`);
     const w = winLine(F.b);
     if (w) { F.over = true; F.winner = i; F.line = w; } else if (!open(F.b).length) F.over = true; else F.turn = 1 - i;
@@ -3590,7 +3656,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'tictactoe', cat: 'mind', name: 'Tic-Tac-Toe', tag: 'Three in a row wins. A quick duel for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'tictactoe', cat: 'mind', name: 'Tic-Tac-Toe', tag: 'Three in a row wins. A quick duel for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['✕', '○', '✕'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> get three of your marks in a row before your opponent.</p>
     <ol><li>Two players take turns. One plays ✕ (gold), the other ○ (cream). The first player changes each game.</li>
@@ -3610,7 +3676,7 @@ async function round(G, io) {
   const M = G.m = { cards: shuffle([...SYMS, ...SYMS]), st: Array(16).fill(0), turn: (G.round - 1) % n, score: P.map(() => 0), over: false, known: {}, pick: [] };
   const down = () => M.st.map((s, i) => (s === 0 ? i : -1)).filter(i => i >= 0);
   const botPick = (first) => {
-    const d = down(), mem = Object.entries(M.known).filter(([i]) => M.st[i] === 0 && Math.random() > 0.15).map(([i, s]) => [+i, s]);
+    const d = down(), mem = Object.entries(M.known).filter(([i]) => M.st[i] === 0 && Math.random() > [0.5, 0.15, 0.03][G.level == null ? 1 : G.level]).map(([i, s]) => [+i, s]);
     if (first) {
       for (const [i, s] of mem) if (mem.some(([j, t]) => j !== i && t === s)) return i;
       const unk = d.filter(i => !(i in M.known)); return (unk.length ? unk : d)[rnd((unk.length ? unk : d).length)];
@@ -3667,6 +3733,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'memory', cat: 'mind', name: 'Memory', tag: 'Flip cards and remember where the pairs are.', min: 2, max: 6, soloBots: 1, roundWord: 'Game',
   art: () => ['🍎', '⭐', '🍎'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> collect the most pairs. Sixteen cards lie face down: eight pairs of pictures.</p>
@@ -3700,7 +3767,7 @@ async function round(G, io) {
     const i = C.turn, p = P[i]; io.render();
     const a = await io.turn(p, { row: C.rows.length + 1 }, { auto: { t: 'guess', g: [0, 1, 2, 3] },
       validate: x => (x && x.t === 'guess' && okGuess(x.g) ? { t: 'guess', g: x.g.slice() } : null),
-      bot: () => { const pool = Math.random() < 0.12 ? ALL : cands; return { t: 'guess', g: pool[rnd(pool.length)] }; }, think: 1200 + Math.random() * 800 });
+      bot: () => { const pool = Math.random() < [0.4, 0.12, 0][G.level == null ? 1 : G.level] ? ALL : cands; return { t: 'guess', g: pool[rnd(pool.length)] }; }, think: 1200 + Math.random() * 800 });
     const f = score(C.secret, a.g); C.rows.push({ p: i, g: a.g, exact: f.exact, near: f.near });
     cands = cands.filter(c => { const r = score(c, a.g); return r.exact === f.exact && r.near === f.near; });
     if (!cands.length) cands = ALL;
@@ -3742,6 +3809,7 @@ const ui = {
 };
 function drawCur() { $('cbCur').innerHTML = Array.from({ length: LEN }, (_, k) => (k < cur.length ? peg(cur[k]) : '<i class="peg empty"></i>')).join(''); $('cbGo').disabled = cur.length !== LEN; }
 Club.register({
+  levels: true,
   id: 'codebreaker', cat: 'mind', name: 'Mastermind', tag: 'Crack the hidden colour code using the clues.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
   art: () => [0, 3, 2].map(c => `<div class="ltile">${peg(c)}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who cracks the secret code of ${LEN} colours. Everyone works on the same code and learns from each other’s guesses.</p>
@@ -3767,7 +3835,7 @@ async function round(G, io) {
     const mid = Math.floor((H.lo + H.hi) / 2);
     const a = await io.turn(p, { lo: H.lo, hi: H.hi }, { auto: { t: 'guess', n: mid },
       validate: x => (x && x.t === 'guess' && Number.isInteger(x.n) && x.n >= H.lo && x.n <= H.hi ? { t: 'guess', n: x.n } : null),
-      bot: () => ({ t: 'guess', n: Math.max(H.lo, Math.min(H.hi, mid + Math.round((Math.random() - 0.5) * Math.max(1, (H.hi - H.lo) * 0.3)))) }), think: 900 + Math.random() * 600 });
+      bot: () => ({ t: 'guess', n: Math.max(H.lo, Math.min(H.hi, mid + Math.round((Math.random() - 0.5) * Math.max(1, (H.hi - H.lo) * [0.7, 0.3, 0.04][G.level == null ? 1 : G.level])))) }), think: 900 + Math.random() * 600 });
     const r = a.n === H.secret ? 'hit' : a.n < H.secret ? 'higher' : 'lower';
     H.hist.push({ p: i, n: a.n, r });
     if (r === 'hit') { H.over = true; H.winner = i; io.ev(p, `guesses ${a.n}. That is it`, `guess ${a.n}. That is it`); }
@@ -3807,6 +3875,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'numberhunt', cat: 'math', name: 'Guess the Number', tag: 'A big-group game: find the secret number first.', min: 2, max: 10, soloBots: 3, roundWord: 'Game',
   art: () => ['?', '42', '?'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who guesses the secret number. Works for a big group, up to 10 players.</p>
@@ -3921,10 +3990,10 @@ Club.register({
 /* ---------- Nim: a two-player thinking game ---------- */
 (function () {
 const ANTE = 20;
-function botMove(piles) {
+function botMove(piles, lv = 1) {
   const x = piles.reduce((a, b) => a ^ b, 0), moves = [];
   piles.forEach((n, i) => { for (let k = 1; k <= n; k++) moves.push({ pile: i, take: k }); });
-  if (Math.random() < 0.15) return moves[rnd(moves.length)];
+  if (Math.random() < [0.55, 0.15, 0][lv]) return moves[rnd(moves.length)];
   if (x) { const good = moves.filter(m => (piles.reduce((a, b, i) => a ^ (i === m.pile ? b - m.take : b), 0)) === 0); if (good.length) return good[rnd(good.length)]; }
   const big = piles.indexOf(Math.max(...piles)); return { pile: big, take: 1 };
 }
@@ -3937,7 +4006,7 @@ async function round(G, io) {
     const first = N.piles.findIndex(n => n > 0);
     const a = await io.turn(p, {}, { auto: { t: 'take', pile: first, take: 1 },
       validate: x => (x && x.t === 'take' && Number.isInteger(x.pile) && Number.isInteger(x.take) && x.pile >= 0 && x.pile < 3 && x.take >= 1 && x.take <= N.piles[x.pile] ? { t: 'take', pile: x.pile, take: x.take } : null),
-      bot: () => Object.assign({ t: 'take' }, botMove(N.piles)), think: 1000 + Math.random() * 600 });
+      bot: () => Object.assign({ t: 'take' }, botMove(N.piles, G.level)), think: 1000 + Math.random() * 600 });
     N.piles[a.pile] -= a.take; N.last = { pile: a.pile, take: a.take };
     io.ev(p, `takes ${a.take} from row ${a.pile + 1}`, `take ${a.take} from row ${a.pile + 1}`);
     if (N.piles.every(n => n === 0)) { N.over = true; N.winner = i; } else N.turn = 1 - i;
@@ -3975,7 +4044,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'nim', cat: 'mind', name: 'Nim', tag: 'Take the last stick. A duel of pure thinking.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'nim', cat: 'mind', name: 'Nim', tag: 'Take the last stick. A duel of pure thinking.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['┃', '┃┃', '┃┃┃'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> take the very last stick.</p>
     <ol><li>Three rows of sticks sit on the table: 3, 4 and 5.</li>
@@ -4071,7 +4140,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(p, { len }, { timeout: 60000, auto: { t: 'seq', s: [...Q.seq, rnd(4)] },
       validate: x => (x && x.t === 'seq' && okSeq(x.s, len + 1) ? { t: 'seq', s: x.s.slice() } : null),
-      bot: () => { const ok = Math.random() < Math.pow(0.96, len) ; const s = [...Q.seq, rnd(4)]; if (!ok && len) { const k = rnd(len); s[k] = (s[k] + 1 + rnd(3)) % 4; } return { t: 'seq', s }; },
+      bot: () => { const ok = Math.random() < Math.pow([0.88, 0.96, 0.995][G.level == null ? 1 : G.level], len) ; const s = [...Q.seq, rnd(4)]; if (!ok && len) { const k = rnd(len); s[k] = (s[k] + 1 + rnd(3)) % 4; } return { t: 'seq', s }; },
       think: 900 + Math.random() * 600 });
     const good = Q.seq.every((c, k) => a.s[k] === c);
     if (good) { Q.seq.push(a.s[len]); io.ev(p, `repeats the pattern and adds ${NAMES[a.s[len]]}`, `repeat the pattern and add ${NAMES[a.s[len]]}`); }
@@ -4129,6 +4198,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'patternmem', cat: 'mind', name: 'Simon', tag: 'Repeat the colour pattern and add one. Last player in wins.', min: 2, max: 8, soloBots: 2, roundWord: 'Game',
   art: () => [0, 2, 3].map(c => `<div class="ltile"><i class="peg c${c}"></i></div>`).join(''),
   rules: `<p><b>Goal:</b> be the last player who can still remember the pattern. Works for 2 to 8 players.</p>
@@ -4356,7 +4426,7 @@ async function round(G, io) {
       Z.turn = i; io.render();
       const a = await io.turn(P[i], { q: k + 1 }, { auto: { t: 'ans', i: 0 },
         validate: x => (x && x.t === 'ans' && Number.isInteger(x.i) && x.i >= 0 && x.i < 4 ? { t: 'ans', i: x.i } : null),
-        bot: () => ({ t: 'ans', i: Math.random() < 0.62 ? right : rnd(4) }), think: 1100 + Math.random() * 900 });
+        bot: () => ({ t: 'ans', i: Math.random() < [0.4, 0.62, 0.88][G.level == null ? 1 : G.level] ? right : rnd(4) }), think: 1100 + Math.random() * 900 });
       Z.answered[i] = true; Z.picks[i] = a.i; if (a.i === right) Z.score[i]++;
     }
     Z.turn = -1; Z.reveal = right;
@@ -4392,6 +4462,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'quiz', cat: 'group', name: 'Trivia Quiz', tag: 'General knowledge for the whole group.', min: 2, max: 10, soloBots: 3, roundWord: 'Quiz',
   art: () => ['?', 'A', '✓'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> answer the most questions correctly. Fits 2 to 10 players.</p>
@@ -4434,10 +4505,10 @@ function search(b, who, me, d, al, be) {
   }
   return best;
 }
-function botMove(b, who) {
-  const mv = moves(b, who); if (Math.random() < 0.1) return mv[rnd(mv.length)];
+function botMove(b, who, lv = 1) {
+  const mv = moves(b, who); if (Math.random() < [0.5, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const i of mv) { const nb = b.slice(); put(nb, i, who); const v = search(nb, 1 - who, who, 2, -1e9, 1e9) + Math.random() * 4; if (v > bs) { bs = v; best = i; } }
+  for (const i of mv) { const nb = b.slice(); put(nb, i, who); const v = search(nb, 1 - who, who, [1, 2, 3][lv], -1e9, 1e9) + Math.random() * 4; if (v > bs) { bs = v; best = i; } }
   return best;
 }
 const count = b => [b.filter(v => v === 0).length, b.filter(v => v === 1).length];
@@ -4455,7 +4526,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(P[i], {}, { auto: { t: 'place', i: mv[0] },
       validate: x => (x && x.t === 'place' && Number.isInteger(x.i) && mv.includes(x.i) ? { t: 'place', i: x.i } : null),
-      bot: () => ({ t: 'place', i: botMove(R.b.slice(), i) }), think: 900 + Math.random() * 500 });
+      bot: () => ({ t: 'place', i: botMove(R.b.slice(), i, G.level) }), think: 900 + Math.random() * 500 });
     const k = put(R.b, a.i, i); R.last = a.i;
     io.ev(P[i], `flips ${k} disc${k === 1 ? '' : 's'}`, `flip ${k} disc${k === 1 ? '' : 's'}`);
     R.turn = 1 - i; io.render();
@@ -4489,7 +4560,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'reversi', cat: 'board', name: 'Reversi', tag: 'Trap your opponent’s discs between yours and flip them.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'reversi', cat: 'board', name: 'Reversi', tag: 'Trap your opponent’s discs between yours and flip them.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> have more discs than your opponent when the board is full or nobody can move.</p>
     <ol><li>Two players take turns. You are gold or cream. The game starts with two discs of each colour in the middle.</li>
@@ -4525,7 +4596,7 @@ function score(b, i, who) {      // how good is a stone at i for `who`
   }
   return s;
 }
-function botMove(b, me) {
+function botMove(b, me, lv = 1) {
   const empties = []; for (let i = 0; i < N * N; i++) if (b[i] < 0) empties.push(i);
   const any = b.some(v => v >= 0), c = (N * N - 1) / 2;
   if (!any) return c;
@@ -4537,7 +4608,7 @@ function botMove(b, me) {
     const v = score(b, i, me) * 1.05 + score(b, i, 1 - me) + Math.random() * 3;
     if (v > bs) { bs = v; best = i; }
   }
-  return Math.random() < 0.06 ? empties[rnd(empties.length)] : best;
+  return Math.random() < [0.4, 0.06, 0][lv] ? empties[rnd(empties.length)] : best;
 }
 async function round(G, io) {
   const P = G.players;
@@ -4547,7 +4618,7 @@ async function round(G, io) {
     const i = F.turn, p = P[i]; io.render();
     const a = await io.turn(p, {}, { auto: { t: 'stone', i: F.b.indexOf(-1) },
       validate: x => (x && x.t === 'stone' && Number.isInteger(x.i) && x.i >= 0 && x.i < N * N && F.b[x.i] < 0 ? { t: 'stone', i: x.i } : null),
-      bot: () => ({ t: 'stone', i: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 500 });
+      bot: () => ({ t: 'stone', i: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 500 });
     F.b[a.i] = i; F.last = a.i; F.n++;
     const w = lineWin(F.b, a.i);
     if (w) { F.over = true; F.winner = i; F.line = w; io.ev(p, 'makes five in a row', 'make five in a row'); }
@@ -4581,7 +4652,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'gomoku', cat: 'board', name: 'Gomoku', tag: 'Five in a row wins. Easy to learn, deep to master.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'gomoku', cat: 'board', name: 'Gomoku', tag: 'Five in a row wins. Easy to learn, deep to master.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be first to line up <b>five</b> of your stones in a row.</p>
     <ol><li>Two players take turns. You are gold or cream.</li>
@@ -4622,10 +4693,10 @@ function search(b, s, me, d) {
   for (const p of legal(b, s)) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, me, d - 1); best = s === me ? Math.max(best, v) : Math.min(best, v); }
   return best;
 }
-function botMove(b, s) {
-  const mv = legal(b, s); if (Math.random() < 0.1) return mv[rnd(mv.length)];
+function botMove(b, s, lv = 1) {
+  const mv = legal(b, s); if (Math.random() < [0.4, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const p of mv) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, s, 5) + Math.random() * 0.8; if (v > bs) { bs = v; best = p; } }
+  for (const p of mv) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, s, [2, 5, 7][lv]) + Math.random() * 0.8; if (v > bs) { bs = v; best = p; } }
   return best;
 }
 async function round(G, io) {
@@ -4637,11 +4708,11 @@ async function round(G, io) {
     const mv = legal(M.b, s);
     const a = await io.turn(P[s], {}, { auto: { t: 'sow', p: mv[0] },
       validate: x => (x && x.t === 'sow' && Number.isInteger(x.p) && mv.includes(x.p) ? { t: 'sow', p: x.p } : null),
-      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s) }), think: 1000 + Math.random() * 500 });
-    const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
+      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s, G.level) }), think: 1000 + Math.random() * 500 });
+    M.sown = M.b[s * 7 + a.p]; const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
     io.ev(P[s], r.again ? 'lands in their store and goes again' : r.cap ? `captures ${r.cap}` : 'sows seeds', r.again ? 'land in your store and go again' : r.cap ? `capture ${r.cap}` : 'sow seeds');
     if (finish(M.b)) M.over = true; else M.turn = r.again ? s : 1 - s;
-    io.render();
+    io.render(); await io.sleep(Math.min(2600, 300 + 270 * (M.sown || 0)));
   }
   const a = M.b[6], c = M.b[13]; M.winner = a === c ? -1 : a > c ? 0 : 1;
   settlePot(G, ANTE, M.winner >= 0 ? [M.winner] : []); potSummary(G);
@@ -4664,32 +4735,64 @@ function stones(n, seed, wide) {
   }
   return out.join('');
 }
-function draw() {
-  const S = S0, g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn ? legal(g.b, me) : [];
-  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp">${stones(g.b[opp * 7 + p], opp * 7 + p)}<b>${g.b[opp * 7 + p]}</b></div>`).join('');
-  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds">${stones(g.b[me * 7 + p], me * 7 + p)}<b>${g.b[me * 7 + p]}</b></button>`).join('');
-  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store">${stones(g.b[store(opp)], store(opp), true)}<b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store">${stones(g.b[store(me)], store(me), true)}<b>${g.b[store(me)]}</b></div>`;
+let prevB = null, animating = false, animTok = 0;
+function draw(bd) {
+  const S = S0, g = S.V.g, b = bd || g.b, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn && !animating ? legal(b, me) : [];
+  // mirrored layout: my store on the LEFT, my pits run right to left, so seeds travel right to left along my row
+  const top = [0, 1, 2, 3, 4, 5].map(p => `<div class="mc-p opp" data-i="${opp * 7 + p}">${stones(b[opp * 7 + p], opp * 7 + p)}<b>${b[opp * 7 + p]}</b></div>`).join('');
+  const bot = [5, 4, 3, 2, 1, 0].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${!bd && g.last === me * 7 + p ? ' last' : ''}" data-i="${me * 7 + p}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${b[me * 7 + p]} seeds">${stones(b[me * 7 + p], me * 7 + p)}<b>${b[me * 7 + p]}</b></button>`).join('');
+  $('mc').innerHTML = `<div class="mc-s me" data-i="${store(me)}" aria-label="Your store">${stones(b[store(me)], store(me), true)}<b>${b[store(me)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s opp" data-i="${store(opp)}" aria-label="Opponent store">${stones(b[store(opp)], store(opp), true)}<b>${b[store(opp)]}</b></div>`;
+}
+function flyStone(from, to, ms) {
+  const m = $('mc'), a = m.querySelector(`[data-i="${from}"]`), z = m.querySelector(`[data-i="${to}"]`); if (!a || !z) return;
+  const mr = m.getBoundingClientRect(), ar = a.getBoundingClientRect(), zr = z.getBoundingClientRect();
+  const el = document.createElement('i'); el.className = 'stone fly';
+  const sz = Math.max(12, Math.min(26, ar.width * 0.3));
+  el.style.cssText = `left:${ar.left - mr.left + ar.width / 2}px;top:${ar.top - mr.top + ar.height / 2}px;width:${sz}px;height:${sz * 0.82}px;--sc:${STONE[(from * 3 + to) % STONE.length]}`;
+  m.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transitionDuration = ms + 'ms'; el.style.left = zr.left - mr.left + zr.width / 2 + 'px'; el.style.top = zr.top - mr.top + zr.height / 2 + 'px'; }));
+  setTimeout(() => el.remove(), ms + 60);
+}
+async function animateSow(pb, last, tok) {
+  const s = (last / 7) | 0, skip = store(1 - s), b = pb.slice();
+  let seeds = b[last]; b[last] = 0; let i = last;
+  animating = true; draw(b); Snd.p('pebble');
+  await delay(260);
+  while (seeds > 0 && tok === animTok) {
+    const from = i; i = (i + 1) % 14; if (i === skip) continue;
+    flyStone(from, i, 190); await delay(200);
+    if (tok !== animTok) return;
+    b[i]++; seeds--; draw(b); Snd.p('pebble');
+    await delay(70);
+  }
+  animating = false;
 }
 const ui = {
   mount(stage) {
+    prevB = null; animating = false; animTok++;
     stage.innerHTML = `<section class="table c4wrap"><div class="bt-opps" id="mcSeats"></div><div class="mc" id="mc"></div><div class="banner" id="mcBanner" aria-live="polite"></div><p class="hint bt-hint" id="mcHint"></p></section>`;
-    $('mc').onclick = e => { const b = e.target.closest('[data-p]'); if (b && S0.turn) S0.send({ t: 'sow', p: +b.dataset.p }); };
+    $('mc').onclick = e => { const b = e.target.closest('[data-p]'); if (b && S0.turn && !animating) S0.send({ t: 'sow', p: +b.dataset.p }); };
   },
   update(S) {
-    S0 = S; const V = S.V, g = V.g;
+    const V = S.V, g = V.g; S0 = S;
+    const moved = prevB && g.last >= 0 && prevB.some((v, k) => v !== g.b[k]) && prevB[g.last] > 0;
+    const pb = prevB; prevB = g.b.slice();
     $('mcSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Sowing…', extra: i => `Store ${g.b[store(i)]}` });
-    draw();
+    if (moved && !animating) {
+      const tok = ++animTok, fin = g.b.slice();
+      animateSow(pb, g.last, tok).then(() => { if (tok === animTok && S0) { animating = false; draw(); } });
+    } else if (!animating) draw();
     $('mcBanner').innerHTML = g.over && V.summary.length ? `<span>${g.winner >= 0 ? S.text(V.summary.find(e => e.p === g.winner) || V.summary[0]) : 'A draw. Everyone keeps their chips.'}</span>` : '';
     $('mcHint').textContent = S.turn ? 'Your turn. Tap one of your pits (bottom row).' : '';
     return '';
   },
 };
 Club.register({
-  id: 'mancala', cat: 'board', name: 'Mancala', tag: 'Sow seeds around the board and capture your opponent’s.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'mancala', cat: 'board', name: 'Mancala', tag: 'Sow seeds around the board and capture your opponent’s.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['4', '4', '4'].map(c => `<div class="ltile">${c}</div>`).join(''),
-  rules: `<p><b>Goal:</b> collect more seeds in your store (the big pit on your right) than your opponent.</p>
+  rules: `<p><b>Goal:</b> collect more seeds in your store (the big pit on your left) than your opponent.</p>
     <ol><li>Each player has six pits, shown on their side, with four seeds in each. Yours are the bottom row.</li>
-    <li>On your turn, tap one of your pits. Its seeds are picked up and dropped one by one into the next pits, going to the right along your row, into your store, then along your opponent’s row. You skip your opponent’s store.</li>
+    <li>On your turn, tap one of your pits. Its seeds are picked up and dropped one by one into the next pits, going to the left along your row, into your store (on your left), then along your opponent’s row. You skip your opponent’s store.</li>
     <li>If your last seed lands in <b>your store</b>, you take another turn.</li>
     <li>If your last seed lands in an <b>empty pit on your side</b> and the pit opposite has seeds, you capture them and your last seed into your store.</li>
     <li>When one side has no seeds left, the other player puts their remaining seeds in their store. Most seeds wins.</li>
@@ -4933,8 +5036,8 @@ const fishUI = {
   },
   update(S) {
     F0 = S; const V = S.V, g = V.g, hand = S.my && S.my.h ? S.my.h : [], my = !!S.turn;
-    $('gfOpps').innerHTML = oppsHTML(S, g, i => `Books: ${g.books[i].length}`);
-    $('gfMsg').innerHTML = `${esc(g.last || 'Ask a player for a card rank you hold.')}<br><small>Cards left to fish: ${g.left}. Your books: ${S.me >= 0 ? g.books[S.me].map(r => LAB[r]).join(' ') || 'none' : ''}</small>`;
+    $('gfOpps').innerHTML = oppsHTML(S, g, i => `Books: ${(g.books[i] || []).length}`);
+    $('gfMsg').innerHTML = `${esc(g.last || 'Ask a player for a card rank you hold.')}<br><small>Cards left to fish: ${g.left}. Your books: ${S.me >= 0 ? (g.books[S.me] || []).map(r => LAB[r]).join(' ') || 'none' : ''}</small>`;
     $('gfBan').innerHTML = banner(V, S);
     $('gfHand').hidden = S.me < 0; $('gfHand').classList.toggle('turn', my); $('gfHand').innerHTML = handHTML(hand, () => my, c => fSel === rank(c));
     $('gfAct').hidden = !my; if (!my) { fSel = null; return ''; }
@@ -5270,12 +5373,13 @@ function draw(E, O, e, who) {                 // returns boxes completed
   return n;
 }
 const missing = (E, r, c) => sides(r, c).filter(x => !E[x]).length;
-function botMove(E, O) {
+function botMove(E, O, lv = 1) {
   const free = []; for (let e = 0; e < NE; e++) if (!E[e]) free.push(e);
   const finish = free.filter(e => edgeBoxes(e).some(([r, c]) => O[r * B + c] < 0 && missing(E, r, c) === 1));
-  if (finish.length && Math.random() < 0.92) return finish[rnd(finish.length)];
+  if (finish.length && Math.random() < [0.45, 0.92, 1][lv]) return finish[rnd(finish.length)];
   const safe = free.filter(e => edgeBoxes(e).every(([r, c]) => O[r * B + c] >= 0 || missing(E, r, c) > 2));
   if (safe.length) return safe[rnd(safe.length)];
+  if (lv === 0 && Math.random() < 0.5) return free[rnd(free.length)];
   let best = free[0], bs = 99;                // give away as little as possible
   for (const e of free) { const s = edgeBoxes(e).reduce((a, [r, c]) => a + (O[r * B + c] < 0 && missing(E, r, c) === 2 ? 1 : 0), 0); if (s < bs) { bs = s; best = e; } }
   return best;
@@ -5288,7 +5392,7 @@ async function round(G, io) {
     const i = D.turn, p = P[i]; io.render();
     const a = await io.turn(p, {}, { auto: { t: 'line', e: D.E.indexOf(0) },
       validate: x => (x && x.t === 'line' && Number.isInteger(x.e) && x.e >= 0 && x.e < NE && !D.E[x.e] ? { t: 'line', e: x.e } : null),
-      bot: () => ({ t: 'line', e: botMove(D.E, D.O) }), think: 700 + Math.random() * 400 });
+      bot: () => ({ t: 'line', e: botMove(D.E, D.O, G.level) }), think: 700 + Math.random() * 400 });
     const n = draw(D.E, D.O, a.e, i); D.last = a.e; D.score[i] += n;
     if (n) io.ev(p, `completes ${n} box${n === 1 ? '' : 'es'} and goes again`, `complete ${n} box${n === 1 ? '' : 'es'} and go again`);
     if (D.O.every(x => x >= 0)) D.over = true; else if (!n) D.turn = 1 - i;
@@ -5327,7 +5431,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'dotsboxes', cat: 'board', name: 'Dots and Boxes', tag: 'Draw lines, close boxes and claim the most.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'dotsboxes', cat: 'board', name: 'Dots and Boxes', tag: 'Draw lines, close boxes and claim the most.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['▢', '▣', '▢'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> close more boxes than your opponent.</p>
     <ol><li>A grid of dots is shown. Two players take turns.</li>
@@ -5436,11 +5540,11 @@ function search(st, d, al, be, s) {            // negamax from side s
   for (const m of mv) { const v = -search(apply(st, m), d - 1, -be, -al, 1 - s); if (v > best) best = v; if (best > al) al = best; if (al >= be) break; }
   return best;
 }
-function botMove(st) {
+function botMove(st, lv = 1) {
   const s = st.turn, mv = legal(st, s);
-  if (Math.random() < 0.07) return mv[rnd(mv.length)];
+  if (Math.random() < [0.4, 0.07, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const m of shuffle(mv.slice())) { const v = -search(apply(st, m), 3, -1e9, 1e9, 1 - s) + Math.random() * 6; if (v > bs) { bs = v; best = m; } }
+  for (const m of shuffle(mv.slice())) { const v = -search(apply(st, m), [1, 3, 3][lv], -1e9, 1e9, 1 - s) + Math.random() * 6; if (v > bs) { bs = v; best = m; } }
   return best;
 }
 const sameMove = (m, x) => m.from === x.from && m.to === x.to && (m.promo || 0) === (x.promo || 0);
@@ -5462,7 +5566,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(Pl[seat], {}, { timeout: 90000, auto: { t: 'move', from: mv[0].from, to: mv[0].to, promo: mv[0].promo || 0 },
       validate: x => (x && x.t === 'move' && Number.isInteger(x.from) && Number.isInteger(x.to) && mv.some(m => sameMove(m, { from: x.from, to: x.to, promo: x.promo || 0 })) ? { t: 'move', from: x.from, to: x.to, promo: x.promo || 0 } : null),
-      bot: () => { const m = botMove(C); return { t: 'move', from: m.from, to: m.to, promo: m.promo || 0 }; }, think: 1000 + Math.random() * 600 });
+      bot: () => { const m = botMove(C, G.level); return { t: 'move', from: m.from, to: m.to, promo: m.promo || 0 }; }, think: 1000 + Math.random() * 600 });
     const m = mv.find(q => sameMove(q, { from: a.from, to: a.to, promo: a.promo || 0 }));
     const piece = Math.abs(C.b[m.from]), took = C.b[m.to] || m.ep;
     const ns = apply(C, m); Object.assign(C, { b: ns.b, turn: ns.turn, cas: ns.cas, ep: ns.ep, half: ns.half, plies: ns.plies });
@@ -5697,7 +5801,7 @@ function chess3d(box, S) {
 }
 
 Club.register({
-  id: 'chess', cat: 'board', name: 'Chess', tag: 'The classic game of strategy. Full rules, for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'chess', cat: 'board', name: 'Chess', tag: 'The classic game of strategy. Full rules, for two.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['♞', '♚', '♜'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> trap your opponent’s king so it cannot escape capture. This is called <b>checkmate</b>.</p>
     <ol><li>Two players take turns. White moves first. You are shown which colour you play, and your pieces start at the bottom.</li>
@@ -5767,7 +5871,7 @@ function makePuzzle(remove) {
 const ANTE = 20;
 async function round(G, io) {
   const P = G.players, n = P.length;
-  const { sol, puz } = makePuzzle(44);
+  const { sol, puz } = makePuzzle([36, 44, 52][G.level == null ? 1 : G.level]);
   const Z = G.su = { g: puz.slice(), given: puz.map(v => v > 0), score: P.map(() => 0), turn: (G.round - 1) % n, over: false, winners: [], last: null };
   io.render(); await io.sleep(500);
   while (Z.g.some(v => !v)) {
@@ -5775,7 +5879,7 @@ async function round(G, io) {
     const empties = Z.g.map((v, k) => (v ? -1 : k)).filter(k => k >= 0);
     const a = await io.turn(p, {}, { timeout: 60000, auto: { t: 'place', i: empties[0], d: sol[empties[0]] },
       validate: x => (x && x.t === 'place' && Number.isInteger(x.i) && Number.isInteger(x.d) && x.i >= 0 && x.i < 81 && !Z.g[x.i] && x.d >= 1 && x.d <= 9 ? { t: 'place', i: x.i, d: x.d } : null),
-      bot: () => { const k = empties[rnd(empties.length)]; return { t: 'place', i: k, d: Math.random() < 0.9 ? sol[k] : 1 + rnd(9) }; }, think: 1000 + Math.random() * 800 });
+      bot: () => { const k = empties[rnd(empties.length)]; return { t: 'place', i: k, d: Math.random() < [0.8, 0.9, 0.98][G.level == null ? 1 : G.level] ? sol[k] : 1 + rnd(9) }; }, think: 1000 + Math.random() * 800 });
     const ok = a.d === sol[a.i];
     if (ok) { Z.g[a.i] = a.d; Z.score[i]++; } else Z.score[i]--;
     Z.last = { i: a.i, ok, p: i };
@@ -5825,6 +5929,7 @@ const ui = {
 };
 function put(d) { if (S0 && S0.turn && cell >= 0 && !S0.V.g.g[cell]) { const i = cell; cell = -1; S0.send({ t: 'place', i, d }); } }
 Club.register({
+  levels: true,
   id: 'sudoku', cat: 'mind', name: 'Sudoku', tag: 'Fill the grid together. Right numbers score, wrong ones cost.', min: 1, max: 4, soloBots: 1, roundWord: 'Puzzle',
   art: () => ['5', '3', '7'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> help finish the Sudoku grid and score more points than the others. You can play alone or with up to 3 others.</p>
@@ -5878,7 +5983,7 @@ let S1 = null;
 const pigUI = {
   mount(stage, ctl) {
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="pgSeats"></div><div class="pg-die" id="pgDie"></div><div class="pz-label" id="pgMsg"></div><div class="banner" id="pgBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="pgAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="roll">Roll the die</button><button type="button" class="b" data-t="hold" id="pgHold">Hold and bank</button></div><p class="hint bt-hint">Keep rolling to build your turn total. Roll a 1 and you lose it. Hold to bank it.</p></div>`;
+    ctl.innerHTML = `<div class="act" id="pgAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="roll">Roll the dice</button><button type="button" class="b" data-t="hold" id="pgHold">Hold and bank</button></div><p class="hint bt-hint">Keep rolling to build your turn total. Roll a 1 and you lose it. Hold to bank it.</p></div>`;
     $('pgAct').onclick = e => { const b = e.target.closest('[data-t]'); if (b && S1.turn) S1.send({ t: b.dataset.t }); };
   },
   update(S) {
@@ -5895,7 +6000,7 @@ Club.register({
   id: 'pig', cat: 'dice', name: 'Pig', tag: 'Roll to build a score, but a 1 loses it all. First to 50.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
   art: () => [3, 6, 1].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the first player to reach ${GOAL} points.</p>
-    <ol><li>On your turn, press <b>Roll the die</b>. The number you roll is added to your <b>turn total</b>.</li>
+    <ol><li>On your turn, press <b>Roll the dice</b>. The number you roll is added to your <b>turn total</b>.</li>
     <li>Roll again to add more, or press <b>Hold and bank</b> to add your turn total to your score and pass the turn.</li>
     <li>But if you roll a <b>1</b>, you lose your whole turn total and the turn passes.</li>
     <li>The more you roll, the more you can lose. Decide when to stop.</li>
@@ -5985,75 +6090,6 @@ Club.register({
   round: boxRound, view: boxView, ui: boxUI, _test: { subsets },
 });
 
-/* ================= Bankroll ================= */
-const ROUNDS = 5;
-async function bankRound(G, io) {
-  const P = G.players, n = P.length;
-  const Z = G.bk = { score: P.map(() => 0), banked: P.map(() => false), pot: 0, rollN: 0, dice: [], roundN: 0, turn: -1, note: '', over: false, winners: [] };
-  io.render(); await io.sleep(500);
-  for (let r = 1; r <= ROUNDS; r++) {
-    Z.roundN = r; Z.pot = 0; Z.rollN = 0; Z.banked = P.map(() => false); Z.dice = []; Z.note = `Round ${r} of ${ROUNDS}`; Z.turn = -1;
-    io.render(); await io.sleep(900);
-    while (Z.banked.some(b => !b) && Z.rollN < 25) {
-      Z.rollN++; const d1 = rollD(), d2 = rollD(), s = d1 + d2; Z.dice = [d1, d2];
-      let bust = false;
-      if (Z.rollN <= 3) Z.pot += s === 7 ? 70 : s;
-      else if (s === 7) bust = true; else if (d1 === d2) Z.pot *= 2; else Z.pot += s;
-      Z.note = bust ? 'A 7! The pot is lost.' : Z.rollN <= 3 ? '' : d1 === d2 ? 'Doubles! The pot doubles.' : '';
-      if (bust) { Z.pot = 0; io.line(`Round ${r}: a 7 busted the pot.`); io.render(); await io.sleep(1500); break; }
-      io.render(); await io.sleep(800);
-      for (let i = 0; i < n; i++) {
-        if (Z.banked[i]) continue;
-        Z.turn = i; io.render();
-        const a = await io.turn(P[i], { pot: Z.pot }, { auto: { t: Z.pot >= 40 ? 'bank' : 'stay' },
-          validate: x => (x && (x.t === 'bank' || x.t === 'stay') ? { t: x.t } : null),
-          bot: () => ({ t: Z.pot >= 45 + (P[i].agg || 0.5) * 60 || (Z.rollN >= 6 && Z.pot >= 40) ? 'bank' : 'stay' }), think: 600 + Math.random() * 500 });
-        if (a.t === 'bank') { Z.banked[i] = true; Z.score[i] += Z.pot; io.ev(P[i], `banks ${Z.pot}`, `bank ${Z.pot}`); }
-      }
-      Z.turn = -1;
-    }
-    io.render();
-  }
-  const top = Math.max(...Z.score); Z.winners = Z.score.map((s, i) => (s === top ? i : -1)).filter(i => i >= 0); Z.over = true; Z.turn = -1;
-  done(G, Z.winners);
-  io.line(`Banked totals: ${P.map((p, i) => `${p.human ? 'player ' + (i + 1) : p.name} ${Z.score[i]}`).join(', ')}.`, true); io.render();
-}
-function bankView(G) {
-  const Z = G.bk;
-  if (!Z || Z.score.length !== G.players.length) return { score: G.players.map(() => 0), banked: G.players.map(() => false), pot: 0, rollN: 0, dice: [], roundN: 0, turn: -1, note: '', over: false, winners: [], delta: [] };
-  return { score: Z.score, banked: Z.banked, pot: Z.pot, rollN: Z.rollN, dice: Z.dice, roundN: Z.roundN, turn: Z.turn, note: Z.note, over: Z.over, winners: Z.winners, delta: G.players.map(p => (Z.over ? p.delta || 0 : 0)) };
-}
-let S3 = null;
-const bankUI = {
-  mount(stage, ctl) {
-    stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="bkSeats"></div><div class="pz-label" id="bkRound"></div><div class="bd-dice" id="bkDice"></div><div class="bk-pot" id="bkPot"></div><div class="pz-label" id="bkNote"></div><div class="banner" id="bkBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="bkAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="bank" id="bkBank">Bank it</button><button type="button" class="b" data-t="stay">Stay in</button></div><p class="hint bt-hint">Bank the pot to keep it for this round, or stay in for more. A 7 after the third roll wipes the pot for everyone still in.</p></div>`;
-    $('bkAct').onclick = e => { const b = e.target.closest('[data-t]'); if (b && S3.turn) S3.send({ t: b.dataset.t }); };
-  },
-  update(S) {
-    S3 = S; const V = S.V, g = V.g;
-    $('bkSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Deciding…', extra: i => `${g.score[i]} banked${g.banked[i] && !g.over ? ' · in the bank' : ''}` });
-    $('bkRound').textContent = g.roundN ? `Round ${g.roundN} of ${ROUNDS} · roll ${g.rollN}` : '';
-    $('bkDice').innerHTML = g.dice.map(d => dieHTML(d)).join('');
-    $('bkPot').textContent = g.over ? '' : `Pot: ${g.pot}`;
-    $('bkNote').textContent = g.note;
-    $('bkBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : '';
-    $('bkAct').hidden = !S.turn; if (S.turn) $('bkBank').textContent = `Bank ${S.turn.data.pot}`;
-    return '';
-  },
-};
-Club.register({
-  id: 'bankroll', cat: 'dice', name: 'Bank', tag: 'Build a shared pot and bank it before a 7 wipes it out.', min: 2, max: 8, soloBots: 3, roundWord: 'Game',
-  art: () => [3, 4, 6].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
-  rules: `<p><b>Goal:</b> have the biggest banked total after ${ROUNDS} rounds. Two to eight players.</p>
-    <ol><li>In each round, two dice are rolled over and over and the total is added to a shared <b>pot</b>.</li>
-    <li>After every roll, each player still in decides: <b>Bank it</b> (add the current pot to your own score and sit out the rest of the round) or <b>Stay in</b>.</li>
-    <li>The first three rolls are safe, and a 7 is worth 70 points. After that, a roll of <b>7 wipes out the pot</b> and ends the round for anyone who has not banked.</li>
-    <li>After the first three rolls, <b>doubles</b> (the same number on both dice) <b>double the pot</b>.</li>
-    <li>The round also ends when everyone has banked. After ${ROUNDS} rounds, the highest score wins the pot. Ties share it.</li>
-    <li>Each player puts in ${ANTE} free chips. Only free play chips are used. They have no cash value.</li></ol>`,
-  round: bankRound, view: bankView, ui: bankUI, _test: {},
-});
 })();
 
 /* ---------- Chip games: Roulette, Baccarat, Sic Bo, Three Card Poker. Free chips only, no cash value ---------- */
@@ -6766,6 +6802,820 @@ Club.register({
     <li>Each player puts in ${ANTE} free chips. Chips have no cash value.</li></ol>`,
   round: archRound, view: archView, ui: archUI, ui3d: T3.wrapUi(archUI, { slot: st => ({ before: st.querySelector('#arSvg'), hide: [st.querySelector('#arSvg')] }), make: archery3d }), _test: { ring },
 });
+})();
+
+/* ---------- Property Tycoon (a Monopoly-style board game) ---------- */
+(function () {
+const ANTE = 20, START = 1500, GO_PAY = 200, JAIL_FEE = 50, ROUNDS = 20;
+const GRP = { brown: '#8b5a2b', lb: '#8fd3f0', pink: '#e279b6', orange: '#f29443', red: '#d83a2f', yellow: '#f0cf3a', green: '#2f9d4f', blue: '#2b52c0' };
+const RAW = [
+  ['go', 'GO'], ['p', 'Mill Lane', 'brown', 60, 2], ['luck', 'Luck'], ['p', 'Cobble Street', 'brown', 60, 4], ['tax', 'Income Tax', 200], ['rail', 'Northern Railway'],
+  ['p', 'Harbour Road', 'lb', 100, 6], ['chance', 'Chance'], ['p', 'Pier Avenue', 'lb', 100, 6], ['p', 'Lighthouse Way', 'lb', 120, 8],
+  ['jail', 'Jail'], ['p', 'Maple Court', 'pink', 140, 10], ['util', 'Power Company'], ['p', 'Orchard Street', 'pink', 140, 10], ['p', 'Cherry Row', 'pink', 160, 12], ['rail', 'Eastern Railway'],
+  ['p', 'Market Square', 'orange', 180, 14], ['luck', 'Luck'], ['p', 'Guild Street', 'orange', 180, 14], ['p', 'Bell Tower Road', 'orange', 200, 16],
+  ['free', 'Free Parking'], ['p', 'Rosewood Avenue', 'red', 220, 18], ['chance', 'Chance'], ['p', 'Garden Terrace', 'red', 220, 18], ['p', 'Fountain Plaza', 'red', 240, 20], ['rail', 'Southern Railway'],
+  ['p', 'Castle Gate', 'yellow', 260, 22], ['p', 'Palace Road', 'yellow', 260, 22], ['util', 'Water Works'], ['p', 'Crown Street', 'yellow', 280, 24],
+  ['gojail', 'Go to Jail'], ['p', 'Lakeside Drive', 'green', 300, 26], ['p', 'Emerald Avenue', 'green', 300, 26], ['luck', 'Luck'], ['p', 'Hilltop Boulevard', 'green', 320, 28], ['rail', 'Western Railway'],
+  ['chance', 'Chance'], ['p', 'Skyline Tower', 'blue', 350, 35], ['tax', 'Luxury Tax', 100], ['p', 'Royal Avenue', 'blue', 400, 50],
+];
+const SQ = RAW.map((r, i) => {
+  const o = { i, k: r[0], name: r[1] };
+  if (r[0] === 'p') { o.g = r[2]; o.price = r[3]; o.rent = r[4]; o.cost = (Math.floor(i / 10) + 1) * 50; const m = o.price <= 150 ? [5, 15, 45, 80, 125] : o.price <= 300 ? [5, 15, 40, 50, 60] : [4, 11, 28, 34, 40]; o.rents = [o.rent, ...m.map(x => Math.round(o.rent * x / 5) * 5)]; }
+  else if (r[0] === 'rail') o.price = 200; else if (r[0] === 'util') o.price = 150; else if (r[0] === 'tax') o.amt = r[2];
+  return o;
+});
+const GROUPS = {}; SQ.forEach(q => { if (q.g) (GROUPS[q.g] = GROUPS[q.g] || []).push(q.i); });
+const RAILS = SQ.filter(q => q.k === 'rail').map(q => q.i), UTILS = SQ.filter(q => q.k === 'util').map(q => q.i);
+const ownable = q => q.k === 'p' || q.k === 'rail' || q.k === 'util';
+const CHANCE = [
+  ['Advance to GO and collect 200.', 'goto', 0], ['Take a trip to Royal Avenue.', 'goto', 39], ['Advance to Rosewood Avenue.', 'goto', 21], ['Advance to Maple Court.', 'goto', 11],
+  ['Go to the nearest railway. If it is owned, pay double rent.', 'rail'], ['The bank pays you a dividend of 50.', 'cash', 50], ['Go back three spaces.', 'back', 3], ['Go directly to Jail. Do not pass GO.', 'jail'],
+  ['Repairs: pay 25 per house and 100 per hotel.', 'repair', 25, 100], ['Speeding fine. Pay 15.', 'cash', -15], ['You win a crossword competition. Collect 100.', 'cash', 100], ['Your building loan matures. Collect 150.', 'cash', 150],
+];
+const LUCK = [
+  ['Bank error in your favour. Collect 200.', 'cash', 200], ['Doctor’s fee. Pay 50.', 'cash', -50], ['Sale of stock. Collect 50.', 'cash', 50], ['Go directly to Jail. Do not pass GO.', 'jail'],
+  ['It is your birthday. Collect 10 from every player.', 'each', 10], ['Tax refund. Collect 20.', 'cash', 20], ['Hospital fees. Pay 100.', 'cash', -100], ['School fees. Pay 50.', 'cash', -50],
+  ['You inherit 100.', 'cash', 100], ['Advance to GO and collect 200.', 'goto', 0], ['Street repairs: pay 40 per house and 115 per hotel.', 'repair', 40, 115], ['Charity dinner. Pay 25 to each player.', 'each', -25],
+];
+
+// ---------- pure rule helpers (work on a plain state object so the UI can reuse them) ----------
+const groupOf = q => GROUPS[SQ[q].g] || [];
+const hasSet = (s, i, q) => groupOf(q).every(x => s.own[x] === i);
+const unCost = q => Math.ceil(SQ[q].price / 2 * 1.1);
+function canBuild(s, i, q) {
+  const c = SQ[q]; if (c.k !== 'p' || s.own[q] !== i || !hasSet(s, i, q) || s.hs[q] >= 5 || s.cash[i] < c.cost) return false;
+  const gr = groupOf(q); return !gr.some(x => s.mort[x]) && s.hs[q] <= Math.min(...gr.map(x => s.hs[x]));
+}
+const canSell = (s, i, q) => SQ[q].k === 'p' && s.own[q] === i && s.hs[q] > 0 && s.hs[q] >= Math.max(...groupOf(q).map(x => s.hs[x]));
+const canMort = (s, i, q) => ownable(SQ[q]) && s.own[q] === i && !s.mort[q] && (SQ[q].k !== 'p' || groupOf(q).every(x => !s.hs[x]));
+const canUnmort = (s, i, q) => ownable(SQ[q]) && s.own[q] === i && !!s.mort[q] && s.cash[i] >= unCost(q);
+function rentOf(s, q, dice) {
+  const c = SQ[q], o = s.own[q]; if (o < 0 || s.mort[q]) return 0;
+  if (c.k === 'rail') return 25 * Math.pow(2, RAILS.filter(x => s.own[x] === o).length - 1);
+  if (c.k === 'util') return (UTILS.every(x => s.own[x] === o) ? 10 : 4) * dice;
+  if (s.hs[q]) return c.rents[s.hs[q]];
+  return c.rents[0] * (hasSet(s, o, q) && !groupOf(q).some(x => s.mort[x]) ? 2 : 1);
+}
+function worth(s, i) {
+  let w = s.cash[i];
+  for (let q = 0; q < 40; q++) if (s.own[q] === i) { w += s.mort[q] ? SQ[q].price / 2 : SQ[q].price; w += (s.hs[q] || 0) * (SQ[q].cost || 0); }
+  return w;
+}
+const nearest = (from, list) => { for (let d = 1; d <= 40; d++) { const q = (from + d) % 40; if (list.includes(q)) return q; } return list[0]; };
+
+// ---------- game loop ----------
+async function round(G, io) {
+  const P = G.players, n = P.length;
+  const T = G.mo = { pos: P.map(() => 0), cash: P.map(() => START), own: Array(40).fill(-1), hs: Array(40).fill(0), mort: Array(40).fill(0), jail: P.map(() => 0), out: P.map(() => false),
+    turn: (G.round - 1) % n, phase: 'roll', dice: [0, 0], rollN: 0, mv: { k: 0, i: -1, tp: false, back: false }, note: '', card: null, owe: 0, buy: -1, over: false, winner: -1, turns: 0, rd: 1 };
+  const alive = () => P.map((_, i) => i).filter(i => !T.out[i]);
+  const say = (i, a, b) => io.ev(P[i], a, b || a);
+  const move = (i, to, o) => { o = o || {}; const from = T.pos[i]; T.pos[i] = to; T.mv = { k: T.mv.k + 1, i, tp: !!o.tp, back: !!o.back }; return from; };
+  const passGo = i => { T.cash[i] += GO_PAY; say(i, `collects ${GO_PAY} for passing GO`, `collect ${GO_PAY} for passing GO`); };
+  io.render(); await io.sleep(600);
+
+  async function raise(i, to) {            // player owes money (cash < 0): sell/mortgage or go bankrupt
+    while (T.cash[i] < 0 && !T.out[i]) {
+      T.phase = 'debt'; T.owe = -T.cash[i]; io.render();
+      const a = await io.turn(P[i], {}, { auto: debtBot(i), validate: v => vAct(i, 'debt', v), bot: () => debtBot(i), think: 500 + Math.random() * 400, timeout: 60000 });
+      if (a.t === 'bankrupt') { bankrupt(i, to); break; }
+      manage(i, a);
+    }
+    T.owe = 0;
+  }
+  function bankrupt(i, to) {
+    say(i, 'is bankrupt!', 'go bankrupt');
+    if (to >= 0 && T.cash[i] < 0) T.cash[to] += T.cash[i];
+    for (let q = 0; q < 40; q++) if (T.own[q] === i) {
+      if (to >= 0) { T.own[q] = to; T.hs[q] = 0; } else { T.own[q] = -1; T.hs[q] = 0; T.mort[q] = 0; }
+    }
+    T.cash[i] = 0; T.out[i] = true; T.note = `${P[i].name} is bankrupt.`;
+    if (to >= 0) T.cash[to] += 0;
+  }
+  async function charge(i, amt, to, why) {
+    T.cash[i] -= amt; if (to >= 0) T.cash[to] += amt;
+    if (why) T.note = why;
+    io.render(); await io.sleep(650);
+    if (T.cash[i] < 0) await raise(i, to);
+  }
+  function manage(i, a) {
+    const q = a.q;
+    if (a.t === 'build' && canBuild(T, i, q)) { T.hs[q]++; T.cash[i] -= SQ[q].cost; T.note = `${P[i].name} builds on ${SQ[q].name}.`; say(i, `builds ${T.hs[q] === 5 ? 'a hotel' : 'a house'} on ${SQ[q].name}`, `build on ${SQ[q].name}`); }
+    else if (a.t === 'sell' && canSell(T, i, q)) { T.hs[q]--; T.cash[i] += SQ[q].cost / 2; T.note = `${P[i].name} sells a house on ${SQ[q].name}.`; }
+    else if (a.t === 'mort' && canMort(T, i, q)) { T.mort[q] = 1; T.cash[i] += SQ[q].price / 2; T.note = `${P[i].name} mortgages ${SQ[q].name}.`; }
+    else if (a.t === 'unmort' && canUnmort(T, i, q)) { T.mort[q] = 0; T.cash[i] -= unCost(q); T.note = `${P[i].name} pays off the mortgage on ${SQ[q].name}.`; }
+  }
+  const mine = i => SQ.filter(c => T.own[c.i] === i).map(c => c.i);
+  function debtBot(i) {
+    const ms = mine(i), h = ms.filter(q => canSell(T, i, q)).sort((a, b) => SQ[b].cost - SQ[a].cost)[0];
+    if (h != null) return { t: 'sell', q: h };
+    const m = ms.filter(q => canMort(T, i, q)).sort((a, b) => SQ[a].price - SQ[b].price)[0];
+    return m != null ? { t: 'mort', q: m } : { t: 'bankrupt' };
+  }
+  function vAct(i, phase, x) {
+    if (!x || typeof x.t !== 'string') return null;
+    const q = x.q;
+    if (['build', 'sell', 'mort', 'unmort'].includes(x.t)) {
+      if (phase === 'buy' || !Number.isInteger(q) || q < 0 || q > 39) return null;
+      if (phase === 'debt' && (x.t === 'build' || x.t === 'unmort')) return null;
+      return { t: x.t, q };
+    }
+    if (phase === 'roll') return x.t === 'roll' || (x.t === 'pay' && T.jail[i] > 0 && T.cash[i] >= JAIL_FEE) ? { t: x.t } : null;
+    if (phase === 'buy') return x.t === 'buy' || x.t === 'pass' ? { t: x.t } : null;
+    if (phase === 'after') return x.t === 'end' ? { t: 'end' } : null;
+    if (phase === 'debt') return x.t === 'bankrupt' ? { t: 'bankrupt' } : null;
+    return null;
+  }
+  function botAct(i, phase) {
+    const c = SQ[T.buy];
+    if (phase === 'buy') return T.cash[i] - c.price >= 120 || (T.cash[i] - c.price >= 20 && c.k !== 'util') ? { t: 'buy' } : { t: 'pass' };
+    if (phase === 'roll' && T.jail[i] > 0 && T.cash[i] > 450 && T.turns < n * 14) return { t: 'pay' };
+    const reserve = 220;
+    const b = mine(i).filter(q => canBuild(T, i, q) && T.cash[i] - SQ[q].cost >= reserve).sort((a, z) => SQ[a].cost - SQ[z].cost || T.hs[a] - T.hs[z])[0];
+    if (b != null) return { t: 'build', q: b };
+    const u = mine(i).filter(q => canUnmort(T, i, q) && T.cash[i] - unCost(q) >= reserve + 200)[0];
+    if (u != null) return { t: 'unmort', q: u };
+    return { t: phase === 'roll' ? 'roll' : 'end' };
+  }
+  async function menu(i, phase) {
+    for (;;) {
+      T.phase = phase; io.render();
+      const auto = phase === 'roll' ? { t: 'roll' } : phase === 'buy' ? { t: 'pass' } : { t: 'end' };
+      const a = await io.turn(P[i], {}, { auto, validate: v => vAct(i, phase, v), bot: () => botAct(i, phase), think: 650 + Math.random() * 500, timeout: 60000 });
+      if (a.t === 'pay') { T.cash[i] -= JAIL_FEE; T.jail[i] = 0; T.note = `${P[i].name} pays ${JAIL_FEE} to leave Jail.`; say(i, 'pays to leave Jail', 'pay to leave Jail'); continue; }
+      if (a.t === 'roll' || a.t === 'end' || a.t === 'buy' || a.t === 'pass') return a;
+      manage(i, a);
+      if (T.cash[i] < 0) await raise(i, -1);
+    }
+  }
+  async function walk(i, steps) {
+    for (let k = 0; k < steps; k++) { const nx = (T.pos[i] + 1) % 40; move(i, nx); if (nx === 0) { passGo(i); } io.render(); await io.sleep(230); }
+  }
+  async function land(i, depth) {
+    const q = T.pos[i], c = SQ[q]; T.buy = -1;
+    if (ownable(c)) {
+      const o = T.own[q];
+      if (o < 0) { if (T.cash[i] >= c.price) T.buy = q; else T.note = `${P[i].name} cannot afford ${c.name}.`; }
+      else if (o !== i && !T.mort[q]) { const r = rentOf(T, q, T.dice[0] + T.dice[1]); say(i, `pays ${r} rent to ${P[o].name}`, `pay ${r} rent to ${P[o].name}`); await charge(i, r, o, `${P[i].name} pays ${r} rent to ${P[o].name} for ${c.name}.`); }
+    } else if (c.k === 'tax') { say(i, `pays ${c.amt} ${c.name.toLowerCase()}`, `pay ${c.amt} ${c.name.toLowerCase()}`); await charge(i, c.amt, -1, `${P[i].name} pays ${c.amt} ${c.name.toLowerCase()}.`); }
+    else if (c.k === 'gojail') { await sendJail(i); }
+    else if (c.k === 'chance' || c.k === 'luck') await draw(i, c.k, depth);
+    else if (c.k === 'go') { T.cash[i] += 0; }
+  }
+  async function sendJail(i) { move(i, 10, { tp: true }); T.jail[i] = 1; T.doubles = 0; T.note = `${P[i].name} goes to Jail.`; say(i, 'goes to Jail', 'go to Jail'); io.render(); await io.sleep(1100); }
+  async function draw(i, kind, depth) {
+    const deck = kind === 'chance' ? CHANCE : LUCK, cd = deck[rnd(deck.length)];
+    T.card = { k: (T.card ? T.card.k : 0) + 1, kind: kind === 'chance' ? 'Chance' : 'Luck', text: cd[0] }; T.note = '';
+    say(i, `draws a ${T.card.kind} card`, `draw a ${T.card.kind} card`); io.render(); await io.sleep(1700);
+    const t = cd[1];
+    if (t === 'cash') { if (cd[2] >= 0) { T.cash[i] += cd[2]; io.render(); await io.sleep(500); } else await charge(i, -cd[2], -1, ''); }
+    else if (t === 'each') {
+      for (const j of alive()) if (j !== i) { if (cd[2] > 0) { T.cash[j] -= cd[2]; T.cash[i] += cd[2]; } else { T.cash[j] += -cd[2]; T.cash[i] -= -cd[2]; } }
+      io.render(); await io.sleep(600);
+      for (const j of alive()) if (T.cash[j] < 0) await raise(j, i);
+      if (T.cash[i] < 0 && !T.out[i]) await raise(i, -1);
+    }
+    else if (t === 'repair') { let h = 0, ho = 0; for (let q = 0; q < 40; q++) if (T.own[q] === i) { if (T.hs[q] === 5) ho++; else h += T.hs[q]; } const amt = h * cd[2] + ho * cd[3]; if (amt) await charge(i, amt, -1, `${P[i].name} pays ${amt} for repairs.`); }
+    else if (t === 'jail') await sendJail(i);
+    else if (t === 'back') { for (let k = 0; k < cd[2]; k++) { move(i, (T.pos[i] + 39) % 40, { back: true }); io.render(); await io.sleep(230); } if (depth < 2) await land(i, depth + 1); }
+    else if (t === 'goto') { const from = T.pos[i], to = cd[2]; if (to < from || to === 0) passGo(i); move(i, to, { tp: true }); io.render(); await io.sleep(1000); if (depth < 2) await land(i, depth + 1); }
+    else if (t === 'rail') { const to = nearest(T.pos[i], RAILS); if (to < T.pos[i]) passGo(i); move(i, to, { tp: true }); io.render(); await io.sleep(1000);
+      const o = T.own[to]; if (o >= 0 && o !== i && !T.mort[to]) { const r = rentOf(T, to, 0) * 2; await charge(i, r, o, `${P[i].name} pays double rent: ${r}.`); } else if (o < 0 && T.cash[i] >= SQ[to].price) T.buy = to; }
+  }
+
+  while (!T.over) {
+    const i = T.turn;
+    if (T.out[i]) { T.turn = (i + 1) % n; continue; }
+    T.doubles = 0; T.card = null; T.note = ''; T.dice = [0, 0]; T.buy = -1;
+    for (;;) {                                                   // one roll (doubles give another)
+      await menu(i, 'roll'); if (T.out[i]) break;
+      const a = 1 + rnd(6), b = 1 + rnd(6), dbl = a === b; T.dice = [a, b]; T.rollN++; T.card = null; T.note = '';
+      say(i, `rolls ${a + b}${dbl ? ' (doubles)' : ''}`, `roll ${a + b}${dbl ? ' (doubles)' : ''}`);
+      io.render(); await io.sleep(1000);
+      if (T.jail[i] > 0) {
+        if (dbl) { T.jail[i] = 0; T.note = `${P[i].name} rolls doubles and leaves Jail.`; await walk(i, a + b); await land(i, 0); }
+        else if (T.jail[i] >= 3) { T.jail[i] = 0; T.cash[i] -= JAIL_FEE; T.note = `${P[i].name} pays ${JAIL_FEE} and leaves Jail.`; io.render(); await io.sleep(600); await walk(i, a + b); await land(i, 0); }
+        else { T.jail[i]++; T.note = `${P[i].name} stays in Jail.`; }
+        if (T.cash[i] < 0 && !T.out[i]) await raise(i, -1);
+        if (!T.out[i] && T.buy >= 0) { const r = await menu(i, 'buy'); if (r.t === 'buy') { buyIt(i); } T.buy = -1; }
+        break;
+      }
+      if (dbl) T.doubles++;
+      if (T.doubles >= 3) { T.note = `${P[i].name} rolled doubles three times.`; await sendJail(i); break; }
+      await walk(i, a + b);
+      await land(i, 0);
+      if (T.out[i]) break;
+      if (T.buy >= 0) { io.render(); const r = await menu(i, 'buy'); if (r.t === 'buy' && T.buy >= 0) buyIt(i); T.buy = -1; if (T.out[i]) break; }
+      if (T.jail[i] > 0) break;
+      if (T.cash[i] < 0) await raise(i, -1);
+      if (T.out[i]) break;
+      if (!(dbl && T.doubles < 3)) break;
+      T.note = `${P[i].name} rolled doubles and goes again.`;
+    }
+    if (!T.out[i]) { await menu(i, 'after'); }
+    const al = alive();
+    T.turns++; T.rd = Math.min(ROUNDS, Math.floor(T.turns / Math.max(1, n)) + 1);
+    if (al.length <= 1) { T.over = true; T.winner = al[0]; }
+    else if (T.turns >= ROUNDS * n) {
+      T.over = true; let best = -1, bw = -1; for (const j of al) { const w = worth(T, j); if (w > bw) { bw = w; best = j; } } T.winner = best;
+    }
+    if (!T.over) { let nx = (i + 1) % n; while (T.out[nx]) nx = (nx + 1) % n; T.turn = nx; }
+    io.render();
+  }
+  function buyIt(i) { const q = T.buy, c = SQ[q]; if (q < 0 || T.cash[i] < c.price || T.own[q] >= 0) return; T.cash[i] -= c.price; T.own[q] = i; T.note = `${P[i].name} buys ${c.name} for ${c.price}.`; say(i, `buys ${c.name} for ${c.price}`, `buy ${c.name} for ${c.price}`); }
+  T.phase = 'over';
+  settlePot(G, ANTE, T.winner >= 0 ? [T.winner] : []); potSummary(G);
+  io.line(T.turns >= ROUNDS * n ? `Time is up after ${ROUNDS} rounds: the richest player wins.` : 'Everyone else went bankrupt.', true);
+  io.render();
+}
+function view(G) {
+  const T = G.mo, n = G.players.length;
+  if (!T || T.pos.length !== n) return { pos: G.players.map(() => 0), cash: G.players.map(() => START), own: Array(40).fill(-1), hs: Array(40).fill(0), mort: Array(40).fill(0), jail: G.players.map(() => 0), out: G.players.map(() => false), turn: -1, phase: 'roll', dice: [0, 0], rollN: 0, mv: { k: 0, i: -1 }, note: '', card: null, owe: 0, buy: -1, over: false, winner: -1, rd: 1, delta: [] };
+  return { pos: T.pos, cash: T.cash, own: T.own, hs: T.hs, mort: T.mort, jail: T.jail, out: T.out, turn: T.over ? -1 : T.turn, phase: T.phase, dice: T.dice, rollN: T.rollN, mv: T.mv, note: T.note, card: T.card, owe: T.owe, buy: T.buy, over: T.over, winner: T.winner, rd: T.rd, delta: G.players.map(p => (T.over ? p.delta || 0 : 0)) };
+}
+
+// ---------- board UI ----------
+const TOKC = ['#f2b441', '#f7f0e1', '#5cc8b0', '#e8708a'], PIECE = ['🚗', '🎩', '🐕', '🚢'];
+const ICON = { go: '➜', luck: '🎁', chance: '❓', tax: '💰', jail: '🚔', free: '🅿️', gojail: '👮', rail: '🚂', util: '💡' };
+const FR = [1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5], FSUM = 12;
+const rc = i => (i <= 10 ? [10, 10 - i] : i <= 20 ? [20 - i, 0] : i <= 30 ? [0, i - 20] : [i - 30, 10]);
+const centre = c => { let s = 0; for (let k = 0; k < c; k++) s += FR[k]; return (s + FR[c] / 2) / FSUM * 100; };
+const spot = (q, i) => { const [r, c] = rc(q), ox = ((i % 2) - 0.5) * 2.6, oy = ((i >> 1) - 0.5) * 2.6; return [centre(c) + ox, centre(r) + oy]; };
+const side = i => (i > 0 && i < 10 ? 'b' : i > 10 && i < 20 ? 'l' : i > 20 && i < 30 ? 't' : i > 30 ? 'r' : 'c');
+const PIPS = [[], [4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
+const dieHTML = (v, roll) => `<span class="dieface${roll ? ' roll' : ''}">${Array.from({ length: 9 }, (_, k) => `<i${PIPS[v].includes(k) ? ' class="on"' : ''}></i>`).join('')}</span>`;
+const money = v => '$' + Math.round(v).toLocaleString('en-US');
+let S0 = null, TK = [], rollKey = -1, sel = -1, mng = false, lastCash = null, lastMv = 0, cardK = 0;
+const tween = ms => new Promise(r => setTimeout(r, ms));
+function setTok(t, x, y, ms) { t.el.style.transitionDuration = ms + 'ms'; t.el.style.left = x + '%'; t.el.style.top = y + '%'; }
+async function hop(i, from, to, mv) {
+  const t = TK[i]; if (!t || !t.el.isConnected) return;
+  const fwd = (to - from + 40) % 40, back = (from - to + 40) % 40;
+  if (!mv.tp && !mv.back && fwd > 0 && fwd <= 12) {
+    for (let k = 1; k <= fwd; k++) { const q = (from + k) % 40, [x, y] = spot(q, i); t.el.classList.add('hop'); setTok(t, x, y, 200); Snd.p('pop'); await tween(230); t.el.classList.remove('hop'); }
+  } else if (mv.back && back > 0 && back <= 6) {
+    for (let k = 1; k <= back; k++) { const q = (from - k + 40) % 40, [x, y] = spot(q, i); setTok(t, x, y, 200); Snd.p('pop'); await tween(230); }
+  } else { const [x, y] = spot(to, i); t.el.classList.add('fly'); setTok(t, x, y, 700); Snd.p(to === 10 ? 'bad' : 'good'); await tween(760); t.el.classList.remove('fly'); }
+}
+function floatTxt(i, text, good) {
+  const t = TK[i], b = $('moTk'); if (!t || !b) return;
+  const e = document.createElement('span'); e.className = 'mofx ' + (good ? 'up' : 'dn'); e.textContent = text; e.style.left = t.el.style.left; e.style.top = t.el.style.top; b.appendChild(e); setTimeout(() => e.remove(), 1500);
+}
+function sqHTML(q, g) {
+  const c = SQ[q.i], o = g ? g.own[q.i] : -1, sd = side(q.i), hs = g ? g.hs[q.i] : 0;
+  const bar = c.k === 'p' ? `<i class="mo-bar" style="background:${GRP[c.g]}"></i>` : '';
+  const houses = hs ? `<span class="mo-hs">${hs === 5 ? '🏨' : '🏠'.repeat(hs)}</span>` : '';
+  const pr = c.price ? money(c.price) : c.amt ? money(c.amt) : '';
+  return `${bar}<span class="mo-ic">${ICON[c.k] && c.k !== 'p' ? ICON[c.k] : ''}</span><span class="mo-nm">${esc(c.name)}</span><span class="mo-pr">${pr}</span>${houses}${o >= 0 ? `<i class="mo-own" style="background:${TOKC[o % 4]}"></i>` : ''}${g && g.mort[q.i] ? '<i class="mo-mort">M</i>' : ''}`;
+}
+function deedHTML(q, g) {
+  const c = SQ[q]; let body = '';
+  if (c.k === 'p') body = `<div class="dd-bar" style="background:${GRP[c.g]}">${esc(c.name)}</div><div class="dd-rows"><span>Rent</span><b>${money(c.rents[0])}</b><span>With 1 house</span><b>${money(c.rents[1])}</b><span>2 houses</span><b>${money(c.rents[2])}</b><span>3 houses</span><b>${money(c.rents[3])}</b><span>4 houses</span><b>${money(c.rents[4])}</b><span>Hotel</span><b>${money(c.rents[5])}</b><span>House cost</span><b>${money(c.cost)}</b></div>`;
+  else if (c.k === 'rail') body = `<div class="dd-bar rail">🚂 ${esc(c.name)}</div><div class="dd-rows"><span>1 railway</span><b>$25</b><span>2 railways</span><b>$50</b><span>3 railways</span><b>$100</b><span>4 railways</span><b>$200</b></div>`;
+  else if (c.k === 'util') body = `<div class="dd-bar rail">💡 ${esc(c.name)}</div><div class="dd-rows"><span>One utility</span><b>4× dice</b><span>Both utilities</span><b>10× dice</b></div>`;
+  else return `<div class="dd-bar rail">${ICON[c.k] || ''} ${esc(c.name)}</div><p class="dd-p">${c.k === 'tax' ? 'Pay ' + money(c.amt) + ' to the bank.' : c.k === 'go' ? 'Collect $200 every time you pass.' : c.k === 'jail' ? 'Just visiting, unless you were sent here.' : c.k === 'gojail' ? 'Go directly to Jail.' : c.k === 'free' ? 'A free rest. Nothing happens.' : 'Draw a card and follow it.'}</p>`;
+  const o = g.own[q];
+  return body + `<p class="dd-p">${c.price ? 'Price ' + money(c.price) + ' · ' : ''}${o >= 0 ? 'Owner: ' + esc(S0.nameOf(o)) + (g.mort[q] ? ' (mortgaged)' : '') : 'Unowned'}</p>`;
+}
+function mountBoard() {
+  const cells = SQ.map(q => { const [r, c] = rc(q.i); return `<div class="msq k-${q.k} s-${side(q.i)}" data-q="${q.i}" style="grid-row:${r + 1};grid-column:${c + 1}" role="button" tabindex="0" aria-label="${esc(q.name)}"></div>`; }).join('');
+  const tpl = `grid-template-columns:${FR.map(f => f + 'fr').join(' ')};grid-template-rows:${FR.map(f => f + 'fr').join(' ')}`;
+  return `<div class="mob"><div class="mobd" style="${tpl}">${cells}<div class="mo-c" id="moC"><div class="mo-title">PROPERTY<br>TYCOON</div><div class="mo-dice" id="moDice"></div><div class="mo-card" id="moCard"></div><div class="mo-note" id="moNote" aria-live="polite"></div></div><div class="mo-tk" id="moTk"></div></div></div>`;
+}
+function manageHTML(g, me) {
+  const s = { own: g.own, hs: g.hs, mort: g.mort, cash: g.cash };
+  const my = SQ.filter(c => g.own[c.i] === me).sort((a, b) => (a.g || 'z').localeCompare(b.g || 'z') || a.i - b.i);
+  if (!my.length) return '<p class="mo-empty">You do not own any property yet. Land on a street and press Buy.</p>';
+  return my.map(c => {
+    const b = c.k === 'p' && canBuild(s, me, c.i), sl = canSell(s, me, c.i), m = canMort(s, me, c.i), u = canUnmort(s, me, c.i);
+    const bt = (t, ok, txt) => `<button type="button" class="mo-b" data-a="${t}" data-q="${c.i}" ${ok ? '' : 'disabled'}>${txt}</button>`;
+    return `<div class="mo-row"><i class="mo-sw" style="background:${c.k === 'p' ? GRP[c.g] : '#777'}"></i><span class="mo-rn">${esc(c.name)}${g.mort[c.i] ? ' <em>(mortgaged)</em>' : ''}${g.hs[c.i] ? ' ' + (g.hs[c.i] === 5 ? '🏨' : '🏠'.repeat(g.hs[c.i])) : ''}</span>${c.k === 'p' ? bt('build', b, 'Build ' + money(c.cost)) + bt('sell', sl, 'Sell +' + money(c.cost / 2)) : ''}${g.mort[c.i] ? bt('unmort', u, 'Pay off ' + money(unCost(c.i))) : bt('mort', m, 'Mortgage +' + money(c.price / 2))}</div>`;
+  }).join('');
+}
+const ui = {
+  mount(stage, ctl, S) {
+    TK = []; rollKey = -1; sel = -1; mng = false; lastCash = null; lastMv = 0; cardK = 0;
+    stage.innerHTML = `<section class="table mowrap"><div class="bt-opps" id="moSeats"></div>${mountBoard()}<div class="banner" id="moBanner" aria-live="polite"></div><div class="mo-mng" id="moMng" hidden></div></section>`;
+    ctl.innerHTML = `<div class="act" id="moAct" hidden></div>`;
+    stage.querySelector('.mobd').addEventListener('click', e => { const q = e.target.closest('[data-q]'); if (q && !e.target.closest('.mo-mng')) { sel = sel === +q.dataset.q ? -1 : +q.dataset.q; paintCenter(); } });
+    $('moMng').onclick = e => { const b = e.target.closest('[data-a]'); if (b && !b.disabled) S0.send({ t: b.dataset.a, q: +b.dataset.q }); if (e.target.id === 'moClose') { mng = false; $('moMng').hidden = true; } };
+    $('moAct').onclick = e => {
+      const b = e.target.closest('[data-do]'); if (!b) return;
+      if (b.dataset.do === 'manage') { mng = !mng; paintMng(); } else { S0.send({ t: b.dataset.do }); mng = false; paintMng(); }
+    };
+    const tks = S.V.seats.map((_, i) => `<div class="mo-t" id="mt${i}" style="--tc:${TOKC[i % 4]}"><span>${PIECE[i % 4]}</span></div>`).join('');
+    $('moTk').innerHTML = tks;
+    const sy = S.V.seats.length;
+    for (let k = 0; k < sy; k++) { const el = $('mt' + k); TK[k] = { el, want: 0, chain: Promise.resolve() }; const [x, y] = spot(0, k); setTok(TK[k], x, y, 0); }
+  },
+  update(S) {
+    S0 = S; const V = S.V, g = V.g;
+    $('moSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: g.phase === 'debt' ? 'Raising cash…' : g.phase === 'buy' ? 'Deciding…' : 'Playing…', extra: i => g.out[i] ? 'Bankrupt' : money(g.cash[i]) + (g.jail[i] ? ' · Jail' : '') });
+    SQ.forEach(q => {
+      const el = document.querySelector(`.mobd [data-q="${q.i}"]`); if (!el) return;
+      el.innerHTML = sqHTML(q, g); const o = g.own[q.i];
+      el.style.boxShadow = o >= 0 ? `inset 0 0 0 3px ${TOKC[o % 4]}` : ''; el.classList.toggle('mort', !!(g.mort[q.i])); el.classList.toggle('sel', sel === q.i);
+    });
+    // tokens
+    g.pos.forEach((p, i) => {
+      const t = TK[i]; if (!t) return; t.el.classList.toggle('out', !!g.out[i]);
+      if (t.want !== p) { const prev = t.want; t.want = p; const mv = g.mv && g.mv.i === i ? g.mv : {}; t.chain = t.chain.then(() => hop(i, prev, p, mv)); }
+    });
+    if (lastCash) g.cash.forEach((c, i) => { const d = c - (lastCash[i] || 0); if (d && !g.out[i] && Math.abs(d) >= 5) { floatTxt(i, (d > 0 ? '+' : '−') + money(Math.abs(d)), d > 0); if (S.me === i || d > 0) Snd.p(d > 0 ? 'coin' : 'chip'); } });
+    lastCash = g.cash.slice();
+    if (g.rollN !== rollKey) { const first = rollKey === -1; rollKey = g.rollN; if (!first && g.rollN) Snd.p('dice'); $('moDice').innerHTML = g.rollN ? dieHTML(g.dice[0], !first) + dieHTML(g.dice[1], !first) : ''; }
+    if (g.card && g.card.k !== cardK) { cardK = g.card.k; Snd.p('card'); sel = -1; }
+    paintCenter(); paintMng();
+    const act = $('moAct'), me = S.me, canAct = S.turn;
+    act.hidden = !canAct;
+    if (canAct) {
+      const B = (d, txt, cls) => `<button type="button" class="b ${cls || ''}" data-do="${d}">${txt}</button>`;
+      let h = '';
+      if (g.phase === 'roll') h = B('roll', 'Roll the dice', 'gold') + (g.jail[me] && g.cash[me] >= JAIL_FEE ? B('pay', 'Pay $50 to leave Jail') : '') + B('manage', mng ? 'Close' : 'Manage');
+      else if (g.phase === 'buy') h = B('buy', `Buy ${esc(SQ[g.buy] ? SQ[g.buy].name : '')} for ${money(SQ[g.buy] ? SQ[g.buy].price : 0)}`, 'gold') + B('pass', 'Pass');
+      else if (g.phase === 'after') h = B('end', 'End turn', 'gold') + B('manage', mng ? 'Close' : 'Manage');
+      else if (g.phase === 'debt') h = `<span class="mo-owe">You owe ${money(g.owe)}. Sell or mortgage to pay.</span>` + B('manage', mng ? 'Close' : 'Manage', 'gold') + B('bankrupt', 'Give up');
+      act.innerHTML = h + `<p class="hint bt-hint">${g.phase === 'roll' ? (g.jail[me] ? 'You are in Jail: roll for doubles or pay $50.' : 'Roll to move. Build on a full colour set to raise the rent.') : g.phase === 'buy' ? 'Nobody owns this yet.' : g.phase === 'after' ? 'Build, sell or mortgage if you wish, then end your turn.' : ''}</p>`;
+      if (g.phase === 'debt') mng = true;
+    } else mng = false;
+    $('moBanner').innerHTML = g.over && V.summary.length ? `<span>${g.winner >= 0 ? S.text(V.summary.find(e => e.p === g.winner) || V.summary[0]) : 'No winner.'}</span>` : `<span class="mo-rd">Round ${g.rd} of ${ROUNDS}</span>`;
+    return '';
+  },
+};
+function paintCenter() {
+  const S = S0; if (!S) return; const g = S.V.g, c = $('moCard'); if (!c) return;
+  if (sel >= 0) c.innerHTML = `<div class="deed">${deedHTML(sel, g)}</div>`;
+  else if (g.card) c.innerHTML = `<div class="cardx ${g.card.kind === 'Chance' ? 'ch' : 'lk'}"><b>${g.card.kind === 'Chance' ? '❓ Chance' : '🎁 Luck'}</b><span>${esc(g.card.text)}</span></div>`;
+  else c.innerHTML = '';
+  $('moNote').textContent = sel >= 0 ? '' : g.note || '';
+}
+function paintMng() {
+  const S = S0, el = $('moMng'); if (!S || !el) return; const g = S.V.g;
+  const show = mng && S.turn;
+  el.hidden = !show; if (!show) return;
+  el.innerHTML = `<div class="mo-sheet"><div class="mo-sh-h"><b>Your properties</b><span>${money(g.cash[S.me])}</span><button type="button" id="moClose" class="b">Close</button></div><div class="mo-list">${manageHTML(g, S.me)}</div></div>`;
+}
+
+Club.register({
+  id: 'monopoly', cat: 'board', name: 'Property Tycoon', tag: 'A Monopoly-style game: roll, buy streets, build, collect rent.', min: 2, max: 4, soloBots: 2, roundWord: 'Game',
+  art: () => ['🎲', '🏠', '🚗'].map(c => `<div class="ltile">${c}</div>`).join(''),
+  rules: `<p><b>Goal:</b> be the richest player after ${ROUNDS} rounds, or the last one who has not gone bankrupt.</p>
+    <ol><li>Everyone starts with $${START} of game cash and a token at <b>GO</b>. Whenever you pass or land on GO, collect $${GO_PAY}.</li>
+    <li>On your turn, press <b>Roll the dice</b>. Your token hops that many squares round the board. Roll doubles and you roll again, but three doubles in a row sends you to Jail.</li>
+    <li>Land on an <b>unowned street, railway or utility</b> and you may <b>Buy</b> it. Land on one that another player owns and you pay them <b>rent</b>.</li>
+    <li>Own every street of one colour and the rent doubles. Press <b>Manage</b> to <b>build houses</b> (up to four, then a hotel) to raise the rent a lot. Build evenly across the set.</li>
+    <li>Short of cash? In <b>Manage</b> you can sell houses or <b>mortgage</b> a street to the bank for half its price. Pay the mortgage off, plus a little interest, to get it back.</li>
+    <li><b>Chance</b> and <b>Luck</b> squares draw a card that can pay you, fine you, move you, or send you to Jail. <b>Tax</b> squares cost money.</li>
+    <li><b>Jail:</b> pay $${JAIL_FEE}, or roll doubles to get out. After three failed tries you pay $${JAIL_FEE} and move. While in Jail you still collect rent.</li>
+    <li>If you cannot pay what you owe, you go bankrupt and your streets go to the player you owed.</li>
+    <li>Tap any square to read its price and rent. Each player puts in ${ANTE} chips and the winner takes the pot.</li></ol>`,
+  round, view, ui, _test: { SQ, canBuild, rentOf, worth },
+});
+})();
+
+/* ---------- Arcade engine + games (canvas, keyboard + touch) ---------- */
+const Arc = (function () {
+const W = 360, H = 480, ANTE = 20;
+const R = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const LV = (lv, a, b, c) => [a, b, c][lv == null ? 1 : lv];
+const FONT = 'system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+function emo(c, ch, x, y, size, rot) { c.save(); c.translate(x, y); if (rot) c.rotate(rot); c.font = `${size}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(ch, 0, 0); c.restore(); }
+function txt(c, s, x, y, size, col, al) { c.font = `800 ${size}px ${FONT}`; c.textAlign = al || 'left'; c.textBaseline = 'middle'; c.fillStyle = col || '#fff'; c.fillText(s, x, y); }
+function hud(c, left, right) { c.fillStyle = 'rgba(0,0,0,.55)'; c.fillRect(0, 0, W, 26); txt(c, left, 8, 14, 15, '#ffe27a'); txt(c, right || '', W - 8, 14, 15, '#fff', 'right'); }
+const sfx = n => { try { Snd.p(n); } catch (e) {} };
+
+function run(cv, make, lv, onEnd) {
+  cv.width = W * 2; cv.height = H * 2;
+  const c = cv.getContext('2d'); c.scale(2, 2);
+  const g = make(lv); let last = performance.now(), raf = 0, alive = true, ended = false, down = false;
+  const pt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; };
+  const pd = e => { e.preventDefault(); down = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} const [x, y] = pt(e); g.ptr && g.ptr('down', x, y); };
+  const pm = e => { if (!down && e.pointerType === 'touch') return; const [x, y] = pt(e); g.ptr && g.ptr('move', x, y); };
+  const pu = e => { down = false; const [x, y] = pt(e); g.ptr && g.ptr('up', x, y); };
+  const kd = e => { if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault(); if (!e.repeat) g.key && g.key(e.key, true); };
+  const ku = e => g.key && g.key(e.key, false);
+  cv.addEventListener('pointerdown', pd); cv.addEventListener('pointermove', pm); cv.addEventListener('pointerup', pu); cv.addEventListener('pointercancel', pu);
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+  window.addEventListener('keydown', kd); window.addEventListener('keyup', ku);
+  const loop = now => {
+    if (!alive) return; const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (!g.over) g.update(dt); g.draw(c);
+    if (g.over) { c.fillStyle = 'rgba(0,0,0,.6)'; c.fillRect(0, 170, W, 120); txt(c, g.msg || 'Game over', W / 2, 205, 30, '#fff', 'center'); txt(c, 'Score ' + Math.round(g.score), W / 2, 250, 24, '#ffe27a', 'center'); }
+    if (g.over && !ended) { ended = true; sfx(g.win ? 'win' : 'end'); setTimeout(() => { if (alive) onEnd(Math.round(g.score)); }, 1500); }
+    raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  return () => { alive = false; cancelAnimationFrame(raf); cv.removeEventListener('pointerdown', pd); cv.removeEventListener('pointermove', pm); cv.removeEventListener('pointerup', pu); cv.removeEventListener('pointercancel', pu); window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); };
+}
+
+// ---------- the multiplayer wrapper: everyone plays in turn, best score wins ----------
+function register(def) {
+  async function round(G, io) {
+    const P = G.players, n = P.length, lv = G.level == null ? 1 : G.level;
+    const A = G.ar = { sc: P.map(() => null), turn: (G.round - 1) % n, order: 0, over: false, winner: -1, lv };
+    io.render(); await io.sleep(400);
+    for (let k = 0; k < n; k++) {
+      const i = (A.turn + k) % n; A.turn = i; io.render();
+      const a = await io.turn(P[i], { lv }, { auto: { t: 'done', score: 0 }, timeout: 240000,
+        validate: x => (x && x.t === 'done' && Number.isFinite(x.score) ? { t: 'done', score: clamp(Math.round(x.score), 0, 99999) } : null),
+        bot: () => ({ t: 'done', score: Math.round(def.par * LV(lv, 0.55, 0.9, 1.25) * R(0.7, 1.3)) }), think: 2200 + Math.random() * 1500 });
+      A.sc[i] = a.score; io.ev(P[i], `scores ${a.score}`, `score ${a.score}`); io.render(); await io.sleep(500);
+    }
+    let best = -1, bs = -1, tie = false; A.sc.forEach((s, i) => { if (s > bs) { bs = s; best = i; tie = false; } else if (s === bs) tie = true; });
+    A.over = true; A.winner = tie && n > 1 ? -1 : best; A.turn = -1;
+    settlePot(G, ANTE, A.winner >= 0 ? [A.winner] : (n > 1 ? A.sc.map((s, i) => (s === bs ? i : -1)).filter(i => i >= 0) : [])); potSummary(G);
+    io.line(`Best score: ${bs}.`, true); io.render();
+  }
+  function view(G) {
+    const A = G.ar;
+    if (!A || A.sc.length !== G.players.length) return { sc: G.players.map(() => null), turn: -1, over: false, winner: -1, lv: 1, delta: [] };
+    return { sc: A.sc, turn: A.over ? -1 : A.turn, over: A.over, winner: A.winner, lv: A.lv, delta: G.players.map(p => (A.over ? p.delta || 0 : 0)) };
+  }
+  let S0 = null, stop = null, running = false, seq = -1;
+  const ui = {
+    mount(stage, ctl) {
+      if (stop) stop(); stop = null; running = false; seq = -1;
+      stage.innerHTML = `<section class="table arwrap"><div class="bt-opps" id="arSeats"></div><div class="arbox"><canvas id="arCv" class="arcv" aria-label="${esc(def.name)} game screen"></canvas><div class="arover" id="arOver"></div></div><div class="banner" id="arBanner" aria-live="polite"></div></section>`;
+      ctl.innerHTML = '';
+      $('arOver').onclick = () => start();
+    },
+    update(S) {
+      S0 = S; const g = S.V.g;
+      $('arSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Playing…', extra: i => (g.sc[i] == null ? 'Waiting' : 'Score ' + g.sc[i]) });
+      $('arBanner').innerHTML = g.over && S.V.summary.length ? `<span>${g.winner >= 0 ? S.text(S.V.summary.find(e => e.p === g.winner) || S.V.summary[0]) : 'A tie. Everyone keeps their chips.'}</span>` : '';
+      const ov = $('arOver');
+      if (S.turn && !running) { ov.hidden = false; ov.innerHTML = `<div class="arcard"><div class="arbig">${def.icon}</div><b>${esc(def.name)}</b><p>${def.how}</p><button type="button" class="b gold">Start</button><small>Press Enter or tap Start</small></div>`; if (seq !== S.turn.seq) { seq = S.turn.seq; } }
+      else if (!S.turn && !running) { ov.hidden = false; ov.innerHTML = g.over ? '' : `<div class="arcard"><div class="arbig">${def.icon}</div><p>${g.turn >= 0 ? esc(S.nameOf(g.turn)) + ' is playing…' : ''}</p></div>`; if (g.over) ov.hidden = true; }
+      if (running && !S.turn) { if (stop) stop(); stop = null; running = false; }
+      return '';
+    },
+  };
+  function start() {
+    if (!S0 || !S0.turn || running) return; running = true; $('arOver').hidden = true;
+    const my = S0.turn.seq;
+    stop = run($('arCv'), def.make, S0.V.g.lv, score => { running = false; if (stop) stop(); stop = null; if (S0 && S0.turn && S0.turn.seq === my) S0.send({ t: 'done', score }); });
+  }
+  window.addEventListener('keydown', e => { if (e.key === 'Enter' && S0 && S0.turn && !running && $('arOver') && !$('arOver').hidden && document.activeElement && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); start(); } });
+  Club.register({
+    id: def.id, cat: 'arcade', name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Game', levels: true,
+    art: () => `<div class="ltile big">${def.icon}</div>`,
+    rules: `<p><b>Goal:</b> ${def.goal}</p><ol><li>${def.how}</li><li>Everyone plays one go, one after another. The highest score wins.</li><li>Pick <b>Easy, Medium or Hard</b> on the game page before you start.</li><li>Each player puts in ${ANTE} chips and the best score takes the pot.</li></ol>`,
+    round, view, ui, _test: { make: def.make },
+  });
+}
+return { W, H, R, clamp, LV, emo, txt, hud, sfx, register };
+})();
+
+(function () {
+const { W, H, R, clamp, LV, emo, txt, hud, sfx, register } = Arc;
+
+// ============ Hit the Mice (Whack-a-Mole) ============
+register({ id: 'whack', name: 'Hit the Mice', icon: '🐭', tag: 'Whack the mice as they pop up. Do not hit the cats.', goal: 'hit as many mice as you can in 30 seconds.', how: 'Tap or click a mouse the moment it pops up. Hitting a cat costs you points.', par: 170,
+  make(lv) {
+    const g = { score: 0, over: false, t: 30, holes: Array.from({ length: 12 }, () => ({ up: 0, k: 0, hit: 0 })), sp: 0, msg: 'Time!' };
+    const cell = i => [60 + (i % 3) * 120, 120 + Math.floor(i / 3) * 90];
+    g.update = dt => {
+      g.t -= dt; if (g.t <= 0) { g.over = true; return; }
+      g.sp -= dt; if (g.sp <= 0) { g.sp = LV(lv, 0.75, 0.5, 0.32) * R(0.6, 1.2); const h = g.holes[Math.floor(Math.random() * 12)]; if (!h.up && !h.hit) { h.up = LV(lv, 1.3, 0.95, 0.65); h.k = Math.random() < 0.18 ? 1 : 0; } }
+      g.holes.forEach(h => { if (h.up > 0) h.up -= dt; if (h.hit > 0) h.hit -= dt; });
+    };
+    g.ptr = (t, x, y) => { if (t !== 'down') return; g.holes.forEach((h, i) => { const [cx, cy] = cell(i); if (h.up > 0 && Math.hypot(x - cx, y - cy + 14) < 38) { h.up = 0; h.hit = 0.4; if (h.k) { g.score = Math.max(0, g.score - 15); sfx('bad'); } else { g.score += 10; sfx('pop'); } } }); };
+    g.draw = c => {
+      c.fillStyle = '#5aa84a'; c.fillRect(0, 0, W, H); c.fillStyle = '#4a9040'; for (let i = 0; i < 30; i++) c.fillRect((i * 53) % W, 40 + (i * 97) % 440, 14, 4);
+      g.holes.forEach((h, i) => { const [cx, cy] = cell(i); c.fillStyle = '#2b1a0d'; c.beginPath(); c.ellipse(cx, cy + 20, 40, 16, 0, 0, 7); c.fill();
+        if (h.up > 0 || h.hit > 0) { const k = h.hit > 0 ? 0.6 : Math.min(1, (h.up) * 6, 1); emo(c, h.hit > 0 ? '💥' : h.k ? '🐱' : '🐭', cx, cy + 20 - 34 * k, 52); }
+        c.fillStyle = '#7a4a22'; c.beginPath(); c.ellipse(cx, cy + 24, 42, 12, 0, 0, Math.PI); c.fill(); });
+      hud(c, 'Score ' + g.score, 'Time ' + Math.ceil(g.t));
+    };
+    return g;
+  } });
+
+// ============ Zombie Hunt ============
+register({ id: 'zombies', name: 'Zombie Hunt', icon: '🧟', tag: 'Shoot the zombies before they reach your house.', goal: 'survive and shoot as many zombies as you can.', how: 'Tap or click a zombie to shoot it. Big zombies take two shots. Do not let five reach the house.', par: 220,
+  make(lv) {
+    const g = { score: 0, over: false, z: [], lives: 5, t: 0, sp: 0.5, fl: [], msg: 'The house fell' };
+    g.update = dt => {
+      g.t += dt; g.sp -= dt;
+      if (g.sp <= 0) { g.sp = Math.max(0.3, LV(lv, 1.1, 0.8, 0.55) - g.t * 0.008) * R(0.6, 1.3); const big = Math.random() < 0.2; g.z.push({ x: R(30, W - 30), y: 40, hp: big ? 2 : 1, big, sp: R(28, 44) * LV(lv, 0.7, 1, 1.35) * (big ? 0.7 : 1) + g.t * 0.35, wob: R(0, 6) }); }
+      g.z.forEach(z => { z.y += z.sp * dt; z.x += Math.sin(g.t * 2 + z.wob) * 14 * dt; if (z.y > H - 70) { z.dead = true; g.lives--; sfx('bad'); } });
+      g.z = g.z.filter(z => !z.dead); g.fl = g.fl.filter(f => (f.t -= dt) > 0);
+      if (g.lives <= 0) g.over = true;
+    };
+    g.ptr = (t, x, y) => { if (t !== 'down') return; sfx('clack'); g.fl.push({ x, y, t: 0.15 }); let best = null, bd = 40; g.z.forEach(z => { const d = Math.hypot(x - z.x, y - z.y); if (d < bd) { bd = d; best = z; } });
+      if (best) { best.hp--; best.hit = 0.15; if (best.hp <= 0) { best.dead = true; g.score += best.big ? 30 : 10; sfx('pop'); g.fl.push({ x: best.x, y: best.y, t: 0.4, boom: 1 }); } } };
+    g.draw = c => {
+      c.fillStyle = '#2b3a2a'; c.fillRect(0, 0, W, H); c.fillStyle = '#1f2b1e'; for (let i = 0; i < 40; i++) c.fillRect((i * 71) % W, 30 + (i * 53) % 400, 10, 3);
+      c.fillStyle = '#3d2f26'; c.fillRect(0, H - 70, W, 70); emo(c, '🏠', 60, H - 40, 50); emo(c, '🏠', 180, H - 40, 50); emo(c, '🏠', 300, H - 40, 50);
+      g.z.slice().sort((a, b) => a.y - b.y).forEach(z => emo(c, '🧟', z.x, z.y, z.big ? 64 : 44, Math.sin(g.t * 6 + z.wob) * 0.15));
+      g.fl.forEach(f => { if (f.boom) emo(c, '💥', f.x, f.y, 40); else { c.strokeStyle = '#ffe27a'; c.lineWidth = 2; c.beginPath(); c.arc(f.x, f.y, 14, 0, 7); c.moveTo(f.x - 20, f.y); c.lineTo(f.x + 20, f.y); c.moveTo(f.x, f.y - 20); c.lineTo(f.x, f.y + 20); c.stroke(); } });
+      hud(c, 'Score ' + g.score, '❤️'.repeat(Math.max(0, g.lives)));
+    };
+    return g;
+  } });
+
+// ============ Street Racer ============
+register({ id: 'racing', name: 'Street Racer', icon: '🏎️', tag: 'Race down the road and dodge the traffic.', goal: 'drive as far as you can without crashing.', how: 'Steer with the left and right arrow keys, or drag across the screen. Grab coins for bonus points. One crash ends the race.', par: 260,
+  make(lv) {
+    const g = { score: 0, over: false, x: W / 2, tx: W / 2, spd: LV(lv, 190, 240, 300), dist: 0, cars: [], coins: [], off: 0, sp: 0.8, k: { l: 0, r: 0 }, msg: 'Crash!' };
+    g.update = dt => {
+      g.spd = Math.min(560, g.spd + dt * LV(lv, 6, 9, 13)); g.dist += g.spd * dt; g.off = (g.off + g.spd * dt) % 60;
+      const kx = (g.k.r - g.k.l) * 300 * dt; if (kx) g.tx = clamp(g.tx + kx, 70, W - 70); g.x += (g.tx - g.x) * Math.min(1, dt * 12);
+      g.sp -= dt; if (g.sp <= 0) { g.sp = R(0.45, 0.9) * 230 / g.spd * 1.6; const lane = Math.floor(R(0, 4)); g.cars.push({ x: 75 + lane * 70, y: -50, e: ['🚗', '🚙', '🚕', '🚚', '🚓'][Math.floor(R(0, 5))], v: g.spd * R(0.3, 0.55) }); if (Math.random() < 0.5) g.coins.push({ x: 75 + Math.floor(R(0, 4)) * 70, y: -120 }); }
+      g.cars.forEach(o => { o.y += (g.spd - o.v) * dt; }); g.coins.forEach(o => { o.y += g.spd * dt; });
+      g.cars.forEach(o => { if (Math.abs(o.x - g.x) < 30 && Math.abs(o.y - (H - 90)) < 42) g.over = true; });
+      g.coins = g.coins.filter(o => { if (Math.abs(o.x - g.x) < 30 && Math.abs(o.y - (H - 90)) < 36) { g.score += 10; sfx('coin'); return false; } return o.y < H + 40; });
+      g.cars = g.cars.filter(o => o.y < H + 60); g.score += g.spd * dt / 40;
+    };
+    g.ptr = (t, x) => { if (t !== 'up') g.tx = clamp(x, 70, W - 70); };
+    g.key = (k, d) => { if (k === 'ArrowLeft' || k === 'a') g.k.l = d ? 1 : 0; if (k === 'ArrowRight' || k === 'd') g.k.r = d ? 1 : 0; };
+    g.draw = c => {
+      c.fillStyle = '#3f8f3a'; c.fillRect(0, 0, W, H); c.fillStyle = '#3a3a42'; c.fillRect(40, 0, W - 80, H); c.fillStyle = '#fff'; c.fillRect(38, 0, 4, H); c.fillRect(W - 42, 0, 4, H);
+      c.fillStyle = '#f2c94c'; for (let l = 1; l < 4; l++) for (let y = -60; y < H; y += 60) c.fillRect(40 + l * 70 - 2 + 0, y + g.off, 4, 28);
+      g.coins.forEach(o => emo(c, '🪙', o.x, o.y, 30)); g.cars.forEach(o => emo(c, o.e, o.x, o.y, 46, Math.PI)); emo(c, '🏎️', g.x, H - 90, 50, 0);
+      hud(c, 'Score ' + Math.round(g.score), Math.round(g.spd / 3) + ' km/h');
+    };
+    return g;
+  } });
+
+// ============ Dance Floor ============
+register({ id: 'dance', name: 'Dance Floor', icon: '💃', tag: 'Hit the arrows in time with the beat.', goal: 'step on every arrow as it reaches the line.', how: 'When an arrow reaches the glowing line, press the same arrow key (or tap its column). Perfect timing scores most.', par: 520,
+  make(lv) {
+    const sp = LV(lv, 170, 230, 300), g = { score: 0, over: false, t: 0, notes: [], combo: 0, best: 0, fb: '', fbT: 0, press: [0, 0, 0, 0], msg: 'Song over' }, ly = H - 90, gap = LV(lv, 0.75, 0.55, 0.4);
+    let tt = 1.6; for (let k = 0; k < 44; k++) { g.notes.push({ l: Math.floor(R(0, 4)), time: tt, done: 0 }); tt += gap * (Math.random() < 0.25 ? 0.5 : 1) + (k % 8 === 7 ? 0.5 : 0); }
+    const end = tt + 2.2;
+    const hit = l => { g.press[l] = 0.15; let best = null; g.notes.forEach(n => { if (n.l === l && !n.done && (!best || Math.abs(n.time - g.t) < Math.abs(best.time - g.t))) best = n; });
+      if (best && Math.abs(best.time - g.t) < 0.2) { const d = Math.abs(best.time - g.t); best.done = 1; g.combo++; g.best = Math.max(g.best, g.combo); const perfect = d < 0.07; g.score += (perfect ? 30 : 15) + Math.min(g.combo, 20); g.fb = perfect ? 'PERFECT!' : 'Good'; g.fbT = 0.6; sfx(perfect ? 'good' : 'tap'); } else { g.combo = 0; g.score = Math.max(0, g.score - 8); g.fb = 'Miss'; g.fbT = 0.4; sfx('bad'); } };
+    g.update = dt => { g.t += dt; g.fbT -= dt; g.press = g.press.map(v => Math.max(0, v - dt)); g.notes.forEach(n => { if (!n.done && g.t - n.time > 0.2) { n.done = -1; g.combo = 0; g.fb = 'Miss'; g.fbT = 0.4; } }); if (g.t > end) g.over = true; };
+    const KM = { ArrowLeft: 0, a: 0, ArrowDown: 1, s: 1, ArrowUp: 2, w: 2, ArrowRight: 3, d: 3 };
+    g.key = (k, d) => { if (d && k in KM) hit(KM[k]); };
+    g.ptr = (t, x) => { if (t === 'down') hit(clamp(Math.floor(x / (W / 4)), 0, 3)); };
+    g.draw = c => {
+      const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#2a1245'); bg.addColorStop(1, '#5a1a6a'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+      for (let i = 0; i < 4; i++) { c.fillStyle = `hsla(${(g.t * 60 + i * 90) % 360},80%,55%,${0.1 + g.press[i] * 2})`; c.fillRect(i * 90, 26, 90, H); }
+      c.strokeStyle = '#fff3'; for (let i = 1; i < 4; i++) { c.beginPath(); c.moveTo(i * 90, 26); c.lineTo(i * 90, H); c.stroke(); }
+      c.strokeStyle = '#ffe27a'; c.lineWidth = 3; c.shadowColor = '#ffe27a'; c.shadowBlur = 12; c.beginPath(); c.moveTo(0, ly); c.lineTo(W, ly); c.stroke(); c.shadowBlur = 0;
+      const AR = ['⬅️', '⬇️', '⬆️', '➡️'];
+      for (let i = 0; i < 4; i++) emo(c, AR[i], i * 90 + 45, ly, 40 + g.press[i] * 60);
+      g.notes.forEach(n => { if (n.done === 1) return; const y = ly - (n.time - g.t) * sp; if (y > 20 && y < H + 30) { c.globalAlpha = n.done === -1 ? 0.3 : 1; emo(c, AR[n.l], n.l * 90 + 45, y, 44); c.globalAlpha = 1; } });
+      emo(c, g.t % 0.8 < 0.4 ? '💃' : '🕺', W / 2, 62, 40);
+      if (g.fbT > 0) txt(c, g.fb, W / 2, H / 2, 32, g.fb === 'Miss' ? '#ff9a90' : '#9af0a0', 'center');
+      hud(c, 'Score ' + g.score, 'Combo ' + g.combo);
+    };
+    return g;
+  } });
+
+// ============ Space Ships (Space Invaders) ============
+register({ id: 'invaders', name: 'Space Ships', icon: '🚀', tag: 'Defend Earth from the alien fleet.', goal: 'shoot down the aliens before they land.', how: 'Move with the left and right arrow keys and fire with the space bar, or drag on the screen (your ship fires by itself). Dodge their shots.', par: 260,
+  make(lv) {
+    const g = { score: 0, over: false, x: W / 2, lives: 3, bullets: [], eb: [], aliens: [], dir: 1, wave: 0, cd: 0, k: { l: 0, r: 0, f: 0 }, t: 0, inv: 0, auto: false, msg: 'Earth is lost' };
+    const spawn = () => { g.aliens = []; for (let r = 0; r < 4; r++) for (let c = 0; c < 7; c++) g.aliens.push({ x: 38 + c * 44, y: 60 + r * 38, e: ['👾', '👽', '🛸', '👾'][r] }); g.dir = 1; g.wave++; };
+    spawn();
+    g.update = dt => {
+      g.t += dt; g.cd -= dt; g.inv -= dt;
+      g.x = clamp(g.x + (g.k.r - g.k.l) * 260 * dt, 20, W - 20);
+      if ((g.k.f || g.auto) && g.cd <= 0) { g.bullets.push({ x: g.x, y: H - 60 }); g.cd = 0.34; sfx('tap'); }
+      g.bullets.forEach(b => b.y -= 420 * dt); g.bullets = g.bullets.filter(b => b.y > 20);
+      const sp = (LV(lv, 22, 32, 44) + g.wave * 5 + (28 - g.aliens.length) * 1.8) * dt; let edge = false;
+      g.aliens.forEach(a => { a.x += g.dir * sp; if (a.x < 18 || a.x > W - 18) edge = true; });
+      if (edge) { g.dir = -g.dir; g.aliens.forEach(a => a.y += 14); }
+      if (Math.random() < dt * (LV(lv, 0.8, 1.3, 1.9) + g.wave * 0.2) && g.aliens.length) { const a = g.aliens[Math.floor(Math.random() * g.aliens.length)]; g.eb.push({ x: a.x, y: a.y + 14 }); }
+      g.eb.forEach(b => b.y += 170 * dt); g.eb = g.eb.filter(b => b.y < H);
+      g.bullets.forEach(b => g.aliens.forEach(a => { if (!b.dead && !a.dead && Math.abs(a.x - b.x) < 16 && Math.abs(a.y - b.y) < 16) { a.dead = b.dead = true; g.score += 10; sfx('pop'); } }));
+      g.aliens = g.aliens.filter(a => !a.dead); g.bullets = g.bullets.filter(b => !b.dead);
+      if (g.inv <= 0) g.eb.forEach(b => { if (!b.dead && Math.abs(b.x - g.x) < 18 && Math.abs(b.y - (H - 44)) < 18) { b.dead = true; g.lives--; g.inv = 1.4; sfx('bad'); } });
+      g.eb = g.eb.filter(b => !b.dead);
+      if (!g.aliens.length) { g.score += 50; spawn(); sfx('good'); }
+      if (g.lives <= 0 || g.aliens.some(a => a.y > H - 80)) g.over = true;
+    };
+    g.key = (k, d) => { if (k === 'ArrowLeft' || k === 'a') g.k.l = d ? 1 : 0; if (k === 'ArrowRight' || k === 'd') g.k.r = d ? 1 : 0; if (k === ' ' || k === 'ArrowUp') g.k.f = d ? 1 : 0; };
+    g.ptr = (t, x) => { if (t !== 'up') { g.x = clamp(x, 20, W - 20); g.auto = true; } };
+    g.draw = c => {
+      c.fillStyle = '#080a1c'; c.fillRect(0, 0, W, H); c.fillStyle = '#fff'; for (let i = 0; i < 50; i++) c.fillRect((i * 67) % W, (i * 131 + g.t * 14) % H, 2, 2);
+      g.aliens.forEach(a => emo(c, a.e, a.x, a.y + Math.sin(g.t * 4 + a.x) * 2, 30));
+      c.fillStyle = '#7af'; g.bullets.forEach(b => c.fillRect(b.x - 2, b.y - 8, 4, 14)); c.fillStyle = '#f66'; g.eb.forEach(b => c.fillRect(b.x - 2, b.y - 6, 4, 12));
+      if (g.inv <= 0 || Math.floor(g.t * 10) % 2) emo(c, '🚀', g.x, H - 44, 38);
+      hud(c, 'Score ' + g.score + '  Wave ' + g.wave, '🚀'.repeat(Math.max(0, g.lives)));
+    };
+    return g;
+  } });
+
+// ============ Pac-Man ============
+const MAZE = ['###############', '#o.....#.....o#', '#.###.#.#.###.#', '#.............#', '#.###.###.###.#', '#.....#.#.....#', '####.##.##.####', '#......G......#', '#.####.#.####.#', '#.............#', '#.###.###.###.#', '#o..#.....#..o#', '###.#.#.#.#.###', '#.............#', '#.###.###.###.#', '#.............#', '#.#.#######.#.#', '#o...........o#', '###############'];
+register({ id: 'pacman', name: 'Pac-Man', icon: '🟡', tag: 'Eat every dot and escape the ghosts.', goal: 'eat all the dots without getting caught.', how: 'Steer with the arrow keys, or swipe in a direction. Eat a big pellet to turn the ghosts blue and catch them.', par: 700,
+  make(lv) {
+    const TS = 24, OY = 28, COLS = 15, ROWS = 19, g = { score: 0, over: false, lives: 3, t: 0, fr: 0, msg: 'Game over' };
+    const grid = MAZE.map(r => r.split('')); let dots = 0; grid.forEach(r => r.forEach(ch => { if (ch === '.' || ch === 'o') dots++; })); const wall = (x, y) => y < 0 || y >= ROWS || x < 0 || x >= COLS || grid[y][x] === '#';
+    const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    const mk = (x, y, v) => ({ x, y, px: x, py: y, d: [0, 0], p: 0, v, nd: null, fx: x, fy: y });
+    let pac, gh; const reset = () => { pac = mk(7, 13, 5.6); pac.d = [-1, 0]; gh = [0, 1, 2, 3].map(i => { const q = mk(5 + i * 1.3 | 0, 7, LV(lv, 3.6, 4.6, 5.4)); q.x = [5, 7, 9, 7][i]; q.y = i === 3 ? 9 : 7; q.px = q.x; q.py = q.y; q.d = [i % 2 ? 1 : -1, 0]; q.i = i; q.home = [q.x, q.y]; q.wait = i * 1.2; return q; }); g.fr = 0; };
+    reset(); grid[7][7] = '.'; dots++;
+    const step = (e, chooser, dt) => {
+      let m = e.v * dt;
+      while (m > 0) {
+        if (e.p === 0) { const nd = chooser(e); if (nd) { e.d = nd; } if (!e.d || wall(e.x + e.d[0], e.y + e.d[1]) || (e.d[0] === 0 && e.d[1] === 0)) { e.d = [0, 0]; break; } }
+        const left = 1 - e.p, s = Math.min(left, m); e.p += s; m -= s;
+        if (e.p >= 1 - 1e-9) { e.x += e.d[0]; e.y += e.d[1]; e.p = 0; if (e.arrive) e.arrive(e); }
+      }
+      e.px = e.x + e.d[0] * e.p; e.py = e.y + e.d[1] * e.p;
+    };
+    pac.arrive = e => { const ch = grid[e.y][e.x]; if (ch === '.') { grid[e.y][e.x] = ' '; g.score += 10; dots--; sfx('tap'); } else if (ch === 'o') { grid[e.y][e.x] = ' '; g.score += 50; dots--; g.fr = LV(lv, 8, 6, 4.5); sfx('good'); } };
+    const pacChoose = e => { if (e.nd && !wall(e.x + e.nd[0], e.y + e.nd[1])) { const d = e.nd; e.nd = null; return d; } if (e.p === 0 && wall(e.x + e.d[0], e.y + e.d[1])) return [0, 0]; return null; };
+    const ghChoose = q => { const opts = DIRS.filter(d => !wall(q.x + d[0], q.y + d[1]) && !(d[0] === -q.d[0] && d[1] === -q.d[1])); if (!opts.length) return [-q.d[0], -q.d[1]];
+      const chase = !q.eaten && g.fr <= 0 && Math.random() < LV(lv, 0.45, 0.7, 0.9) * (q.i === 3 ? 0.6 : 1); if (q.eaten) { const tgt = q.home; opts.sort((a, b) => Math.hypot(q.x + a[0] - tgt[0], q.y + a[1] - tgt[1]) - Math.hypot(q.x + b[0] - tgt[0], q.y + b[1] - tgt[1])); return opts[0]; }
+      if (chase) { opts.sort((a, b) => Math.hypot(q.x + a[0] - pac.x, q.y + a[1] - pac.y) - Math.hypot(q.x + b[0] - pac.x, q.y + b[1] - pac.y)); return opts[0]; }
+      return opts[Math.floor(Math.random() * opts.length)]; };
+    g.update = dt => {
+      g.t += dt; g.fr -= dt; step(pac, pacChoose, dt);
+      gh.forEach(q => { q.wait -= dt; if (q.wait > 0) return; q.v = q.eaten ? 9 : g.fr > 0 ? 3 : LV(lv, 3.6, 4.6, 5.4); step(q, ghChoose, dt); if (q.eaten && q.x === q.home[0] && q.y === q.home[1] && q.p === 0) q.eaten = false; });
+      gh.forEach(q => { if (q.wait > 0 || q.eaten) return; if (Math.hypot(q.px - pac.px, q.py - pac.py) < 0.6) { if (g.fr > 0) { q.eaten = true; g.score += 200; sfx('coin'); } else { g.lives--; sfx('bad'); if (g.lives <= 0) { g.over = true; } else reset(); } } });
+      if (dots <= 0) { g.score += 500; g.over = true; g.win = true; g.msg = 'Cleared!'; }
+    };
+    const setD = d => { pac.nd = d; if (pac.p === 0 && !wall(pac.x + d[0], pac.y + d[1])) { pac.d = d; pac.nd = null; } else if (pac.p > 0 && d[0] === -pac.d[0] && d[1] === -pac.d[1]) { pac.x += pac.d[0]; pac.y += pac.d[1]; pac.d = d; pac.p = 1 - pac.p; pac.nd = null; } };
+    g.key = (k, d) => { if (!d) return; const m = { ArrowRight: [1, 0], d: [1, 0], ArrowLeft: [-1, 0], a: [-1, 0], ArrowDown: [0, 1], s: [0, 1], ArrowUp: [0, -1], w: [0, -1] }[k]; if (m) setD(m); };
+    let sx = 0, sy = 0;
+    g.ptr = (t, x, y) => { if (t === 'down') { sx = x; sy = y; } else if (t === 'move' || t === 'up') { const dx = x - sx, dy = y - sy; if (Math.hypot(dx, dy) > 18) { setD(Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)]); sx = x; sy = y; } } };
+    g.draw = c => {
+      c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+      for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { const ch = grid[y][x], X = x * TS, Y = OY + y * TS;
+        if (ch === '#') { c.fillStyle = '#1f3fbf'; c.fillRect(X + 1, Y + 1, TS - 2, TS - 2); c.fillStyle = '#0a1670'; c.fillRect(X + 5, Y + 5, TS - 10, TS - 10); }
+        else if (ch === '.') { c.fillStyle = '#ffd9a0'; c.fillRect(X + TS / 2 - 2, Y + TS / 2 - 2, 4, 4); }
+        else if (ch === 'o') { c.fillStyle = '#ffe9c0'; c.beginPath(); c.arc(X + TS / 2, Y + TS / 2, 5 + Math.sin(g.t * 8) * 1.2, 0, 7); c.fill(); } }
+      const ang = Math.atan2(pac.d[1], pac.d[0]), mo = 0.15 + Math.abs(Math.sin(g.t * 14)) * 0.5; c.fillStyle = '#ffd800'; c.beginPath(); c.moveTo(pac.px * TS + TS / 2, OY + pac.py * TS + TS / 2); c.arc(pac.px * TS + TS / 2, OY + pac.py * TS + TS / 2, TS * 0.42, ang + mo, ang + Math.PI * 2 - mo); c.closePath(); c.fill();
+      const GC = ['#ff3b3b', '#ffb8f0', '#3bd6ff', '#ffa83b'];
+      gh.forEach(q => { const X = q.px * TS + TS / 2, Y = OY + q.py * TS + TS / 2; const scared = g.fr > 0 && !q.eaten, flash = scared && g.fr < 2 && Math.floor(g.t * 6) % 2;
+        if (!q.eaten) { c.fillStyle = scared ? (flash ? '#fff' : '#2b3fff') : GC[q.i]; c.beginPath(); c.arc(X, Y - 2, TS * 0.4, Math.PI, 0); c.lineTo(X + TS * 0.4, Y + TS * 0.38); for (let k = 0; k < 4; k++) c.lineTo(X + TS * 0.4 - (k + 0.5) * TS * 0.2, Y + TS * (k % 2 ? 0.38 : 0.28)); c.lineTo(X - TS * 0.4, Y + TS * 0.38); c.closePath(); c.fill(); }
+        c.fillStyle = '#fff'; c.beginPath(); c.arc(X - 4, Y - 4, 3.2, 0, 7); c.arc(X + 4, Y - 4, 3.2, 0, 7); c.fill(); c.fillStyle = '#123'; c.beginPath(); c.arc(X - 4 + q.d[0] * 1.5, Y - 4 + q.d[1] * 1.5, 1.6, 0, 7); c.arc(X + 4 + q.d[0] * 1.5, Y - 4 + q.d[1] * 1.5, 1.6, 0, 7); c.fill(); });
+      hud(c, 'Score ' + g.score, '🟡'.repeat(Math.max(0, g.lives)));
+    };
+    return g;
+  } });
+})();
+
+/* ---------- Arcade games, part 2 ---------- */
+(function () {
+const { W, H, R, clamp, LV, emo, txt, hud, sfx, register } = Arc;
+
+// ============ Mine Sweeper ============
+register({ id: 'mines', name: 'Minesweeper', icon: '💣', tag: 'Clear the field without touching a mine.', goal: 'uncover every safe square without hitting a mine.', how: 'Tap a square to dig. Numbers show how many mines touch it. Tap the flag button (or press F, or long-press a square) to flag a mine instead. A faster win scores more.', par: 520,
+  make(lv) {
+    const N = 9, M = LV(lv, 7, 11, 16), CS = 36, OX = 18, OY = 70, g = { score: 0, over: false, t: 0, flagMode: false, first: true, msg: 'Boom!' };
+    const cells = Array.from({ length: N * N }, () => ({ m: 0, o: 0, f: 0, n: 0 }));
+    const nb = i => { const r = [], x = i % N, y = Math.floor(i / N); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { if ((dx || dy) && x + dx >= 0 && x + dx < N && y + dy >= 0 && y + dy < N) r.push((y + dy) * N + x + dx); } return r; };
+    const place = safe => { let k = 0; while (k < M) { const i = Math.floor(R(0, N * N)); if (!cells[i].m && i !== safe && !nb(safe).includes(i)) { cells[i].m = 1; k++; } } cells.forEach((c, i) => { c.n = nb(i).filter(j => cells[j].m).length; }); };
+    const open = i => { const st = [i]; while (st.length) { const j = st.pop(), c = cells[j]; if (c.o || c.f) continue; c.o = 1; if (!c.n && !c.m) nb(j).forEach(k => st.push(k)); } };
+    const safeLeft = () => cells.filter(c => !c.m && !c.o).length;
+    const dig = i => { const c = cells[i]; if (c.o || c.f) return; if (g.first) { g.first = false; place(i); }
+      if (c.m) { cells.forEach(k => { if (k.m) k.o = 1; }); g.over = true; g.score = cells.filter(k => k.o && !k.m).length * 4; sfx('bad'); return; }
+      open(i); sfx('tap'); if (!safeLeft()) { g.over = true; g.win = true; g.msg = 'Cleared!'; g.score = Math.round(600 + Math.max(0, 240 - g.t * 2.2) + M * 8); } };
+    g.update = dt => { if (!g.first) g.t += dt; };
+    let hold = null;
+    g.key = (k, d) => { if (d && (k === 'f' || k === 'F')) g.flagMode = !g.flagMode; };
+    const at = (x, y) => { const cx = Math.floor((x - OX) / CS), cy = Math.floor((y - OY) / CS); return cx >= 0 && cx < N && cy >= 0 && cy < N ? cy * N + cx : -1; };
+    g.ptr = (t, x, y) => {
+      if (t === 'down') { if (y > OY + N * CS + 20 && y < OY + N * CS + 70) { g.flagMode = !g.flagMode; return; } const i = at(x, y); hold = i >= 0 ? { i, t: performance.now() } : null; }
+      if (t === 'up' && hold) { const i = at(x, y); const long = performance.now() - hold.t > 380; if (i === hold.i) { if (g.flagMode || long) { if (!cells[i].o) { cells[i].f ^= 1; sfx('pop'); } } else dig(i); } hold = null; }
+    };
+    g.draw = c => {
+      c.fillStyle = '#2d3b4a'; c.fillRect(0, 0, W, H);
+      cells.forEach((k, i) => { const X = OX + (i % N) * CS, Y = OY + Math.floor(i / N) * CS;
+        c.fillStyle = k.o ? (k.m ? '#c33' : '#cfd6dc') : '#7b8d9d'; c.fillRect(X + 1, Y + 1, CS - 2, CS - 2);
+        if (!k.o) { c.fillStyle = '#9db0c0'; c.fillRect(X + 1, Y + 1, CS - 2, 4); }
+        if (k.o && k.m) emo(c, '💣', X + CS / 2, Y + CS / 2, 24); else if (k.o && k.n) txt(c, k.n, X + CS / 2, Y + CS / 2 + 1, 20, ['', '#1b5fd8', '#1a8a3a', '#d6372a', '#2a2a9a', '#8a2a2a', '#0a8a8a', '#222', '#555'][k.n], 'center'); else if (k.f) emo(c, '🚩', X + CS / 2, Y + CS / 2, 22); });
+      const fl = cells.filter(k => k.f).length;
+      hud(c, '💣 ' + (M - fl), 'Time ' + Math.floor(g.t));
+      c.fillStyle = g.flagMode ? '#e0a020' : '#4a5d70'; c.fillRect(OX, OY + N * CS + 24, N * CS, 40); txt(c, g.flagMode ? '🚩 Flag mode ON (tap to switch)' : '⛏️ Dig mode (tap for flags)', W / 2, OY + N * CS + 44, 16, '#fff', 'center');
+    };
+    return g;
+  } });
+
+// ============ Sea Battle (Battleship) ============
+register({ id: 'seabattle', name: 'Sea Battle', icon: '🚢', tag: 'Sink the enemy fleet before they sink yours.', goal: 'sink every enemy ship before the computer sinks yours.', how: 'Tap a square on the top sea (the enemy fleet) to fire. A hit lets you see part of a ship. The computer then fires at your fleet on the bottom sea. First to sink all ships wins.', par: 430,
+  make(lv) {
+    const N = 8, CS = 30, SHIPS = [4, 3, 3, 2, 2], g = { score: 0, over: false, turn: 0, wait: 0, shots: 0, fx: [], t: 0, msg: 'Fleet sunk' };
+    const mkBoard = () => { const b = { s: Array(N * N).fill(-1), shot: Array(N * N).fill(0), ships: [] }; SHIPS.forEach((len, si) => { for (let tries = 0; tries < 200; tries++) { const h = Math.random() < 0.5, x = Math.floor(R(0, N - (h ? len : 0))), y = Math.floor(R(0, N - (h ? 0 : len))), cs = []; for (let k = 0; k < len; k++) cs.push((y + (h ? 0 : k)) * N + x + (h ? k : 0)); if (cs.every(i => b.s[i] < 0)) { cs.forEach(i => { b.s[i] = si; }); b.ships.push(cs); break; } } }); return b; };
+    const E = mkBoard(), Y = mkBoard(); const OXE = 45, OYE = 40, OYY = 300;
+    const sunk = (b, si) => b.ships[si].every(i => b.shot[i]); const allSunk = b => b.ships.every((_, si) => sunk(b, si));
+    const aiQueue = []; const aiPick = () => { const free = i => !Y.shot[i]; let cand = []; for (let i = 0; i < N * N; i++) if (Y.shot[i] === 2 && !sunk(Y, Y.s[i])) { const x = i % N, y = Math.floor(i / N); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([dx, dy]) => { const nx = x + dx, ny = y + dy; if (nx >= 0 && nx < N && ny >= 0 && ny < N && free(ny * N + nx)) cand.push(ny * N + nx); }); }
+      if (cand.length && Math.random() < LV(lv, 0.35, 0.8, 1)) return cand[Math.floor(Math.random() * cand.length)];
+      const all = []; for (let i = 0; i < N * N; i++) if (free(i) && (lv < 2 || ((i % N) + Math.floor(i / N)) % 2 === 0)) all.push(i); const pool = all.length ? all : [...Array(N * N).keys()].filter(free); return pool[Math.floor(Math.random() * pool.length)]; };
+    const fire = (b, i, who) => { b.shot[i] = b.s[i] >= 0 ? 2 : 1; const x = i % N, y = Math.floor(i / N); g.fx.push({ x: (who ? OXE : OXE) + x * CS + CS / 2, y: (who ? OYY : OYE) + y * CS + CS / 2, t: 0.7, e: b.s[i] >= 0 ? '💥' : '💦' }); if (b.s[i] >= 0) { sfx('thud'); if (sunk(b, b.s[i])) { g.fx.push({ x: 180, y: 240, t: 1.2, e: '🔥', big: 1, m: who ? 'They sank your ship!' : 'Ship sunk!' }); sfx('good'); } } else sfx('pop'); };
+    g.update = dt => {
+      g.t += dt; g.fx = g.fx.filter(f => (f.t -= dt) > 0);
+      if (g.turn === 1) { g.wait -= dt; if (g.wait <= 0) { fire(Y, aiPick(), 1); if (allSunk(Y)) { g.over = true; g.score = Math.round(E.shot.filter(v => v === 2).length * 12); g.msg = 'Your fleet sank'; } else g.turn = 0; } }
+    };
+    g.ptr = (t, x, y) => { if (t !== 'down' || g.turn !== 0 || g.over) return; const cx = Math.floor((x - OXE) / CS), cy = Math.floor((y - OYE) / CS); if (cx < 0 || cx >= N || cy < 0 || cy >= N) return; const i = cy * N + cx; if (E.shot[i]) return; g.shots++; fire(E, i, 0);
+      if (allSunk(E)) { g.over = true; g.win = true; g.msg = 'Victory!'; g.score = Math.round(300 + Y.ships.flat().filter(j => !Y.shot[j]).length * 25 + Math.max(0, 120 - g.shots * 2)); } else { g.turn = 1; g.wait = 0.9; } };
+    const grid = (c, b, ox, oy, show) => { for (let i = 0; i < N * N; i++) { const X = ox + (i % N) * CS, Yy = oy + Math.floor(i / N) * CS; c.fillStyle = '#2a7fc0'; c.fillRect(X, Yy, CS - 1, CS - 1);
+      const si = b.s[i]; if ((show || b.shot[i] === 2) && si >= 0) { c.fillStyle = sunk(b, si) ? '#8a2a2a' : '#8d99a5'; c.fillRect(X + 2, Yy + 2, CS - 5, CS - 5); }
+      if (b.shot[i] === 1) { c.fillStyle = '#fff'; c.beginPath(); c.arc(X + CS / 2, Yy + CS / 2, 4, 0, 7); c.fill(); } if (b.shot[i] === 2) emo(c, '💥', X + CS / 2, Yy + CS / 2, 20); } };
+    g.draw = c => {
+      const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0e3f6e'); bg.addColorStop(1, '#0a2a4a'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+      txt(c, '🎯 Enemy sea (tap to fire)', W / 2, 32, 14, '#cfe9ff', 'center'); grid(c, E, OXE, OYE, false);
+      txt(c, '🚢 Your fleet', W / 2, OYY - 12, 14, '#cfe9ff', 'center'); grid(c, Y, OXE, OYY, true);
+      g.fx.forEach(f => emo(c, f.e, f.x, f.y - (0.7 - Math.min(0.7, f.t)) * 10, f.big ? 60 : 30));
+      const f = g.fx.find(v => v.m); if (f) txt(c, f.m, W / 2, 285, 18, '#ffe27a', 'center');
+      c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(0, H - 26, W, 26); txt(c, g.turn === 0 ? 'Your shot' : 'Enemy is aiming…', 8, H - 13, 14, '#ffe27a'); txt(c, 'Shots ' + g.shots, W - 8, H - 13, 14, '#fff', 'right');
+    };
+    return g;
+  } });
+
+// ============ Brick Breaker ============
+register({ id: 'breakout', name: 'Brick Breaker', icon: '🧱', tag: 'Bounce the ball and smash every brick.', goal: 'break all the bricks with the bouncing ball.', how: 'Move the paddle with the left and right arrow keys, or drag. Do not let the ball fall. You have three lives.', par: 280,
+  make(lv) {
+    const g = { score: 0, over: false, px: W / 2, lives: 3, bricks: [], ball: null, k: { l: 0, r: 0 }, launched: false, msg: 'Out of lives' }, PW = LV(lv, 90, 72, 58), sp0 = LV(lv, 250, 300, 360);
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 8; c++) g.bricks.push({ x: 8 + c * 43, y: 50 + r * 20, w: 40, h: 16, col: ['#e84a4a', '#f29443', '#f0cf3a', '#4caf50', '#3a8fe0', '#9a5ad8'][r], pts: 10 + (5 - r) * 2 });
+    const serve = () => { g.ball = { x: g.px, y: H - 52, vx: 0, vy: 0 }; g.launched = false; }; serve();
+    const launch = () => { if (!g.launched) { g.launched = true; g.ball.vx = R(-90, 90); g.ball.vy = -sp0; } };
+    g.update = dt => {
+      g.px = clamp(g.px + (g.k.r - g.k.l) * 330 * dt, PW / 2, W - PW / 2); const b = g.ball;
+      if (!g.launched) { b.x = g.px; return; }
+      const sp = Math.hypot(b.vx, b.vy); const steps = Math.ceil(sp * dt / 6);
+      for (let s = 0; s < steps; s++) { b.x += b.vx * dt / steps; b.y += b.vy * dt / steps;
+        if (b.x < 8) { b.x = 8; b.vx = Math.abs(b.vx); } if (b.x > W - 8) { b.x = W - 8; b.vx = -Math.abs(b.vx); } if (b.y < 34) { b.y = 34; b.vy = Math.abs(b.vy); }
+        if (b.vy > 0 && b.y > H - 46 && b.y < H - 34 && Math.abs(b.x - g.px) < PW / 2 + 6) { const o = (b.x - g.px) / (PW / 2); const v = Math.min(520, Math.hypot(b.vx, b.vy) * 1.015); b.vx = o * v * 0.8; b.vy = -Math.sqrt(Math.max(v * v - b.vx * b.vx, 100)); b.y = H - 47; sfx('clack'); }
+        for (const br of g.bricks) { if (!br.dead && b.x > br.x - 6 && b.x < br.x + br.w + 6 && b.y > br.y - 6 && b.y < br.y + br.h + 6) { br.dead = true; g.score += br.pts; sfx('pop'); const ox = Math.min(b.x - br.x + 6, br.x + br.w + 6 - b.x), oy = Math.min(b.y - br.y + 6, br.y + br.h + 6 - b.y); if (ox < oy) b.vx = -b.vx; else b.vy = -b.vy; break; } }
+      }
+      g.bricks = g.bricks.filter(x => !x.dead);
+      if (!g.bricks.length) { g.score += 100; g.over = true; g.win = true; g.msg = 'Cleared!'; }
+      if (b.y > H + 10) { g.lives--; sfx('bad'); if (g.lives <= 0) g.over = true; else serve(); }
+    };
+    g.key = (k, d) => { if (k === 'ArrowLeft' || k === 'a') g.k.l = d ? 1 : 0; if (k === 'ArrowRight' || k === 'd') g.k.r = d ? 1 : 0; if (d && (k === ' ' || k === 'ArrowUp')) launch(); };
+    g.ptr = (t, x) => { if (t !== 'up') g.px = clamp(x, PW / 2, W - PW / 2); if (t === 'down') launch(); };
+    g.draw = c => {
+      c.fillStyle = '#10142a'; c.fillRect(0, 0, W, H); g.bricks.forEach(b => { c.fillStyle = b.col; c.fillRect(b.x, b.y, b.w, b.h); c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(b.x, b.y, b.w, 4); });
+      c.fillStyle = '#e8eefc'; c.beginPath(); c.roundRect ? c.roundRect(g.px - PW / 2, H - 40, PW, 12, 6) : c.rect(g.px - PW / 2, H - 40, PW, 12); c.fill();
+      c.fillStyle = '#ffe27a'; c.beginPath(); c.arc(g.ball.x, g.ball.y, 6, 0, 7); c.fill();
+      if (!g.launched) txt(c, 'Tap or press Space to launch', W / 2, H - 90, 15, '#cfe', 'center');
+      hud(c, 'Score ' + g.score, '❤️'.repeat(Math.max(0, g.lives)));
+    };
+    return g;
+  } });
+
+// ============ Snake ============
+register({ id: 'snake', name: 'Snake', icon: '🐍', tag: 'Eat apples and grow, but never bite yourself.', goal: 'eat as many apples as you can without hitting a wall or yourself.', how: 'Steer with the arrow keys, or swipe on the screen. Each apple makes you longer and faster.', par: 140,
+  make(lv) {
+    const C = 18, Rr = 22, S = 20, OY = 36, g = { score: 0, over: false, sn: [[9, 11], [8, 11], [7, 11]], d: [1, 0], nd: [1, 0], apple: null, acc: 0, t: 0, msg: 'Ouch!' };
+    const putApple = () => { for (;;) { const a = [Math.floor(R(0, C)), Math.floor(R(0, Rr))]; if (!g.sn.some(s => s[0] === a[0] && s[1] === a[1])) { g.apple = a; return; } } }; putApple();
+    const spd = () => LV(lv, 6, 8, 11) + g.sn.length * 0.12;
+    g.update = dt => { g.t += dt; g.acc += dt * spd(); while (g.acc >= 1 && !g.over) { g.acc -= 1; g.d = g.nd; const h = [g.sn[0][0] + g.d[0], g.sn[0][1] + g.d[1]];
+      if (h[0] < 0 || h[0] >= C || h[1] < 0 || h[1] >= Rr || g.sn.slice(0, -1).some(s => s[0] === h[0] && s[1] === h[1])) { g.over = true; sfx('bad'); return; }
+      g.sn.unshift(h); if (h[0] === g.apple[0] && h[1] === g.apple[1]) { g.score += 10; sfx('coin'); putApple(); } else g.sn.pop(); } };
+    const turn = d => { if (d[0] !== -g.d[0] || d[1] !== -g.d[1]) g.nd = d; };
+    g.key = (k, d) => { if (!d) return; const m = { ArrowRight: [1, 0], d: [1, 0], ArrowLeft: [-1, 0], a: [-1, 0], ArrowDown: [0, 1], s: [0, 1], ArrowUp: [0, -1], w: [0, -1] }[k]; if (m) turn(m); };
+    let sx = 0, sy = 0; g.ptr = (t, x, y) => { if (t === 'down') { sx = x; sy = y; } else { const dx = x - sx, dy = y - sy; if (Math.hypot(dx, dy) > 16) { turn(Math.abs(dx) > Math.abs(dy) ? [Math.sign(dx), 0] : [0, Math.sign(dy)]); sx = x; sy = y; } } };
+    g.draw = c => {
+      c.fillStyle = '#16301c'; c.fillRect(0, 0, W, H); for (let y = 0; y < Rr; y++) for (let x = 0; x < C; x++) { c.fillStyle = (x + y) % 2 ? '#1b3a22' : '#1f4428'; c.fillRect(x * S, OY + y * S, S, S); }
+      emo(c, '🍎', g.apple[0] * S + S / 2, OY + g.apple[1] * S + S / 2, 18);
+      g.sn.forEach((s, i) => { c.fillStyle = i ? `hsl(${120 - i * 2},65%,${48 - (i % 2) * 5}%)` : '#7be06a'; c.beginPath(); c.arc(s[0] * S + S / 2, OY + s[1] * S + S / 2, S / 2 - (i ? 1 : 0), 0, 7); c.fill(); });
+      const h = g.sn[0]; c.fillStyle = '#111'; c.beginPath(); c.arc(h[0] * S + S / 2 + g.d[0] * 3 - g.d[1] * 4, OY + h[1] * S + S / 2 + g.d[1] * 3 + g.d[0] * -4, 2, 0, 7); c.arc(h[0] * S + S / 2 + g.d[0] * 3 + g.d[1] * 4, OY + h[1] * S + S / 2 + g.d[1] * 3 - g.d[0] * -4, 2, 0, 7); c.fill();
+      hud(c, 'Score ' + g.score, 'Length ' + g.sn.length);
+    };
+    return g;
+  } });
+
+// ============ Flappy Bird ============
+register({ id: 'flappy', name: 'Flappy Chick', icon: '🐤', tag: 'Flap through the gaps between the pipes.', goal: 'fly through as many pipes as you can.', how: 'Tap, click or press Space to flap. Fly through the gaps. Touch a pipe, the ground or the sky and it is over.', par: 80,
+  make(lv) {
+    const g = { score: 0, over: false, y: 220, vy: 0, pipes: [], t: 0, sp: 0, started: false, msg: 'Splat!' }, gap = LV(lv, 170, 140, 118), vx = LV(lv, 120, 150, 185);
+    const flap = () => { if (!g.started) g.started = true; g.vy = -300; sfx('tap'); };
+    g.update = dt => {
+      g.t += dt; if (!g.started) { g.y = 220 + Math.sin(g.t * 5) * 8; return; }
+      g.vy += 900 * dt; g.y += g.vy * dt; g.sp -= dt; if (g.sp <= 0) { g.sp = 1.55 * 150 / vx * 1.05; g.pipes.push({ x: W + 30, gy: R(100, H - 140 - gap + 40), done: 0 }); }
+      g.pipes.forEach(p => { p.x -= vx * dt; if (!p.done && p.x < 70) { p.done = 1; g.score += 10; sfx('good'); } if (Math.abs(p.x - 90) < 38 && (g.y - 12 < p.gy || g.y + 12 > p.gy + gap)) { g.over = true; sfx('bad'); } });
+      g.pipes = g.pipes.filter(p => p.x > -50); if (g.y > H - 50 || g.y < 10) { g.over = true; sfx('bad'); }
+    };
+    g.key = (k, d) => { if (d && (k === ' ' || k === 'ArrowUp' || k === 'w')) flap(); }; g.ptr = (t) => { if (t === 'down') flap(); };
+    g.draw = c => {
+      const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#6ec6f2'); bg.addColorStop(1, '#c8ecff'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+      emo(c, '☁️', 60 + ((-g.t * 12) % 420 + 420) % 420 - 40, 90, 50); emo(c, '☁️', 260 + ((-g.t * 8) % 420 + 420) % 420 - 200, 170, 40);
+      g.pipes.forEach(p => { c.fillStyle = '#3fa64a'; c.fillRect(p.x - 28, 0, 56, p.gy); c.fillRect(p.x - 28, p.gy + gap, 56, H); c.fillStyle = '#2d8a38'; c.fillRect(p.x - 34, p.gy - 16, 68, 16); c.fillRect(p.x - 34, p.gy + gap, 68, 16); });
+      c.fillStyle = '#d9b36a'; c.fillRect(0, H - 40, W, 40); c.fillStyle = '#6aa84f'; c.fillRect(0, H - 40, W, 8);
+      emo(c, '🐤', 90, g.y, 34, clamp(g.vy / 700, -0.5, 1));
+      if (!g.started) txt(c, 'Tap to flap', W / 2, 320, 22, '#234', 'center');
+      hud(c, 'Score ' + g.score, '');
+    };
+    return g;
+  } });
+
+// ============ Fruit Catch ============
+register({ id: 'fruit', name: 'Fruit Catch', icon: '🍉', tag: 'Catch the falling fruit. Dodge the bombs.', goal: 'catch as much fruit as you can in 40 seconds.', how: 'Move the basket with the left and right arrow keys, or drag. Golden fruit is worth more. A bomb costs a life.', par: 230,
+  make(lv) {
+    const g = { score: 0, over: false, x: W / 2, t: 40, items: [], sp: 0.4, lives: 3, k: { l: 0, r: 0 }, msg: 'Time!' }, FR = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉'];
+    g.update = dt => {
+      g.t -= dt; if (g.t <= 0) { g.over = true; return; } g.x = clamp(g.x + (g.k.r - g.k.l) * 360 * dt, 34, W - 34);
+      g.sp -= dt; if (g.sp <= 0) { g.sp = R(0.3, 0.7) * LV(lv, 1.3, 1, 0.75); const r = Math.random(); g.items.push({ x: R(24, W - 24), y: 30, v: R(120, 190) * LV(lv, 0.8, 1, 1.25) * (1 + (40 - g.t) * 0.01), e: r < 0.16 ? '💣' : r < 0.24 ? '⭐' : FR[Math.floor(R(0, FR.length))] }); }
+      g.items.forEach(o => { o.y += o.v * dt; if (!o.dead && o.y > H - 70 && o.y < H - 30 && Math.abs(o.x - g.x) < 42) { o.dead = true; if (o.e === '💣') { g.lives--; sfx('bad'); if (g.lives <= 0) g.over = true; } else { g.score += o.e === '⭐' ? 30 : 10; sfx('coin'); } } });
+      g.items = g.items.filter(o => !o.dead && o.y < H + 30);
+    };
+    g.key = (k, d) => { if (k === 'ArrowLeft' || k === 'a') g.k.l = d ? 1 : 0; if (k === 'ArrowRight' || k === 'd') g.k.r = d ? 1 : 0; };
+    g.ptr = (t, x) => { if (t !== 'up') g.x = clamp(x, 34, W - 34); };
+    g.draw = c => {
+      const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#ffe9a8'); bg.addColorStop(1, '#f7b267'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+      g.items.forEach(o => emo(c, o.e, o.x, o.y, 36)); emo(c, '🧺', g.x, H - 52, 62);
+      hud(c, 'Score ' + g.score, '❤️'.repeat(Math.max(0, g.lives)) + '  ⏱ ' + Math.ceil(g.t));
+    };
+    return g;
+  } });
 })();
 
 /* ---------- Casino: Slots, Craps, Video Poker. Free chips only, no cash value ---------- */
@@ -8298,7 +9148,7 @@ function makeGame(o) {
   const G = { id: o.id, name: o.name, game: o.game, hostId: o.hostId, mode: '', max: o.max || D.max, minP: o.min || D.min, status: o.status, players: [],
     round: 0, done: false, summary: [], log: [], seq: Date.now(), prompt: null, waitHuman: false, pendingHuman: null,
     dl: 0, nextAt: 0, fast: false, closed: false, joinSet: new Set(), startResolve: null, nextResolve: null,
-    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [] };
+    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [], level: o.level == null ? 1 : o.level };
   G.nicks[o.hostId] = myNick;
   G.players.push(mkPlayer({ uid: o.hostId, human: true }));
   for (let i = 0; i < (o.bots || 0); i++) { const b = mkBot(G); if (b) G.players.push(b); }
@@ -8310,7 +9160,7 @@ function makeGame(o) {
 function buildView(G) {
   const hold = G.done || G.status === 'waiting' || G.round === 0;
   return {
-    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [],
+    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [], lv: G.level,
     seats: G.players.map(p => ({ u: p.human ? p.uid : null, nm: p.human ? (G.nicks[p.uid] || '') : '', w: p.wins || 0, n: p.human ? '' : p.name, st: p.human ? '' : p.style, stack: p.stack })),
     g: G.players.length ? gameOf(G).view(G) : {},
     prompt: G.prompt, dl: G.dl, wait: G.waitHuman, done: G.done, summary: G.summary,
@@ -8480,7 +9330,7 @@ function goHome() {
 function startSolo(gid, count) {
   const D = Club.games[gid];
   const n = Math.max(D.min, Math.min(D.max, count || D.soloBots + 1));
-  const G = makeGame({ id: 'solo', name: D.name, game: gid, hostId: myUid, bots: n - 1, status: 'playing' });
+  const G = makeGame({ id: 'solo', name: D.name, game: gid, hostId: myUid, bots: n - 1, status: 'playing', level: gpLevel });
   G.mode = 'solo'; G.joinOk();
   const sv = (store.load()[gid]) || {};
   if (sv.stack > 0) G.players[0].stack = sv.stack;
@@ -8493,7 +9343,7 @@ async function createTable(gid, opt) {
   const name = (opt.name || $('tName').value.trim() || 'Card night').slice(0, 28);
   const id = 't' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
   const mx = opt.max || +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, opt.min || +$('hMin').value || Club.games[gid].min);
-  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [] });
+  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [], level: gpLevel });
   G.mode = 'host';
   const ref = DB.doc('tables/' + id);
   $('createBtn').disabled = true;
@@ -8508,7 +9358,7 @@ async function resumeTable(id) {
   let V;
   try { const s = await DB.doc('tables/' + id).get(); if (!s.exists) return; V = s.data(); } catch { return; }
   if (!Club.games[V.game]) return;
-  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [] });
+  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [], level: V.lv });
   G.mode = 'host';
   G.players = V.seats.map((s, i) => {
     const p = s.u ? mkPlayer({ uid: s.u, human: true }) : (mkBot(G, s.n) || mkPlayer({ name: s.n, style: s.st }));
@@ -8589,11 +9439,12 @@ function selectGame(gid) {
   try { if (location.hash.slice(1) !== (selGame || '')) location.hash = selGame || ''; } catch {}
   renderHome();
 }
-const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games']];
+const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games'], ['arcade', 'Arcade']];
 let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(id, c))) || [null])[0];
 function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
 const inCat = inCatEarly;
-let gpMode = 'solo', frN = 0, soloC = -1;
+let gpMode = 'solo', frN = 0, soloC = -1, gpLevel = 1;
+const LEVELS = ['Easy', 'Medium', 'Hard'];
 const lc = t => cleanNick(t).toLowerCase();
 const getFriends = () => { const f = store.load().friends; return Array.isArray(f) ? f.map(cleanNick).filter(x => x.length >= 2).slice(0, 40) : []; };
 const setFriends = f => { const s = store.load(); s.friends = f; store.save(s); };
@@ -8630,6 +9481,7 @@ function renderHome() {
       const opts = (a, b, sl) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sl ? ' selected' : ''}>${k}</option>`).join('');
       $('hMin').innerHTML = opts(D.min, D.max, D.min); hm.innerHTML = opts(D.min, D.max, D.max);
     }
+    $('lvlRow').hidden = !D.levels; $('lvlChips').innerHTML = chipsHTML([0, 1, 2], gpLevel, v => LEVELS[v]);
     $('gpCover').outerHTML = coverHTML(selGame).replace('class="cover"', 'class="cover big" id="gpCover" aria-hidden="true"');
     $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
     document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
@@ -8675,7 +9527,7 @@ function renderRoom() {
   if (!c || $('room').hidden) return;
   const V = c.V, D = Club.games[c.game];
   $('roomName').textContent = c.mode === 'solo' ? D.name : V ? V.name : 'Table';
-  $('roomSub').textContent = c.mode === 'solo' ? (c.demo ? 'demo' : 'vs computer') : V ? D.name + ' · Host: ' + (V.hostId === c.uid ? 'you' : hostName(V)) : D.name;
+  $('roomSub').textContent = c.mode === 'solo' ? (c.demo ? 'demo' : 'vs computer' + (D.levels ? ' · ' + LEVELS[c.G && c.G.level != null ? c.G.level : 1] : '')) : V ? D.name + ' · Host: ' + (V.hostId === c.uid ? 'you' : hostName(V)) : D.name;
   const warn = [];
   if (c.gone) warn.push('This table has closed.');
   else if (c.err) warn.push('Lost the connection to the table. Trying again.');
@@ -8792,6 +9644,7 @@ $('startBtn').onclick = () => {
 $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value); };
 $('backBtn').onclick = () => selectGame(null);
 $('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
+$('lvlChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { gpLevel = +b.dataset.v; renderHome(); } };
 $('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
 $('frList').onclick = e => {
   const x = e.target.closest('[data-frx]'); if (x) { setFriends(getFriends().filter(f => f !== x.dataset.frx)); renderHome(); return; }

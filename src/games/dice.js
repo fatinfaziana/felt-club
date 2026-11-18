@@ -38,7 +38,7 @@ let S1 = null;
 const pigUI = {
   mount(stage, ctl) {
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="pgSeats"></div><div class="pg-die" id="pgDie"></div><div class="pz-label" id="pgMsg"></div><div class="banner" id="pgBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="pgAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="roll">Roll the die</button><button type="button" class="b" data-t="hold" id="pgHold">Hold and bank</button></div><p class="hint bt-hint">Keep rolling to build your turn total. Roll a 1 and you lose it. Hold to bank it.</p></div>`;
+    ctl.innerHTML = `<div class="act" id="pgAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="roll">Roll the dice</button><button type="button" class="b" data-t="hold" id="pgHold">Hold and bank</button></div><p class="hint bt-hint">Keep rolling to build your turn total. Roll a 1 and you lose it. Hold to bank it.</p></div>`;
     $('pgAct').onclick = e => { const b = e.target.closest('[data-t]'); if (b && S1.turn) S1.send({ t: b.dataset.t }); };
   },
   update(S) {
@@ -55,7 +55,7 @@ Club.register({
   id: 'pig', cat: 'dice', name: 'Pig', tag: 'Roll to build a score, but a 1 loses it all. First to 50.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
   art: () => [3, 6, 1].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the first player to reach ${GOAL} points.</p>
-    <ol><li>On your turn, press <b>Roll the die</b>. The number you roll is added to your <b>turn total</b>.</li>
+    <ol><li>On your turn, press <b>Roll the dice</b>. The number you roll is added to your <b>turn total</b>.</li>
     <li>Roll again to add more, or press <b>Hold and bank</b> to add your turn total to your score and pass the turn.</li>
     <li>But if you roll a <b>1</b>, you lose your whole turn total and the turn passes.</li>
     <li>The more you roll, the more you can lose. Decide when to stop.</li>
@@ -145,73 +145,4 @@ Club.register({
   round: boxRound, view: boxView, ui: boxUI, _test: { subsets },
 });
 
-/* ================= Bankroll ================= */
-const ROUNDS = 5;
-async function bankRound(G, io) {
-  const P = G.players, n = P.length;
-  const Z = G.bk = { score: P.map(() => 0), banked: P.map(() => false), pot: 0, rollN: 0, dice: [], roundN: 0, turn: -1, note: '', over: false, winners: [] };
-  io.render(); await io.sleep(500);
-  for (let r = 1; r <= ROUNDS; r++) {
-    Z.roundN = r; Z.pot = 0; Z.rollN = 0; Z.banked = P.map(() => false); Z.dice = []; Z.note = `Round ${r} of ${ROUNDS}`; Z.turn = -1;
-    io.render(); await io.sleep(900);
-    while (Z.banked.some(b => !b) && Z.rollN < 25) {
-      Z.rollN++; const d1 = rollD(), d2 = rollD(), s = d1 + d2; Z.dice = [d1, d2];
-      let bust = false;
-      if (Z.rollN <= 3) Z.pot += s === 7 ? 70 : s;
-      else if (s === 7) bust = true; else if (d1 === d2) Z.pot *= 2; else Z.pot += s;
-      Z.note = bust ? 'A 7! The pot is lost.' : Z.rollN <= 3 ? '' : d1 === d2 ? 'Doubles! The pot doubles.' : '';
-      if (bust) { Z.pot = 0; io.line(`Round ${r}: a 7 busted the pot.`); io.render(); await io.sleep(1500); break; }
-      io.render(); await io.sleep(800);
-      for (let i = 0; i < n; i++) {
-        if (Z.banked[i]) continue;
-        Z.turn = i; io.render();
-        const a = await io.turn(P[i], { pot: Z.pot }, { auto: { t: Z.pot >= 40 ? 'bank' : 'stay' },
-          validate: x => (x && (x.t === 'bank' || x.t === 'stay') ? { t: x.t } : null),
-          bot: () => ({ t: Z.pot >= 45 + (P[i].agg || 0.5) * 60 || (Z.rollN >= 6 && Z.pot >= 40) ? 'bank' : 'stay' }), think: 600 + Math.random() * 500 });
-        if (a.t === 'bank') { Z.banked[i] = true; Z.score[i] += Z.pot; io.ev(P[i], `banks ${Z.pot}`, `bank ${Z.pot}`); }
-      }
-      Z.turn = -1;
-    }
-    io.render();
-  }
-  const top = Math.max(...Z.score); Z.winners = Z.score.map((s, i) => (s === top ? i : -1)).filter(i => i >= 0); Z.over = true; Z.turn = -1;
-  done(G, Z.winners);
-  io.line(`Banked totals: ${P.map((p, i) => `${p.human ? 'player ' + (i + 1) : p.name} ${Z.score[i]}`).join(', ')}.`, true); io.render();
-}
-function bankView(G) {
-  const Z = G.bk;
-  if (!Z || Z.score.length !== G.players.length) return { score: G.players.map(() => 0), banked: G.players.map(() => false), pot: 0, rollN: 0, dice: [], roundN: 0, turn: -1, note: '', over: false, winners: [], delta: [] };
-  return { score: Z.score, banked: Z.banked, pot: Z.pot, rollN: Z.rollN, dice: Z.dice, roundN: Z.roundN, turn: Z.turn, note: Z.note, over: Z.over, winners: Z.winners, delta: G.players.map(p => (Z.over ? p.delta || 0 : 0)) };
-}
-let S3 = null;
-const bankUI = {
-  mount(stage, ctl) {
-    stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="bkSeats"></div><div class="pz-label" id="bkRound"></div><div class="bd-dice" id="bkDice"></div><div class="bk-pot" id="bkPot"></div><div class="pz-label" id="bkNote"></div><div class="banner" id="bkBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="bkAct" hidden><div class="betrow"><button type="button" class="b gold" data-t="bank" id="bkBank">Bank it</button><button type="button" class="b" data-t="stay">Stay in</button></div><p class="hint bt-hint">Bank the pot to keep it for this round, or stay in for more. A 7 after the third roll wipes the pot for everyone still in.</p></div>`;
-    $('bkAct').onclick = e => { const b = e.target.closest('[data-t]'); if (b && S3.turn) S3.send({ t: b.dataset.t }); };
-  },
-  update(S) {
-    S3 = S; const V = S.V, g = V.g;
-    $('bkSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Deciding…', extra: i => `${g.score[i]} banked${g.banked[i] && !g.over ? ' · in the bank' : ''}` });
-    $('bkRound').textContent = g.roundN ? `Round ${g.roundN} of ${ROUNDS} · roll ${g.rollN}` : '';
-    $('bkDice').innerHTML = g.dice.map(d => dieHTML(d)).join('');
-    $('bkPot').textContent = g.over ? '' : `Pot: ${g.pot}`;
-    $('bkNote').textContent = g.note;
-    $('bkBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : '';
-    $('bkAct').hidden = !S.turn; if (S.turn) $('bkBank').textContent = `Bank ${S.turn.data.pot}`;
-    return '';
-  },
-};
-Club.register({
-  id: 'bankroll', cat: 'dice', name: 'Bank', tag: 'Build a shared pot and bank it before a 7 wipes it out.', min: 2, max: 8, soloBots: 3, roundWord: 'Game',
-  art: () => [3, 4, 6].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
-  rules: `<p><b>Goal:</b> have the biggest banked total after ${ROUNDS} rounds. Two to eight players.</p>
-    <ol><li>In each round, two dice are rolled over and over and the total is added to a shared <b>pot</b>.</li>
-    <li>After every roll, each player still in decides: <b>Bank it</b> (add the current pot to your own score and sit out the rest of the round) or <b>Stay in</b>.</li>
-    <li>The first three rolls are safe, and a 7 is worth 70 points. After that, a roll of <b>7 wipes out the pot</b> and ends the round for anyone who has not banked.</li>
-    <li>After the first three rolls, <b>doubles</b> (the same number on both dice) <b>double the pot</b>.</li>
-    <li>The round also ends when everyone has banked. After ${ROUNDS} rounds, the highest score wins the pot. Ties share it.</li>
-    <li>Each player puts in ${ANTE} free chips. Only free play chips are used. They have no cash value.</li></ol>`,
-  round: bankRound, view: bankView, ui: bankUI, _test: {},
-});
 })();

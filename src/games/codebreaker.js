@@ -19,7 +19,7 @@ async function round(G, io) {
     const i = C.turn, p = P[i]; io.render();
     const a = await io.turn(p, { row: C.rows.length + 1 }, { auto: { t: 'guess', g: [0, 1, 2, 3] },
       validate: x => (x && x.t === 'guess' && okGuess(x.g) ? { t: 'guess', g: x.g.slice() } : null),
-      bot: () => { const pool = Math.random() < 0.12 ? ALL : cands; return { t: 'guess', g: pool[rnd(pool.length)] }; }, think: 1200 + Math.random() * 800 });
+      bot: () => { const pool = Math.random() < [0.4, 0.12, 0][G.level == null ? 1 : G.level] ? ALL : cands; return { t: 'guess', g: pool[rnd(pool.length)] }; }, think: 1200 + Math.random() * 800 });
     const f = score(C.secret, a.g); C.rows.push({ p: i, g: a.g, exact: f.exact, near: f.near });
     cands = cands.filter(c => { const r = score(c, a.g); return r.exact === f.exact && r.near === f.near; });
     if (!cands.length) cands = ALL;
@@ -61,6 +61,7 @@ const ui = {
 };
 function drawCur() { $('cbCur').innerHTML = Array.from({ length: LEN }, (_, k) => (k < cur.length ? peg(cur[k]) : '<i class="peg empty"></i>')).join(''); $('cbGo').disabled = cur.length !== LEN; }
 Club.register({
+  levels: true,
   id: 'codebreaker', cat: 'mind', name: 'Mastermind', tag: 'Crack the hidden colour code using the clues.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
   art: () => [0, 3, 2].map(c => `<div class="ltile">${peg(c)}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who cracks the secret code of ${LEN} colours. Everyone works on the same code and learns from each other’s guesses.</p>

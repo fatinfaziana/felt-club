@@ -55,7 +55,7 @@ function makePuzzle(remove) {
 const ANTE = 20;
 async function round(G, io) {
   const P = G.players, n = P.length;
-  const { sol, puz } = makePuzzle(44);
+  const { sol, puz } = makePuzzle([36, 44, 52][G.level == null ? 1 : G.level]);
   const Z = G.su = { g: puz.slice(), given: puz.map(v => v > 0), score: P.map(() => 0), turn: (G.round - 1) % n, over: false, winners: [], last: null };
   io.render(); await io.sleep(500);
   while (Z.g.some(v => !v)) {
@@ -63,7 +63,7 @@ async function round(G, io) {
     const empties = Z.g.map((v, k) => (v ? -1 : k)).filter(k => k >= 0);
     const a = await io.turn(p, {}, { timeout: 60000, auto: { t: 'place', i: empties[0], d: sol[empties[0]] },
       validate: x => (x && x.t === 'place' && Number.isInteger(x.i) && Number.isInteger(x.d) && x.i >= 0 && x.i < 81 && !Z.g[x.i] && x.d >= 1 && x.d <= 9 ? { t: 'place', i: x.i, d: x.d } : null),
-      bot: () => { const k = empties[rnd(empties.length)]; return { t: 'place', i: k, d: Math.random() < 0.9 ? sol[k] : 1 + rnd(9) }; }, think: 1000 + Math.random() * 800 });
+      bot: () => { const k = empties[rnd(empties.length)]; return { t: 'place', i: k, d: Math.random() < [0.8, 0.9, 0.98][G.level == null ? 1 : G.level] ? sol[k] : 1 + rnd(9) }; }, think: 1000 + Math.random() * 800 });
     const ok = a.d === sol[a.i];
     if (ok) { Z.g[a.i] = a.d; Z.score[i]++; } else Z.score[i]--;
     Z.last = { i: a.i, ok, p: i };
@@ -113,6 +113,7 @@ const ui = {
 };
 function put(d) { if (S0 && S0.turn && cell >= 0 && !S0.V.g.g[cell]) { const i = cell; cell = -1; S0.send({ t: 'place', i, d }); } }
 Club.register({
+  levels: true,
   id: 'sudoku', cat: 'mind', name: 'Sudoku', tag: 'Fill the grid together. Right numbers score, wrong ones cost.', min: 1, max: 4, soloBots: 1, roundWord: 'Puzzle',
   art: () => ['5', '3', '7'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> help finish the Sudoku grid and score more points than the others. You can play alone or with up to 3 others.</p>

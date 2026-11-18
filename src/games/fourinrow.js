@@ -45,13 +45,13 @@ function search(b, who, depth, alpha, beta) {
   }
   return best;
 }
-function botMove(b, who) {
+function botMove(b, who, lv = 1) {
   const mv = legal(b);
-  if (Math.random() < 0.1) return mv[rnd(mv.length)];
+  if (Math.random() < [0.45, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
   for (const c of mv) {
     const r = drop(b, c, who);
-    const v = (lineAt(b, r, c) ? 1010 : -search(b, 1 - who, 4, -1e9, 1e9)) + Math.random() * 0.6;
+    const v = (lineAt(b, r, c) ? 1010 : -search(b, 1 - who, [2, 4, 6][lv], -1e9, 1e9)) + Math.random() * 0.6;
     b[idx(r, c)] = -1;
     if (v > bs) { bs = v; best = c; }
   }
@@ -69,7 +69,7 @@ async function round(G, io) {
     const a = await io.turn(p, {}, {
       auto: { t: 'drop', c: legal(F.b)[0] },
       validate: x => (x && x.t === 'drop' && Number.isInteger(x.c) && x.c >= 0 && x.c < COLS && F.b[idx(0, x.c)] < 0 ? { t: 'drop', c: x.c } : null),
-      bot: () => ({ t: 'drop', c: botMove(F.b.slice(), i) }), think: 700 + Math.random() * 500,
+      bot: () => ({ t: 'drop', c: botMove(F.b.slice(), i, G.level) }), think: 700 + Math.random() * 500,
     });
     const r = drop(F.b, a.c, i); F.last = idx(r, a.c);
     io.ev(p, `drops a disc in column ${a.c + 1}`, `drop a disc in column ${a.c + 1}`);
@@ -115,7 +115,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'fourinrow', cat: 'board', name: 'Connect Four', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'fourinrow', cat: 'board', name: 'Connect Four', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to get four of your discs in a row: across, up and down, or diagonally.</p>
     <ol><li>Two players take turns. You are gold or cream; the colour is shown beside your name.</li>

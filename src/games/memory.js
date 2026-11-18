@@ -6,7 +6,7 @@ async function round(G, io) {
   const M = G.m = { cards: shuffle([...SYMS, ...SYMS]), st: Array(16).fill(0), turn: (G.round - 1) % n, score: P.map(() => 0), over: false, known: {}, pick: [] };
   const down = () => M.st.map((s, i) => (s === 0 ? i : -1)).filter(i => i >= 0);
   const botPick = (first) => {
-    const d = down(), mem = Object.entries(M.known).filter(([i]) => M.st[i] === 0 && Math.random() > 0.15).map(([i, s]) => [+i, s]);
+    const d = down(), mem = Object.entries(M.known).filter(([i]) => M.st[i] === 0 && Math.random() > [0.5, 0.15, 0.03][G.level == null ? 1 : G.level]).map(([i, s]) => [+i, s]);
     if (first) {
       for (const [i, s] of mem) if (mem.some(([j, t]) => j !== i && t === s)) return i;
       const unk = d.filter(i => !(i in M.known)); return (unk.length ? unk : d)[rnd((unk.length ? unk : d).length)];
@@ -63,6 +63,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'memory', cat: 'mind', name: 'Memory', tag: 'Flip cards and remember where the pairs are.', min: 2, max: 6, soloBots: 1, roundWord: 'Game',
   art: () => ['🍎', '⭐', '🍎'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> collect the most pairs. Sixteen cards lie face down: eight pairs of pictures.</p>

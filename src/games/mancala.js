@@ -26,10 +26,10 @@ function search(b, s, me, d) {
   for (const p of legal(b, s)) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, me, d - 1); best = s === me ? Math.max(best, v) : Math.min(best, v); }
   return best;
 }
-function botMove(b, s) {
-  const mv = legal(b, s); if (Math.random() < 0.1) return mv[rnd(mv.length)];
+function botMove(b, s, lv = 1) {
+  const mv = legal(b, s); if (Math.random() < [0.4, 0.1, 0][lv]) return mv[rnd(mv.length)];
   let best = mv[0], bs = -1e9;
-  for (const p of mv) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, s, 5) + Math.random() * 0.8; if (v > bs) { bs = v; best = p; } }
+  for (const p of mv) { const nb = b.slice(), r = sow(nb, s, p); const v = search(nb, r.again ? s : 1 - s, s, [2, 5, 7][lv]) + Math.random() * 0.8; if (v > bs) { bs = v; best = p; } }
   return best;
 }
 async function round(G, io) {
@@ -41,11 +41,11 @@ async function round(G, io) {
     const mv = legal(M.b, s);
     const a = await io.turn(P[s], {}, { auto: { t: 'sow', p: mv[0] },
       validate: x => (x && x.t === 'sow' && Number.isInteger(x.p) && mv.includes(x.p) ? { t: 'sow', p: x.p } : null),
-      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s) }), think: 1000 + Math.random() * 500 });
-    const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
+      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s, G.level) }), think: 1000 + Math.random() * 500 });
+    M.sown = M.b[s * 7 + a.p]; const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
     io.ev(P[s], r.again ? 'lands in their store and goes again' : r.cap ? `captures ${r.cap}` : 'sows seeds', r.again ? 'land in your store and go again' : r.cap ? `capture ${r.cap}` : 'sow seeds');
     if (finish(M.b)) M.over = true; else M.turn = r.again ? s : 1 - s;
-    io.render();
+    io.render(); await io.sleep(Math.min(2600, 300 + 270 * (M.sown || 0)));
   }
   const a = M.b[6], c = M.b[13]; M.winner = a === c ? -1 : a > c ? 0 : 1;
   settlePot(G, ANTE, M.winner >= 0 ? [M.winner] : []); potSummary(G);
@@ -68,32 +68,64 @@ function stones(n, seed, wide) {
   }
   return out.join('');
 }
-function draw() {
-  const S = S0, g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn ? legal(g.b, me) : [];
-  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp">${stones(g.b[opp * 7 + p], opp * 7 + p)}<b>${g.b[opp * 7 + p]}</b></div>`).join('');
-  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds">${stones(g.b[me * 7 + p], me * 7 + p)}<b>${g.b[me * 7 + p]}</b></button>`).join('');
-  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store">${stones(g.b[store(opp)], store(opp), true)}<b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store">${stones(g.b[store(me)], store(me), true)}<b>${g.b[store(me)]}</b></div>`;
+let prevB = null, animating = false, animTok = 0;
+function draw(bd) {
+  const S = S0, g = S.V.g, b = bd || g.b, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn && !animating ? legal(b, me) : [];
+  // mirrored layout: my store on the LEFT, my pits run right to left, so seeds travel right to left along my row
+  const top = [0, 1, 2, 3, 4, 5].map(p => `<div class="mc-p opp" data-i="${opp * 7 + p}">${stones(b[opp * 7 + p], opp * 7 + p)}<b>${b[opp * 7 + p]}</b></div>`).join('');
+  const bot = [5, 4, 3, 2, 1, 0].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${!bd && g.last === me * 7 + p ? ' last' : ''}" data-i="${me * 7 + p}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${b[me * 7 + p]} seeds">${stones(b[me * 7 + p], me * 7 + p)}<b>${b[me * 7 + p]}</b></button>`).join('');
+  $('mc').innerHTML = `<div class="mc-s me" data-i="${store(me)}" aria-label="Your store">${stones(b[store(me)], store(me), true)}<b>${b[store(me)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s opp" data-i="${store(opp)}" aria-label="Opponent store">${stones(b[store(opp)], store(opp), true)}<b>${b[store(opp)]}</b></div>`;
+}
+function flyStone(from, to, ms) {
+  const m = $('mc'), a = m.querySelector(`[data-i="${from}"]`), z = m.querySelector(`[data-i="${to}"]`); if (!a || !z) return;
+  const mr = m.getBoundingClientRect(), ar = a.getBoundingClientRect(), zr = z.getBoundingClientRect();
+  const el = document.createElement('i'); el.className = 'stone fly';
+  const sz = Math.max(12, Math.min(26, ar.width * 0.3));
+  el.style.cssText = `left:${ar.left - mr.left + ar.width / 2}px;top:${ar.top - mr.top + ar.height / 2}px;width:${sz}px;height:${sz * 0.82}px;--sc:${STONE[(from * 3 + to) % STONE.length]}`;
+  m.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => { el.style.transitionDuration = ms + 'ms'; el.style.left = zr.left - mr.left + zr.width / 2 + 'px'; el.style.top = zr.top - mr.top + zr.height / 2 + 'px'; }));
+  setTimeout(() => el.remove(), ms + 60);
+}
+async function animateSow(pb, last, tok) {
+  const s = (last / 7) | 0, skip = store(1 - s), b = pb.slice();
+  let seeds = b[last]; b[last] = 0; let i = last;
+  animating = true; draw(b); Snd.p('pebble');
+  await delay(260);
+  while (seeds > 0 && tok === animTok) {
+    const from = i; i = (i + 1) % 14; if (i === skip) continue;
+    flyStone(from, i, 190); await delay(200);
+    if (tok !== animTok) return;
+    b[i]++; seeds--; draw(b); Snd.p('pebble');
+    await delay(70);
+  }
+  animating = false;
 }
 const ui = {
   mount(stage) {
+    prevB = null; animating = false; animTok++;
     stage.innerHTML = `<section class="table c4wrap"><div class="bt-opps" id="mcSeats"></div><div class="mc" id="mc"></div><div class="banner" id="mcBanner" aria-live="polite"></div><p class="hint bt-hint" id="mcHint"></p></section>`;
-    $('mc').onclick = e => { const b = e.target.closest('[data-p]'); if (b && S0.turn) S0.send({ t: 'sow', p: +b.dataset.p }); };
+    $('mc').onclick = e => { const b = e.target.closest('[data-p]'); if (b && S0.turn && !animating) S0.send({ t: 'sow', p: +b.dataset.p }); };
   },
   update(S) {
-    S0 = S; const V = S.V, g = V.g;
+    const V = S.V, g = V.g; S0 = S;
+    const moved = prevB && g.last >= 0 && prevB.some((v, k) => v !== g.b[k]) && prevB[g.last] > 0;
+    const pb = prevB; prevB = g.b.slice();
     $('mcSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Sowing…', extra: i => `Store ${g.b[store(i)]}` });
-    draw();
+    if (moved && !animating) {
+      const tok = ++animTok, fin = g.b.slice();
+      animateSow(pb, g.last, tok).then(() => { if (tok === animTok && S0) { animating = false; draw(); } });
+    } else if (!animating) draw();
     $('mcBanner').innerHTML = g.over && V.summary.length ? `<span>${g.winner >= 0 ? S.text(V.summary.find(e => e.p === g.winner) || V.summary[0]) : 'A draw. Everyone keeps their chips.'}</span>` : '';
     $('mcHint').textContent = S.turn ? 'Your turn. Tap one of your pits (bottom row).' : '';
     return '';
   },
 };
 Club.register({
-  id: 'mancala', cat: 'board', name: 'Mancala', tag: 'Sow seeds around the board and capture your opponent’s.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'mancala', cat: 'board', name: 'Mancala', tag: 'Sow seeds around the board and capture your opponent’s.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['4', '4', '4'].map(c => `<div class="ltile">${c}</div>`).join(''),
-  rules: `<p><b>Goal:</b> collect more seeds in your store (the big pit on your right) than your opponent.</p>
+  rules: `<p><b>Goal:</b> collect more seeds in your store (the big pit on your left) than your opponent.</p>
     <ol><li>Each player has six pits, shown on their side, with four seeds in each. Yours are the bottom row.</li>
-    <li>On your turn, tap one of your pits. Its seeds are picked up and dropped one by one into the next pits, going to the right along your row, into your store, then along your opponent’s row. You skip your opponent’s store.</li>
+    <li>On your turn, tap one of your pits. Its seeds are picked up and dropped one by one into the next pits, going to the left along your row, into your store (on your left), then along your opponent’s row. You skip your opponent’s store.</li>
     <li>If your last seed lands in <b>your store</b>, you take another turn.</li>
     <li>If your last seed lands in an <b>empty pit on your side</b> and the pit opposite has seeds, you capture them and your last seed into your store.</li>
     <li>When one side has no seeds left, the other player puts their remaining seeds in their store. Most seeds wins.</li>

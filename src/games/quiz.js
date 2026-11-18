@@ -60,7 +60,7 @@ async function round(G, io) {
       Z.turn = i; io.render();
       const a = await io.turn(P[i], { q: k + 1 }, { auto: { t: 'ans', i: 0 },
         validate: x => (x && x.t === 'ans' && Number.isInteger(x.i) && x.i >= 0 && x.i < 4 ? { t: 'ans', i: x.i } : null),
-        bot: () => ({ t: 'ans', i: Math.random() < 0.62 ? right : rnd(4) }), think: 1100 + Math.random() * 900 });
+        bot: () => ({ t: 'ans', i: Math.random() < [0.4, 0.62, 0.88][G.level == null ? 1 : G.level] ? right : rnd(4) }), think: 1100 + Math.random() * 900 });
       Z.answered[i] = true; Z.picks[i] = a.i; if (a.i === right) Z.score[i]++;
     }
     Z.turn = -1; Z.reveal = right;
@@ -96,6 +96,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'quiz', cat: 'group', name: 'Trivia Quiz', tag: 'General knowledge for the whole group.', min: 2, max: 10, soloBots: 3, roundWord: 'Quiz',
   art: () => ['?', 'A', '✓'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> answer the most questions correctly. Fits 2 to 10 players.</p>

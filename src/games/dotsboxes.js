@@ -11,12 +11,13 @@ function draw(E, O, e, who) {                 // returns boxes completed
   return n;
 }
 const missing = (E, r, c) => sides(r, c).filter(x => !E[x]).length;
-function botMove(E, O) {
+function botMove(E, O, lv = 1) {
   const free = []; for (let e = 0; e < NE; e++) if (!E[e]) free.push(e);
   const finish = free.filter(e => edgeBoxes(e).some(([r, c]) => O[r * B + c] < 0 && missing(E, r, c) === 1));
-  if (finish.length && Math.random() < 0.92) return finish[rnd(finish.length)];
+  if (finish.length && Math.random() < [0.45, 0.92, 1][lv]) return finish[rnd(finish.length)];
   const safe = free.filter(e => edgeBoxes(e).every(([r, c]) => O[r * B + c] >= 0 || missing(E, r, c) > 2));
   if (safe.length) return safe[rnd(safe.length)];
+  if (lv === 0 && Math.random() < 0.5) return free[rnd(free.length)];
   let best = free[0], bs = 99;                // give away as little as possible
   for (const e of free) { const s = edgeBoxes(e).reduce((a, [r, c]) => a + (O[r * B + c] < 0 && missing(E, r, c) === 2 ? 1 : 0), 0); if (s < bs) { bs = s; best = e; } }
   return best;
@@ -29,7 +30,7 @@ async function round(G, io) {
     const i = D.turn, p = P[i]; io.render();
     const a = await io.turn(p, {}, { auto: { t: 'line', e: D.E.indexOf(0) },
       validate: x => (x && x.t === 'line' && Number.isInteger(x.e) && x.e >= 0 && x.e < NE && !D.E[x.e] ? { t: 'line', e: x.e } : null),
-      bot: () => ({ t: 'line', e: botMove(D.E, D.O) }), think: 700 + Math.random() * 400 });
+      bot: () => ({ t: 'line', e: botMove(D.E, D.O, G.level) }), think: 700 + Math.random() * 400 });
     const n = draw(D.E, D.O, a.e, i); D.last = a.e; D.score[i] += n;
     if (n) io.ev(p, `completes ${n} box${n === 1 ? '' : 'es'} and goes again`, `complete ${n} box${n === 1 ? '' : 'es'} and go again`);
     if (D.O.every(x => x >= 0)) D.over = true; else if (!n) D.turn = 1 - i;
@@ -68,7 +69,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'dotsboxes', cat: 'board', name: 'Dots and Boxes', tag: 'Draw lines, close boxes and claim the most.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'dotsboxes', cat: 'board', name: 'Dots and Boxes', tag: 'Draw lines, close boxes and claim the most.', min: 2, max: 2, soloBots: 1, roundWord: 'Game', levels: true,
   art: () => ['▢', '▣', '▢'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> close more boxes than your opponent.</p>
     <ol><li>A grid of dots is shown. Two players take turns.</li>

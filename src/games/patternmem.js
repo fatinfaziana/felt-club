@@ -14,7 +14,7 @@ async function round(G, io) {
     io.render();
     const a = await io.turn(p, { len }, { timeout: 60000, auto: { t: 'seq', s: [...Q.seq, rnd(4)] },
       validate: x => (x && x.t === 'seq' && okSeq(x.s, len + 1) ? { t: 'seq', s: x.s.slice() } : null),
-      bot: () => { const ok = Math.random() < Math.pow(0.96, len) ; const s = [...Q.seq, rnd(4)]; if (!ok && len) { const k = rnd(len); s[k] = (s[k] + 1 + rnd(3)) % 4; } return { t: 'seq', s }; },
+      bot: () => { const ok = Math.random() < Math.pow([0.88, 0.96, 0.995][G.level == null ? 1 : G.level], len) ; const s = [...Q.seq, rnd(4)]; if (!ok && len) { const k = rnd(len); s[k] = (s[k] + 1 + rnd(3)) % 4; } return { t: 'seq', s }; },
       think: 900 + Math.random() * 600 });
     const good = Q.seq.every((c, k) => a.s[k] === c);
     if (good) { Q.seq.push(a.s[len]); io.ev(p, `repeats the pattern and adds ${NAMES[a.s[len]]}`, `repeat the pattern and add ${NAMES[a.s[len]]}`); }
@@ -72,6 +72,7 @@ const ui = {
   },
 };
 Club.register({
+  levels: true,
   id: 'patternmem', cat: 'mind', name: 'Simon', tag: 'Repeat the colour pattern and add one. Last player in wins.', min: 2, max: 8, soloBots: 2, roundWord: 'Game',
   art: () => [0, 2, 3].map(c => `<div class="ltile"><i class="peg c${c}"></i></div>`).join(''),
   rules: `<p><b>Goal:</b> be the last player who can still remember the pattern. Works for 2 to 8 players.</p>
