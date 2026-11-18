@@ -428,6 +428,18 @@ body { margin: 0; }
 .board { --cw: clamp(48px, 9.5vw, 76px); gap: 6px; }
 .vp-card { transition: transform .14s ease; } .vp-card.held { transform: translateY(-16px); } .vp-card.held .card { box-shadow: 0 0 0 3px var(--gold), 0 10px 16px rgba(0, 0, 0, .5); }
 @media (max-width: 520px) { .catbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .catbtn { justify-content: space-between; padding: 9px 10px; font-size: 14px; } }
+.addfr{display:flex;gap:8px;margin:6px 0}
+.addfr input{flex:1;min-width:0;font:600 15px var(--body);color:var(--text);background:var(--room);border:2px solid var(--rail-hi);border-radius:999px;padding:9px 14px}
+.frchip{display:inline-flex;align-items:center;gap:2px}
+.frchip .cp{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:10px}
+.frx{font:700 16px var(--body);color:var(--text);background:var(--room);border:2px solid var(--rail-hi);border-left:0;border-radius:0 999px 999px 0;padding:8px 10px;cursor:pointer}
+.frchip.on .frx{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.sndpanel{position:fixed;top:54px;right:12px;z-index:90;width:min(280px,calc(100vw - 24px));background:var(--panel,#241b30);border:2px solid var(--rail-hi,#4a3a60);border-radius:14px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:6px}
+.sndpanel[hidden]{display:none}
+.snd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.sndpanel input[type=range]{width:100%;accent-color:#f2b441}
+.snd-close{align-self:flex-end;margin-top:6px}
+.sndbtn{white-space:nowrap}
 
 /* ----- Tai Ti and Colour Rush share a row of opponents and a hand of tappable cards ----- */
 .bt-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(8px, 2vw, 20px); }
@@ -756,13 +768,25 @@ body { margin: 0; }
 .s3d-views button[data-z] { padding: 5px 9px; font-size: 14px; line-height: 1; }
 .s3d canvas { cursor: grab; } .s3d canvas:active { cursor: grabbing; }
 
+/* mancala pebbles */
+.mc-p, .mc-s { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #2a170d 0%, #4a2a1b 75%); box-shadow: inset 0 4px 10px rgba(0,0,0,.65); }
+.mc-p.ok { background: radial-gradient(circle at 50% 40%, #3a2012 0%, #6a4028 80%); box-shadow: inset 0 4px 10px rgba(0,0,0,.55), 0 0 0 2px var(--gold); }
+.mc-s.me { background: radial-gradient(ellipse at 50% 40%, #2a170d 0%, #5a3624 85%); }
+.stone { position: absolute; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #fff9 0, transparent 38%), radial-gradient(circle at 50% 55%, var(--sc) 55%, rgba(0,0,0,.38) 120%); box-shadow: 0 1.5px 2px rgba(0,0,0,.6); pointer-events: none; }
+.mc-p b, .mc-s b { position: absolute; right: 6%; bottom: 4%; z-index: 2; font-size: clamp(10px, 2.6vw, 13px); background: rgba(20,10,5,.7); border-radius: 99px; padding: 0 6px; line-height: 1.5; }
+.powrow{display:flex;align-items:center;gap:10px;justify-content:center;margin:2px 0 4px;font-weight:600}
+.powrow input[type=range]{flex:1;max-width:320px;accent-color:#f2b441}
+.powrow b{min-width:44px;text-align:right}
+.powbar{height:6px;border-radius:4px;background:rgba(255,255,255,.12);max-width:380px;margin:0 auto 6px;overflow:hidden}
+.powbar i{display:block;height:100%;width:50%;background:#f2b441;transition:width .1s}
+
 </style>
 <div class="wrap">
   <header class="top">
     <h1 class="brand"><a href="#" id="brandLink">Felt Club</a><small id="brandSub">Card games</small></h1>
     <div class="meta">
       <button type="button" class="nick" id="nickBtn" aria-label="Change your name">Playing as <b id="nickName"></b><span>Change</span></button>
-      <span id="roundNo"></span>
+      <button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><span id="roundNo"></span>
       <span class="free">Play chips only. No real money.</span>
     </div>
   </header>
@@ -802,8 +826,8 @@ body { margin: 0; }
 
       <div class="modes" id="modes" role="group" aria-label="How do you want to play?">
         <button type="button" class="mode" data-mode="solo" aria-pressed="true"><b>Solo</b><span>Play with computers</span></button>
-        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite or join</span></button>
-        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Choose the size</span></button>
+        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite by username</span></button>
+        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Open to anyone</span></button>
       </div>
 
       <div class="modebody" id="mSolo">
@@ -814,10 +838,13 @@ body { margin: 0; }
       </div>
 
       <div class="modebody" id="mFriends" hidden>
-        <h3>How many friends are joining?</h3>
-        <div class="chips-pick" id="frChips" role="group" aria-label="Number of friends"></div>
-        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Create a table for friends</button></div>
+        <h3>Your friends</h3>
+        <form class="addfr" id="addFrForm" autocomplete="off"><input id="frIn" maxlength="16" placeholder="Friend's username" aria-label="Friend's username"><button type="submit" class="b small gold">Add friend</button></form>
+        <p class="hint" id="frNote"></p>
+        <div class="chips-pick" id="frList" role="group" aria-label="Your friends. Tick the ones to invite"></div>
+        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Invite friends</button></div>
         <p class="hint" id="friendNote"></p>
+        <div id="invitesBox"></div>
         <div id="joinSlot"></div>
       </div>
 
@@ -843,7 +870,7 @@ body { margin: 0; }
   <section id="room" hidden>
     <div class="roombar">
       <div><b id="roomName"></b><span id="roomSub"></span></div>
-      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
     </div>
     <div class="notice" id="notice" hidden></div>
     <div class="invite" id="invite" hidden>
@@ -1047,6 +1074,157 @@ const COVERS = {
   darts: ['🎯', '#c4372e', '#3a1210'], archery: ['🏹', '#3a8a3a', '#10381a'], minigolf: ['⛳', '#3aa04a', '#10401a'], pool: ['🎱', '#1f7a4a', '#0a3220'], carrom: ['🟤', '#d6b05a', '#5a3f10'],
 };
 const coverHTML = id => { const c = COVERS[id] || ['🎮', '#4a3a6a', '#1a1230']; return `<div class="cover" style="--c1:${c[1]};--c2:${c[2]}"><span>${c[0]}</span></div>`; };
+
+/* ---------- Sound: synthesized effects and arcade music (WebAudio, no files) ---------- */
+const Snd = (() => {
+  const KEY = 'feltclub.snd';
+  const st = Object.assign({ sfx: true, sv: 0.7, mus: true, mv: 0.35 }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} };
+  let ctx = null, sfxG, musG, nbuf, timer = 0, playing = false, nextT = 0, step = 0, started = false;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  function init() {
+    if (ctx || !AC) return !!ctx;
+    try {
+      ctx = new AC(); const comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
+      sfxG = ctx.createGain(); musG = ctx.createGain(); sfxG.connect(comp); musG.connect(comp);
+      nbuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      vols();
+    } catch { ctx = null; }
+    return !!ctx;
+  }
+  function vols() { if (!ctx) return; sfxG.gain.value = st.sfx ? st.sv * 0.9 : 0; musG.gain.value = st.mus ? st.mv * 0.35 : 0; }
+  const midi = m => 440 * Math.pow(2, (m - 69) / 12);
+  function tone(f, t, d, o) {
+    o = o || {}; const os = ctx.createOscillator(), g = ctx.createGain(); os.type = o.type || 'square'; os.frequency.setValueAtTime(f, t); if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + d);
+    const v = o.vol == null ? 0.25 : o.vol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + (o.a || 0.006)); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    os.connect(g); g.connect(o.dest || sfxG); os.start(t); os.stop(t + d + 0.03);
+  }
+  function noise(t, d, o) {
+    o = o || {}; const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = nbuf; s.loop = true;
+    f.type = o.type || 'bandpass'; f.frequency.setValueAtTime(o.f || 2000, t); if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t + d); f.Q.value = o.q || 1;
+    const v = o.vol == null ? 0.25 : o.vol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    s.connect(f); f.connect(g); g.connect(o.dest || sfxG); s.start(t, Math.random() * 0.5); s.stop(t + d + 0.03);
+  }
+  const R = (a, b) => a + Math.random() * (b - a);
+  const FX = {
+    click: t => { tone(900, t, 0.04, { type: 'square', vol: 0.08 }); },
+    tap: t => { tone(520, t, 0.05, { type: 'triangle', vol: 0.12 }); },
+    card: t => { noise(t, 0.07, { f: R(2600, 3600), q: 0.8, vol: 0.3 }); noise(t + 0.03, 0.05, { f: 1800, vol: 0.15 }); },
+    flip: t => { noise(t, 0.1, { f: 3200, to: 1200, q: 0.7, vol: 0.3 }); },
+    chip: t => { for (let i = 0; i < 3; i++) { tone(R(2200, 2700), t + i * 0.045, 0.06, { type: 'sine', vol: 0.18 }); noise(t + i * 0.045, 0.03, { f: 4200, vol: 0.1 }); } },
+    dice: t => { for (let i = 0; i < 6; i++) { noise(t + i * 0.055 + R(0, 0.02), 0.04, { f: R(900, 1800), q: 2, vol: 0.28 - i * 0.02 }); tone(R(300, 520), t + i * 0.055, 0.04, { type: 'triangle', vol: 0.1 }); } },
+    clack: t => { tone(R(640, 760), t, 0.07, { type: 'sine', vol: 0.3, to: 380 }); noise(t, 0.03, { f: 3500, vol: 0.2 }); },
+    drop: t => { tone(700, t, 0.12, { type: 'sine', vol: 0.25, to: 260 }); noise(t + 0.1, 0.03, { f: 2500, vol: 0.18 }); },
+    pop: t => { tone(480, t, 0.09, { type: 'sine', vol: 0.28, to: 900 }); },
+    pebble: t => { for (let i = 0; i < 5; i++) { const u = t + i * 0.12; tone(R(1100, 1700), u, 0.035, { type: 'sine', vol: 0.18, to: 700 }); noise(u, 0.03, { f: 3000, q: 3, vol: 0.12 }); } },
+    thud: t => { tone(150, t, 0.12, { type: 'sine', vol: 0.5, to: 60 }); noise(t, 0.05, { f: 900, type: 'lowpass', vol: 0.3 }); },
+    twang: t => { tone(330, t, 0.35, { type: 'sawtooth', vol: 0.1, to: 200 }); noise(t + 0.05, 0.25, { f: 2000, to: 6000, q: 0.5, vol: 0.12 }); },
+    putt: t => { tone(240, t, 0.08, { type: 'triangle', vol: 0.4, to: 120 }); noise(t, 0.03, { f: 2800, vol: 0.22 }); },
+    sink: t => { tone(880, t, 0.1, { type: 'sine', vol: 0.25, to: 440 }); tone(520, t + 0.12, 0.1, { type: 'sine', vol: 0.22, to: 260 }); tone(1046, t + 0.28, 0.25, { type: 'triangle', vol: 0.25 }); },
+    pocket: t => { tone(180, t, 0.18, { type: 'sine', vol: 0.4, to: 70 }); noise(t + 0.05, 0.2, { f: 700, type: 'lowpass', vol: 0.2 }); },
+    ding: t => { tone(988, t, 0.25, { type: 'sine', vol: 0.18 }); tone(1318, t + 0.08, 0.3, { type: 'sine', vol: 0.15 }); },
+    good: t => { tone(660, t, 0.09, { type: 'square', vol: 0.12 }); tone(880, t + 0.08, 0.14, { type: 'square', vol: 0.12 }); },
+    bad: t => { tone(300, t, 0.14, { type: 'sawtooth', vol: 0.14, to: 200 }); tone(220, t + 0.1, 0.2, { type: 'sawtooth', vol: 0.14, to: 130 }); },
+    fold: t => { noise(t, 0.12, { f: 1400, to: 500, q: 0.6, vol: 0.2 }); },
+    win: t => { [523, 659, 784, 1046, 784, 1046, 1318].forEach((f, i) => tone(f, t + i * 0.09, i === 6 ? 0.5 : 0.12, { type: 'square', vol: 0.14 })); },
+    end: t => { [523, 440, 392].forEach((f, i) => tone(f, t + i * 0.14, 0.2, { type: 'triangle', vol: 0.2 })); },
+    coin: t => { tone(988, t, 0.07, { type: 'square', vol: 0.12 }); tone(1318, t + 0.07, 0.25, { type: 'square', vol: 0.12 }); },
+  };
+  function p(name, delay) {
+    if (!st.sfx || !FX[name] || !init()) return; if (ctx.state === 'suspended') ctx.resume();
+    try { FX[name](ctx.currentTime + 0.01 + (delay || 0)); } catch {}
+  }
+
+  /* ----- arcade music: a bouncy minor-key loop with chiptune voices ----- */
+  const CH = [[45, [0, 3, 7]], [41, [0, 4, 7]], [48, [0, 4, 7]], [43, [0, 4, 7]]];
+  const PENT = [0, 3, 5, 7, 10, 12, 15];
+  let motifs = null;
+  const makeMotifs = () => [0, 1].map(() => Array.from({ length: 16 }, (_, i) => (i % 2 === 0 && Math.random() < 0.75) || Math.random() < 0.12 ? PENT[Math.floor(Math.random() * PENT.length)] : -1));
+  const SD = 60 / 150 / 4;   // sixteenth note
+  function sched(s, t) {
+    const bar = Math.floor(s / 16) % 4, i = s % 16, ch = CH[bar], phrase = Math.floor(s / 64);
+    if (!motifs || (s % 128 === 0)) motifs = makeMotifs();
+    if (i === 0 || i === 8 || (i === 10 && bar % 2)) { tone(150, t, 0.14, { type: 'sine', vol: 0.9, to: 45, dest: musG }); }
+    if (i === 4 || i === 12) noise(t, 0.1, { f: 2200, q: 0.6, vol: 0.3, dest: musG });
+    if (i % 2 === 0) noise(t, 0.03, { f: 7000, type: 'highpass', vol: i % 4 === 2 ? 0.16 : 0.08, dest: musG });
+    if ([0, 3, 6, 8, 11, 14].includes(i)) tone(midi(ch[0] + (i === 8 || i === 14 ? 12 : 0)), t, SD * 2.2, { type: 'triangle', vol: 0.55, dest: musG });
+    tone(midi(ch[0] + 24 + ch[1][i % 3]), t, SD * 0.9, { type: 'square', vol: 0.07, dest: musG });
+    const m = motifs[(bar + (phrase % 2)) % 2][i];
+    if (m >= 0) tone(midi(69 + m + (bar === 1 ? -4 : bar === 3 ? -2 : 0)), t, SD * 1.8, { type: 'square', vol: 0.15, dest: musG });
+  }
+  function pump() { if (!playing) return; while (nextT < ctx.currentTime + 0.25) { sched(step++, nextT); nextT += SD; } }
+  function musicOn() {
+    if (playing || !st.mus || !init()) return; if (ctx.state === 'suspended') ctx.resume();
+    playing = true; nextT = ctx.currentTime + 0.08; vols(); timer = setInterval(pump, 60); pump();
+  }
+  function musicOff() { playing = false; clearInterval(timer); }
+  function sync() { if (st.mus && started && !document.hidden) musicOn(); else musicOff(); vols(); }
+  document.addEventListener('visibilitychange', sync);
+  const gesture = () => { started = true; init(); sync(); };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(e => document.addEventListener(e, gesture, { once: false, passive: true }));
+
+  /* ----- settings panel ----- */
+  function panel() {
+    if (document.getElementById('sndPanel')) return;
+    const d = document.createElement('div'); d.id = 'sndPanel'; d.className = 'sndpanel'; d.hidden = true; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Sound settings');
+    d.innerHTML = `<div class="snd-row"><b>Music</b><button type="button" class="ghost" id="musTog"></button></div><input type="range" id="musVol" min="0" max="100" aria-label="Music volume">
+      <div class="snd-row"><b>Sound effects</b><button type="button" class="ghost" id="sfxTog"></button></div><input type="range" id="sfxVol" min="0" max="100" aria-label="Sound effects volume">
+      <button type="button" class="ghost snd-close" id="sndClose">Close</button>`;
+    document.body.appendChild(d); paintPanel();
+    d.querySelector('#musTog').onclick = () => { st.mus = !st.mus; save(); sync(); paintPanel(); };
+    d.querySelector('#sfxTog').onclick = () => { st.sfx = !st.sfx; save(); vols(); paintPanel(); p('ding'); };
+    d.querySelector('#musVol').oninput = e => { st.mv = e.target.value / 100; if (st.mv > 0 && !st.mus) st.mus = true; save(); sync(); paintPanel(true); };
+    d.querySelector('#sfxVol').oninput = e => { st.sv = e.target.value / 100; save(); vols(); };
+    d.querySelector('#sfxVol').onchange = () => p('chip');
+    d.querySelector('#sndClose').onclick = () => { d.hidden = true; };
+  }
+  function paintPanel(keep) {
+    const d = document.getElementById('sndPanel'); if (!d) return;
+    d.querySelector('#musTog').textContent = st.mus ? 'Pause music' : 'Play music'; d.querySelector('#sfxTog').textContent = st.sfx ? 'Turn off' : 'Turn on';
+    if (!keep) d.querySelector('#musVol').value = Math.round(st.mv * 100); d.querySelector('#sfxVol').value = Math.round(st.sv * 100);
+    document.querySelectorAll('.sndbtn').forEach(b => { b.textContent = st.mus || st.sfx ? '♪ Sound' : '♪ Muted'; b.setAttribute('aria-pressed', String(!!(st.mus || st.sfx))); });
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('.sndbtn');
+    if (b) { panel(); const d = document.getElementById('sndPanel'); d.hidden = !d.hidden; paintPanel(); return; }
+    const pn = document.getElementById('sndPanel'); if (pn && !pn.hidden && !e.target.closest('#sndPanel')) pn.hidden = true;
+    const t = e.target.closest && e.target.closest('button, .gtile, .catbtn, [data-cat], [data-g]');
+    if (t && !t.closest('#sndPanel') && !t.classList.contains('sndbtn')) { if (t.closest('#stage')) p('tap'); else p('click'); }
+    else if (!t && e.target.closest && e.target.closest('#stage')) p('tap');
+  }, true);
+  document.addEventListener('DOMContentLoaded', () => { panel(); paintPanel(); });
+  if (document.readyState !== 'loading') { panel(); paintPanel(); }
+
+  /* ----- generic game hooks: react to the table log, turns and round end ----- */
+  const BYCAT = { card: 'card', casino: 'chip', dice: 'dice', board: 'clack', mind: 'pop', word: 'pop', math: 'pop', group: 'pop' };
+  const BYGAME = { mancala: 'pebble', fourinrow: 'drop', chess: 'clack', checkers: 'clack', reversi: 'clack', gomoku: 'clack', tictactoe: 'pop', dotsboxes: 'pop', bluffdice: 'dice', dice: 'dice', poker: 'chip', blackjack: 'card', sudoku: 'pop', hangman: 'pop' };
+  const SPECIFIC = new Set(['darts', 'archery', 'minigolf', 'pool', 'carrom']);
+  let memo = { id: '', logN: 0, lastTxt: '', seq: 0, done: false, round: 0 };
+  function observe(c, V, me, turn, D) {
+    if (!st.sfx) { memo = { id: c.id + '|' + c.game, logN: V.log.length, lastTxt: '', seq: V.prompt ? V.prompt.seq : 0, done: !!V.done, round: V.round }; return; }
+    const key = c.id + '|' + c.game, first = memo.id !== key; if (first) memo = { id: key, logN: V.log.length, lastTxt: JSON.stringify(V.log[V.log.length - 1] || ''), seq: V.prompt ? V.prompt.seq : 0, done: !!V.done, round: V.round };
+    const last = JSON.stringify(V.log[V.log.length - 1] || '');
+    if (!first && (V.log.length !== memo.logN || last !== memo.lastTxt)) {
+      const k = Math.max(0, Math.min(V.log.length, V.log.length - memo.logN || 1, 3)), news = V.log.slice(-Math.max(1, k));
+      news.forEach((e, i) => {
+        const txt = (e.t || e.y || e.s || '').toLowerCase(); let n = null;
+        if (/\b(win|wins|won|sinks|pots|potted|scores|solved|correct|bingo|bullseye|triple|double|jackpot)\b/.test(txt)) n = 'good';
+        else if (/\b(bust|busts|lose|loses|lost|foul|fouls|miss|misses|wrong|out|scratch)\b/.test(txt)) n = 'bad';
+        else if (/\bfold/.test(txt)) n = 'fold';
+        else if (SPECIFIC.has(c.game)) n = null;
+        else n = BYGAME[c.game] || BYCAT[D.cat] || 'tick';
+        if (n && FX[n]) p(n, i * 0.12);
+      });
+    }
+    if (!first && V.prompt && V.prompt.seq !== memo.seq && turn) p('ding', 0.05);
+    if (!first && V.done && !memo.done) {
+      const mine = (V.summary || []).some(e => e.p === me && /\b(win|wins|won|take|takes|collect|collects|scoop)/i.test((e.t || e.y || e.s || '')));
+      p(mine ? 'win' : 'end', 0.2);
+    }
+    memo.logN = V.log.length; memo.lastTxt = last; memo.seq = V.prompt ? V.prompt.seq : 0; memo.done = !!V.done; memo.round = V.round;
+  }
+  return { p, observe, st, FX };
+})();
 
 /* ---------- 3D layer (Three.js r128). Every 3D scene is built from these parts ---------- */
 const T3 = (() => {
@@ -4365,11 +4543,22 @@ function view(G) {
   return { b: M.b, turn: M.over ? -1 : M.turn, over: M.over, winner: M.winner, last: M.last, delta: G.players.map(p => (M.over ? p.delta || 0 : 0)) };
 }
 let S0 = null;
+// real pebbles: glossy stones scattered in each pit (deterministic, so they do not jump about between redraws)
+const STONE = ['#f3ead8', '#c9c2b4', '#8fb8a8', '#d9b38c', '#a8a29a', '#e8d2a6', '#7f9bb0'];
+function stones(n, seed, wide) {
+  const d = Math.max(10, Math.min(30, 72 / Math.sqrt(n + 1))), out = [];
+  for (let k = 0; k < n; k++) {
+    const a = k * 2.399963 + seed * 1.7, r = Math.sqrt((k + 0.5) / n) * (wide ? 40 : 34), x = 50 + Math.cos(a) * r * (wide ? 0.62 : 1), y = 50 + Math.sin(a) * r * (wide ? 1.15 : 1);
+    const c = STONE[(seed * 3 + k * 5) % STONE.length], rot = (k * 47 + seed * 31) % 180;
+    out.push(`<i class="stone" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${d}%;height:${(d * (wide ? 0.62 : 0.82)).toFixed(1)}%;--sc:${c};transform:translate(-50%,-50%) rotate(${rot}deg)"></i>`);
+  }
+  return out.join('');
+}
 function draw() {
   const S = S0, g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn ? legal(g.b, me) : [];
-  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp"><b>${g.b[opp * 7 + p]}</b></div>`).join('');
-  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds"><b>${g.b[me * 7 + p]}</b></button>`).join('');
-  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store"><b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store"><b>${g.b[store(me)]}</b></div>`;
+  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp">${stones(g.b[opp * 7 + p], opp * 7 + p)}<b>${g.b[opp * 7 + p]}</b></div>`).join('');
+  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds">${stones(g.b[me * 7 + p], me * 7 + p)}<b>${g.b[me * 7 + p]}</b></button>`).join('');
+  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store">${stones(g.b[store(opp)], store(opp), true)}<b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store">${stones(g.b[store(me)], store(me), true)}<b>${g.b[store(me)]}</b></div>`;
 }
 const ui = {
   mount(stage) {
@@ -5544,7 +5733,14 @@ const ANTE = 20;
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 const clampN = (v, a) => Math.max(-a, Math.min(a, v));
 const okPt = x => x && typeof x.x === 'number' && typeof x.y === 'number' && Math.abs(x.x) <= 1.3 && Math.abs(x.y) <= 1.3;
-function svgPoint(svg, e) { const r = svg.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width * 2.6 - 1.3), y: ((e.clientY - r.top) / r.height * 2.6 - 1.3) }; }
+function svgPoint(svg, e) { const r = svg.getBoundingClientRect(); if (!r.width || !r.height) return { x: 0, y: 0 }; return { x: ((e.clientX - r.left) / r.width * 2.6 - 1.3), y: ((e.clientY - r.top) / r.height * 2.6 - 1.3) }; }
+/* hand wobble: the reticle drifts around your aim and tires the longer you hold it */
+const SWAY = { t0: 0, amp: 0.07, reset(a) { this.t0 = performance.now(); if (a) this.amp = a; },
+  off() { const t = (performance.now() - this.t0) / 1000, a = this.amp * (1 + Math.min(t, 7) * 0.14);
+    return { x: a * (Math.sin(t * 1.7) + 0.55 * Math.sin(t * 3.3 + 1)), y: a * (Math.cos(t * 1.3) + 0.55 * Math.sin(t * 2.6 + 2)) }; } };
+const live = (p) => { const o = SWAY.off(); return { x: +(p.x + o.x).toFixed(4), y: +(p.y + o.y).toFixed(4) }; };
+const reticle = (p, c) => `<g stroke="#fff" stroke-width="0.012"><circle cx="${p.x}" cy="${p.y}" r="0.05" fill="none"/><line x1="${p.x - 0.09}" y1="${p.y}" x2="${p.x + 0.09}" y2="${p.y}"/><line x1="${p.x}" y1="${p.y - 0.09}" x2="${p.x}" y2="${p.y + 0.09}"/></g><circle cx="${c.x}" cy="${c.y}" r="0.012" fill="#f2b441" opacity=".7"/>`;
+let swayRaf = 0; function swayLoop(fn) { if (swayRaf) return; const f = () => { swayRaf = 0; if (fn()) swayRaf = requestAnimationFrame(f); }; swayRaf = requestAnimationFrame(f); }
 const arc = (r0, r1, a0, a1) => { const p = (r, a) => [(r * Math.sin(a)).toFixed(4), (-r * Math.cos(a)).toFixed(4)]; const [x0, y0] = p(r1, a0), [x1, y1] = p(r1, a1), [x2, y2] = p(r0, a1), [x3, y3] = p(r0, a0); return `M${x0},${y0} A${r1},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 0 0 ${x3},${y3} Z`; };
 
 /* ======================= Darts ======================= */
@@ -5578,7 +5774,7 @@ async function dartRound(G, io) {
       const a = await io.turn(p, { dart: k + 1, rem: cur }, { auto: { t: 'throw', x: 0, y: 0 },
         validate: x => (x && x.t === 'throw' && okPt(x) ? { t: 'throw', x: x.x, y: x.y } : null),
         bot: () => { const t = dartBotAim(cur); return { t: 'throw', x: t.x, y: t.y }; }, think: 1100 + Math.random() * 500 });
-      const sig = p.human ? 0.06 : 0.1 + (p.agg || 0.5) * 0.04;
+      const sig = p.human ? 0.045 : 0.1 + (p.agg || 0.5) * 0.04;
       const x = clampN(a.x + gauss() * sig, 1.25), y = clampN(a.y + gauss() * sig, 1.25), s = dartScore(x, y);
       D.darts.push({ x, y, pts: s.pts, label: s.label });
       if (s.pts > cur) { bust = true; io.ev(p, `hits ${s.label} and goes bust`, `hit ${s.label} and go bust`); D.bust = true; io.render(); await io.sleep(1100); break; }
@@ -5611,25 +5807,26 @@ function boardSVG() {
 }
 const dartUI = {
   mount(stage, ctl) {
-    dAim = null;
+    dAim = null; dartUI._n = -1;
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="dtSeats"></div><svg class="dart-svg" id="dtSvg" viewBox="-1.3 -1.3 2.6 2.6" role="img" aria-label="Dartboard"><g>${boardSVG()}</g><g id="dtDarts"></g><g id="dtAim"></g></svg><div class="pz-label" id="dtMsg"></div><div class="banner" id="dtBanner" aria-live="polite"></div></section>`;
     ctl.innerHTML = `<div class="act" id="dtAct" hidden><div class="betrow"><button type="button" class="b gold" id="dtThrow" disabled>Throw dart</button></div><p class="hint bt-hint" id="dtHint"></p></div>`;
-    $('dtSvg').onclick = e => { if (!SD || !SD.turn) return; dAim = svgPoint($('dtSvg'), e); drawAim(); };
-    $('dtThrow').onclick = () => { if (SD.turn && dAim) { const a = dAim; dAim = null; drawAim(); SD.send({ t: 'throw', x: a.x, y: a.y }); } };
+    $('dtSvg').onclick = e => { if (!SD || !SD.turn) return; dAim = svgPoint($('dtSvg'), e); SWAY.reset(0.07); drawAim(); };
+    $('dtThrow').onclick = () => { if (SD.turn && dAim) { const a = live(dAim); dAim = null; drawAim(); SD.send({ t: 'throw', x: a.x, y: a.y }); } };
   },
   update(S) {
     SD = S; const V = S.V, g = V.g;
+    if (dartUI._n >= 0 && g.darts.length > dartUI._n) { Snd.p('thud', 0.35); } dartUI._n = g.darts.length;
     if (!S.turn) dAim = null;
     $('dtSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Throwing…', extra: i => `${g.rem[i]} left` });
     $('dtDarts').innerHTML = g.darts.map((d, k) => `<g><circle cx="${d.x}" cy="${d.y}" r="0.028" fill="#f2b441" stroke="#000" stroke-width="0.01"/><text x="${d.x + 0.04}" y="${d.y - 0.04}" font-size="0.085" fill="#fff" stroke="#000" stroke-width="0.012" paint-order="stroke">${k + 1}</text></g>`).join('');
     $('dtMsg').textContent = g.darts.length ? `${g.darts.map(d => d.label).join(' · ')}${g.bust ? ' · Bust! Score unchanged' : ''}` : '';
     $('dtBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : '';
     $('dtAct').hidden = !S.turn; drawAim();
-    $('dtHint').textContent = S.turn ? `Dart ${S.turn.data.dart} of 3. You need ${S.turn.data.rem}. Tap the board where you want to aim, then press Throw. Your dart lands close to your aim, not exactly on it.` : '';
+    $('dtHint').textContent = S.turn ? `Dart ${S.turn.data.dart} of 3. You need ${S.turn.data.rem}. Tap the board to set your aim. Your hand wobbles and gets tired, so press Throw (or Enter) when the cross drifts over your target. The dart can still fly a little off.` : '';
     return '';
   },
 };
-function drawAim() { $('dtAim').innerHTML = dAim ? `<g stroke="#fff" stroke-width="0.012"><circle cx="${dAim.x}" cy="${dAim.y}" r="0.05" fill="none"/><line x1="${dAim.x - 0.09}" y1="${dAim.y}" x2="${dAim.x + 0.09}" y2="${dAim.y}"/><line x1="${dAim.x}" y1="${dAim.y - 0.09}" x2="${dAim.x}" y2="${dAim.y + 0.09}"/></g>` : ''; if ($('dtThrow')) $('dtThrow').disabled = !(SD && SD.turn && dAim); }
+function drawAim() { $('dtAim').innerHTML = dAim ? reticle(live(dAim), dAim) : ''; if ($('dtThrow')) $('dtThrow').disabled = !(SD && SD.turn && dAim); if (dAim) swayLoop(() => { if (!dAim || !$('dtAim')) return false; $('dtAim').innerHTML = reticle(live(dAim), dAim); return true; }); }
 
 /* ----- 3D pub: dartboard on the wall ----- */
 function makeDart(col) {
@@ -5699,9 +5896,9 @@ function darts3d(box, S) {
   function clear() { darts.forEach(d => bg.remove(d)); darts.length = 0; shown = 0; }
   s.onTap(e => {
     if (!SS || !SS.turn) return; const h = s.pick(e, [hitPlane]); if (!h.length) return;
-    const p = bg.worldToLocal(h[0].point.clone()); dAim = { x: p.x, y: -p.y }; drawAim(); paint();
+    const p = bg.worldToLocal(h[0].point.clone()); dAim = { x: p.x, y: -p.y }; SWAY.reset(0.07); drawAim(); paint();
   });
-  function paint() { ch.visible = !!(dAim && SS && SS.turn); if (dAim) ch.position.set(dAim.x, -dAim.y, 0.16); s.hint(SS && SS.turn ? (dAim ? 'Press Throw dart. Your dart lands close to the cross.' : 'Your throw: tap the board where you want to aim.') : ''); }
+  function paint() { ch.visible = !!(dAim && SS && SS.turn); if (dAim) { const o = live(dAim); ch.position.set(o.x, -o.y, 0.16); } s.hint(SS && SS.turn ? (dAim ? 'Press Throw dart when the cross drifts over your target. Your hand wobbles!' : 'Your throw: tap the board where you want to aim.') : ''); }
   s.on((dt, t) => {
     const g = SS.V.g;
     people.forEach((pp, i) => {
@@ -5710,6 +5907,7 @@ function darts3d(box, S) {
       pp.rotation.y += (((Math.PI - pp.rotation.y) + Math.PI * 3) % (Math.PI * 2) - Math.PI) * Math.min(1, dt * 6);
       const ar = pp.userData.arms[1]; if (!ar.userData.busy) ar.rotation.x += ((act ? -1.4 : 0.05) - ar.rotation.x) * Math.min(1, dt * 5);
     });
+    if (dAim && SS.turn) paint();
     held.visible = !!SS.turn && s.view === 'aim'; held.position.y = -0.42 + Math.sin(t * 1.6) * 0.012; held.position.x = 0.3 + Math.cos(t * 1.1) * 0.01;
   });
   s.onView = n => { people.forEach((pp, i) => { pp.visible = !(n === 'aim' && i === SS.me && SS.turn); }); };
@@ -5731,7 +5929,7 @@ Club.register({
   art: () => ['20', '◎', '3'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to bring your score from 101 down to exactly zero.</p>
     <ol><li>Everyone starts on 101. On your turn you throw <b>three darts</b>.</li>
-    <li>Tap the dartboard to place your aim (a crosshair appears; tap again to move it), then press <b>Throw dart</b>. Your dart lands <b>near</b> your aim, with a little wobble, so aim carefully.</li>
+    <li>Tap the dartboard to place your aim (a crosshair appears; tap again to move it), then press <b>Throw dart</b>. Your hand <b>wobbles</b> and gets tired the longer you hold the aim, so press Throw (or Enter) as the cross drifts over your target. The dart can still fly a little off.</li>
     <li>The score of each dart is taken off your total. The outer thin ring counts <b>double</b>, the inner thin ring counts <b>triple</b>, the small green ring is 25 and the red centre is 50.</li>
     <li>You must finish on <b>exactly zero</b>. If a dart takes you below zero, you <b>bust</b>: your score goes back to what it was at the start of your turn.</li>
     <li>First to zero wins the pot. If nobody finishes after 15 turns each, the lowest score wins.</li>
@@ -5774,15 +5972,16 @@ const PCOL = ['#f2b441', '#f7f0e1', '#5cc8b0', '#e8708a', '#a063d8', '#8ab4ff'];
 let SA = null, aAim = null;
 const archUI = {
   mount(stage, ctl) {
-    aAim = null;
+    aAim = null; archUI._n = -1;
     let t = ''; for (let k = 0; k < 10; k++) t += `<circle r="${(1 - k * 0.1).toFixed(2)}" fill="${RING_COL[k]}" stroke="${k > 1 && k < 4 ? '#f7f0e1' : '#000'}" stroke-width="0.006"/>`;
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="arSeats"></div><div class="ar-wind" id="arWind"></div><svg class="dart-svg" id="arSvg" viewBox="-1.3 -1.3 2.6 2.6" role="img" aria-label="Archery target"><rect x="-1.3" y="-1.3" width="2.6" height="2.6" fill="#3a6b45" rx="0.1"/>${t}<g id="arShots"></g><g id="arAim"></g></svg><div class="banner" id="arBanner" aria-live="polite"></div></section>`;
     ctl.innerHTML = `<div class="act" id="arAct" hidden><div class="betrow"><button type="button" class="b gold" id="arGo" disabled>Release arrow</button></div><p class="hint bt-hint" id="arHint"></p></div>`;
-    $('arSvg').onclick = e => { if (!SA || !SA.turn) return; aAim = svgPoint($('arSvg'), e); drawA(); };
-    $('arGo').onclick = () => { if (SA.turn && aAim) { const a = aAim; aAim = null; drawA(); SA.send({ t: 'shoot', x: a.x, y: a.y }); } };
+    $('arSvg').onclick = e => { if (!SA || !SA.turn) return; aAim = svgPoint($('arSvg'), e); SWAY.reset(0.055); drawA(); };
+    $('arGo').onclick = () => { if (SA.turn && aAim) { const a = live(aAim); aAim = null; drawA(); SA.send({ t: 'shoot', x: a.x, y: a.y }); } };
   },
   update(S) {
     SA = S; const V = S.V, g = V.g;
+    if (archUI._n >= 0 && g.shots.length > archUI._n) { Snd.p('twang'); Snd.p('thud', 0.6); } archUI._n = g.shots.length;
     if (!S.turn) aAim = null;
     $('arSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Aiming…', extra: i => `${g.score[i]} points` });
     const w = g.wind, rd = Math.round(Math.abs(w.dx) / 0.1 * 10) / 10, rv = Math.round(Math.abs(w.dy) / 0.1 * 10) / 10;
@@ -5790,11 +5989,11 @@ const archUI = {
     $('arShots').innerHTML = g.shots.map((s, k) => `<circle cx="${s.x}" cy="${s.y}" r="0.03" fill="${PCOL[s.p % 6]}" stroke="#000" stroke-width="0.01"${k === g.shots.length - 1 ? ' class="ar-last"' : ''}/>`).join('');
     $('arBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : (g.last && g.turn >= 0 ? `<span>${S.nameOf(g.last.p)} scored ${g.last.pts}</span>` : '');
     $('arAct').hidden = !S.turn; drawA();
-    $('arHint').textContent = S.turn ? 'Tap the target where you want to aim. The wind will push your arrow, so aim the opposite way to cancel it. Then press Release arrow.' : '';
+    $('arHint').textContent = S.turn ? 'Tap the target to set your aim, against the wind. Your bow arm wobbles and tires, so press Release arrow (or Enter) as the cross drifts over your spot.' : '';
     return '';
   },
 };
-function drawA() { $('arAim').innerHTML = aAim ? `<g stroke="#fff" stroke-width="0.012"><circle cx="${aAim.x}" cy="${aAim.y}" r="0.05" fill="none"/><line x1="${aAim.x - 0.09}" y1="${aAim.y}" x2="${aAim.x + 0.09}" y2="${aAim.y}"/><line x1="${aAim.x}" y1="${aAim.y - 0.09}" x2="${aAim.x}" y2="${aAim.y + 0.09}"/></g>` : ''; if ($('arGo')) $('arGo').disabled = !(SA && SA.turn && aAim); }
+function drawA() { $('arAim').innerHTML = aAim ? reticle(live(aAim), aAim) : ''; if ($('arGo')) $('arGo').disabled = !(SA && SA.turn && aAim); if (aAim) swayLoop(() => { if (!aAim || !$('arAim')) return false; $('arAim').innerHTML = reticle(live(aAim), aAim); return true; }); }
 
 /* ----- 3D range: target in a field ----- */
 function makeArrow(col) {
@@ -5863,13 +6062,14 @@ function archery3d(box, S) {
   }
   s.onTap(e => {
     if (!SS || !SS.turn) return; const h = s.pick(e, [hit]); if (!h.length) return;
-    const p = h[0].point; aAim = { x: p.x / TR, y: (TY - p.y) / TR }; drawA(); paint();
+    const p = h[0].point; aAim = { x: p.x / TR, y: (TY - p.y) / TR }; SWAY.reset(0.055); drawA(); paint();
   });
-  function paint() { ch.visible = !!(aAim && SS && SS.turn); if (aAim) ch.position.set(aAim.x * TR, TY - aAim.y * TR, 0.1); s.hint(SS && SS.turn ? (aAim ? 'Press Release arrow. The wind will push your arrow.' : 'Look at the wind socks, then tap the target where you want to aim.') : ''); }
+  function paint() { ch.visible = !!(aAim && SS && SS.turn); if (aAim) { const o = live(aAim); ch.position.set(o.x * TR, TY - o.y * TR, 0.1); } s.hint(SS && SS.turn ? (aAim ? 'Press Release arrow as the cross drifts over your spot. Your arm wobbles and the wind pushes.' : 'Look at the wind socks, then tap the target where you want to aim.') : ''); }
   s.on((dt, t) => {
     const g = SS.V.g, w = g.wind || { dx: 0, dy: 0 }, str = Math.min(1, Math.abs(w.dx) / 0.12);
     socks.forEach((p, i) => { p.rotation.y = w.dx >= 0 ? 0 : Math.PI; p.rotation.z = -(1 - str) * 1.25 + Math.sin(t * 7 + i) * 0.05 * (0.3 + str); });
     people.forEach((pp, i) => { const act = g.turn === i && !g.over, ar = pp.userData.arms; const v = act ? -1.45 : 0.05; ar[0].rotation.x += (v - ar[0].rotation.x) * Math.min(1, dt * 5); if (!act) ar[1].rotation.x += (0.05 - ar[1].rotation.x) * Math.min(1, dt * 5); else if (!s.tweens.length) ar[1].rotation.x += (-1.45 - ar[1].rotation.x) * Math.min(1, dt * 5); });
+    if (aAim && SS.turn) paint();
     fp.visible = !!SS.turn && s.view === 'aim'; fp.position.y = Math.sin(t * 1.3) * 0.01;
   });
   s.onView = n => { people.forEach((pp, i) => { pp.visible = !(n === 'aim' && i === SS.me && SS.turn); }); };
@@ -5891,7 +6091,7 @@ Club.register({
   rules: `<p><b>Goal:</b> score the most points with your arrows. Each player shoots ${ENDS * PER_END} arrows.</p>
     <ol><li>A round target has ten rings. The gold centre scores 10, the outer white ring scores 1, and missing the target scores 0.</li>
     <li>Players take turns shooting one arrow at a time. For each arrow, a new <b>wind</b> is shown above the target: how far it will push your arrow left, right, up or down.</li>
-    <li>Tap the target to place your aim, then press <b>Release arrow</b>. The wind pushes your arrow, and it lands with a little wobble. Aim <b>against</b> the wind to cancel it out: if the wind pushes 2 rings right, aim 2 rings left of the centre.</li>
+    <li>Tap the target to place your aim, then press <b>Release arrow</b>. Your arm wobbles and gets tired the longer you hold, and the wind pushes your arrow, so time your release. Aim <b>against</b> the wind to cancel it out: if the wind pushes 2 rings right, aim 2 rings left of the centre.</li>
     <li>Your arrows stay on the target, shown in your colour.</li>
     <li>After ${ENDS * PER_END} arrows each, the highest total wins the pot. Ties share it.</li>
     <li>Each player puts in ${ANTE} free chips. Chips have no cash value.</li></ol>`,
@@ -6612,9 +6812,10 @@ function draw() {
 }
 function playShot(shot) {
   if (!shot || shot.seq === animSeq) return;
-  animSeq = shot.seq; clearInterval(animT); let k = 0;
+  const first = animSeq < 0; animSeq = shot.seq; clearInterval(animT); let k = 0; if (!first) Snd.p('putt');
   animT = setInterval(() => {
-    if (k >= shot.path.length) { clearInterval(animT); anim = null; draw(); return; }
+    if (k >= shot.path.length) { clearInterval(animT); anim = null; draw(); const L = shot.path[shot.path.length - 1], H = HOLES[SM.V.g.hole] || HOLES[0]; if (!first && L[0] === H.hole.x && L[1] === H.hole.y) Snd.p('sink'); return; }
+    if (!first && k > 2) { const a = shot.path[k - 2], b = shot.path[k - 1], c = shot.path[k], u = [b[0] - a[0], b[1] - a[1]], v = [c[0] - b[0], c[1] - b[1]], lu = Math.hypot(...u), lv = Math.hypot(...v); if (lu > 0.3 && lv > 0.3 && (u[0] * v[0] + u[1] * v[1]) / (lu * lv) < 0.6) Snd.p('clack'); }
     anim = { p: shot.p, x: shot.path[k][0], y: shot.path[k][1] }; k++; draw();
   }, 33);
 }
@@ -6622,11 +6823,14 @@ const ui = {
   mount(stage, ctl) {
     mAim = null; animSeq = -1; anim = null; clearInterval(animT);
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="mgSeats"></div><svg class="mg-svg" id="mgSvg" viewBox="0 0 100 60" role="img" aria-label="Mini golf course"></svg><div class="pz-label" id="mgMsg"></div><div class="banner" id="mgBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="mgAct" hidden><div class="betrow"><button type="button" class="b gold" id="mgHit" disabled>Hit ball</button></div><p class="hint bt-hint" id="mgHint"></p></div>`;
+    ctl.innerHTML = `<div class="act" id="mgAct" hidden><div class="powrow"><span>Power</span><input type="range" id="mgPow" min="8" max="100" value="50" aria-label="Shot power"><b id="mgPowV">50%</b></div><div class="powbar"><i id="mgPowBar"></i></div><div class="betrow"><button type="button" class="b gold" id="mgHit" disabled>Hit ball</button></div><p class="hint bt-hint" id="mgHint"></p></div>`;
     $('mgSvg').onclick = e => {
       if (!SM || !SM.turn) return; const r = $('mgSvg').getBoundingClientRect();
       mAim = { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 60 }; ui.update(SM);
     };
+    $('mgPow').oninput = () => { const me = SM && SM.V.g.ps[SM.me]; if (!SM || !SM.turn || !me || !me.pos) return;
+      const pw = $('mgPow').value / 100, ang = mAim ? toShot(me.pos, mAim.x, mAim.y).ang : Math.atan2(HOLES[SM.V.g.hole].hole.y - me.pos.y, HOLES[SM.V.g.hole].hole.x - me.pos.x);
+      mAim = target(me.pos, ang, pw); ui.update(SM); };
     $('mgHit').onclick = () => { if (SM.turn && mAim) { const a = mAim; mAim = null; SM.send({ t: 'shot', x: a.x, y: a.y }); } };
   },
   update(S) {
@@ -6639,7 +6843,9 @@ const ui = {
     $('mgAct').hidden = !S.turn;
     if (S.turn) { const me = g.ps[S.me]; let pw = '';
       if (mAim && me && me.pos) pw = ` Power ${Math.round(toShot(me.pos, mAim.x, mAim.y).pw * 100)}%.`;
-      $('mgHint').textContent = `Stroke ${S.turn.data.stroke}. Tap the course to aim: further from your ball means a harder hit. Walls bounce the ball, sand slows it, and a ball that is too fast skips over the hole.${pw}`; }
+      const pp = mAim && me && me.pos ? Math.round(toShot(me.pos, mAim.x, mAim.y).pw * 100) : +$('mgPow').value;
+      $('mgPow').value = pp; $('mgPowV').textContent = pp + '%'; $('mgPowBar').style.width = pp + '%'; $('mgPowBar').style.background = pp < 40 ? '#5cc8b0' : pp < 75 ? '#f2b441' : '#e0443c';
+      $('mgHint').textContent = `Stroke ${S.turn.data.stroke}. Tap the course to point the shot, then set the Power slider (or tap further away for a harder hit). Walls bounce the ball, sand slows it, and a ball that is too fast skips over the hole.${pw}`; }
     draw();
     return '';
   },
@@ -6763,7 +6969,7 @@ function golf3d(box, S) {
     else if (g.shot && g.shot.seq !== lastSeq) { lastSeq = g.shot.seq; if (!anim) startAnim(g.shot); }
     place(g);
     people.forEach((pp, i) => { pp.visible = i < g.ps.length; pp.userData.lb.set(S2.nameOf(i) + (g.ps[i].sunk ? ' ✓' : ''), g.turn === i ? '#f2b441' : '#f7f0e1'); });
-    if (!S2.turn) { s.hint(''); ring.visible = false; dots.forEach(d => { d.visible = false; }); } else if (!mAim) s.hint('Your stroke: tap the course to aim. Further from the ball means a harder hit.');
+    if (!S2.turn) { s.hint(''); ring.visible = false; dots.forEach(d => { d.visible = false; }); } else if (!mAim) s.hint('Your stroke: tap the course to aim, then adjust the Power slider.');
     paintAim();
   };
   return s;
@@ -6774,7 +6980,7 @@ Club.register({
   art: () => ['⛳', '●', '3'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> get your ball in the hole in the fewest strokes. Play three holes; the lowest total wins.</p>
     <ol><li>Everyone starts at the white tee circle. Players take turns, one stroke at a time, until every ball is in the hole.</li>
-    <li>Tap the course to aim. The line goes from your ball to where you tapped. <b>The further away you tap, the harder you hit</b> (shown as a power percentage). Press <b>Hit ball</b>.</li>
+    <li>Tap the course to aim. The line goes from your ball to where you tapped. Then set the <b>Power slider</b> (or tap further away for a harder hit). Press <b>Hit ball</b>.</li>
     <li>The ball rolls and slows down. <b>Brown walls</b> make it bounce, so you can bank shots. <b>Sand</b> slows it quickly.</li>
     <li>The ball drops in only if it is rolling slowly enough. A fast ball skips over the hole.</li>
     <li>Balls do not bump into each other. If a ball is not in after ${MAXS} strokes, it scores ${MAXS + 1} for that hole.</li>
@@ -7058,13 +7264,27 @@ const CUE = (() => {
   const colOf = id => (id === 0 ? '#fff' : id === 8 ? '#16161c' : BCOL[id > 8 ? id - 8 : id]);
   const PCOL = ['#f2b441', '#f7f0e1'];
 
+  /* aiming effects: breathing wobble, cue/finger pull-back with power, thrust before the shot, ghost ball */
+  const AIMFX = { raf: 0, loop(fn) { if (this.raf) return; const f = () => { this.raf = 0; if (fn()) this.raf = requestAnimationFrame(f); }; this.raf = requestAnimationFrame(f); } };
+  const wob = () => Math.sin(performance.now() / 380) * 0.5 + 0.5;
+  const pullOf = (st, base, per) => { const th = st.th || 0; return (base + st.pw * per + wob() * 0.25 * per / 10) * (1 - th * th) + 0.15 * th * th; };
+  function fire(st, send) { if (st.firing) return; st.firing = true; const t0 = performance.now(); const step = () => { const k = Math.min(1, (performance.now() - t0) / 220); st.th = k; if (k < 1) requestAnimationFrame(step); else { st.th = 0; st.firing = false; send(); } }; step(); }
+  function ghostHit(P, c, ang, R) { const dx = Math.cos(ang), dy = Math.sin(ang); let best = null;
+    for (let i = 1; i < P.length; i++) { const b = P[i]; if (!b.alive) continue; const rx = b.x - c.x, ry = b.y - c.y, t = rx * dx + ry * dy; if (t <= 0) continue; const d2 = rx * rx + ry * ry - t * t; if (d2 > R * R) continue; const tc = t - Math.sqrt(R * R - d2); if (tc > 0 && (!best || tc < best.t)) best = { t: tc, b }; }
+    return best && { x: c.x + dx * best.t, y: c.y + dy * best.t, b: best.b, t: best.t }; }
+  const stick2d = (c, ang, off) => { const dx = Math.cos(ang), dy = Math.sin(ang), x0 = c.x - dx * off, y0 = c.y - dy * off, x1 = x0 - dx * 34, y1 = y0 - dy * 34;
+    return `<line x1="${x0 + 0.2}" y1="${y0 + 0.3}" x2="${x1 + 0.2}" y2="${y1 + 0.3}" stroke="#000" stroke-opacity=".3" stroke-width="1.1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#d9b36b" stroke-width=".9" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x0 - dx * 20}" y2="${y0 - dy * 20}" stroke="#5a3418" stroke-width="1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x0 - dx * 1.2}" y2="${y0 - dy * 1.2}" stroke="#3f8be8" stroke-width=".95" stroke-linecap="round"/>`; };
+
   /* shared: play the recorded frames on a flat screen */
   function player(st, redraw) {
     return shot => {
       if (!shot || shot.seq === st.seq) return; st.seq = shot.seq; clearInterval(st.timer); let k = 0;
       st.timer = setInterval(() => {
         if (k >= shot.frames.length) { clearInterval(st.timer); st.anim = null; redraw(); return; }
-        st.anim = shot.frames[k++]; redraw();
+        const f = shot.frames[k], q = k > 1 ? shot.frames[k - 1] : null, r = k > 2 ? shot.frames[k - 2] : null; k++;
+        if (q && r && !st.mute) { let hit = 0, pk = 0; for (let i = 0; i < f.length; i += 2) { if (f[i] < 0 && q[i] >= 0) pk++; else if (f[i] >= 0 && q[i] >= 0 && r[i] >= 0) { const dv = Math.hypot((f[i] - q[i]) - (q[i] - r[i]), (f[i + 1] - q[i + 1]) - (q[i + 1] - r[i + 1])); if (dv > 7) hit++; } }
+          if (pk) Snd.p('pocket'); else if (hit) Snd.p('clack'); }
+        st.anim = f; redraw();
       }, 66);
     };
   }
@@ -7078,7 +7298,7 @@ const CUE = (() => {
   const poolUI = {
     st: poolSt,
     tap(x, y) {
-      const S = poolSt.S; if (!S || !S.turn) return; const g = S.V.g;
+      const S = poolSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; const g = S.V.g;
       if (S.turn.data.inHand && !poolSt.place) { if (CUE.freeSpot(g.balls, x, y, 0)) poolSt.place = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }; }
       else poolSt.aim = { x, y };
       poolUI.update(S);
@@ -7096,21 +7316,25 @@ const CUE = (() => {
         if (id > 0) s += `<text x="${x}" y="${y + 0.45}" font-size="1.2" text-anchor="middle" fill="${id > 8 || id === 0 ? '#111' : '#fff'}" font-weight="700">${id}</text>`;
       });
       if (my && poolSt.aim && !(my.data.inHand && !poolSt.place) && cue) {
-        const c = place || cue, dx = poolSt.aim.x - c.x, dy = poolSt.aim.y - c.y, l = Math.hypot(dx, dy) || 1;
-        s += `<line x1="${c.x}" y1="${c.y}" x2="${c.x + dx / l * 30}" y2="${c.y + dy / l * 30}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`;
+        const c = place || cue, ang = Math.atan2(poolSt.aim.y - c.y, poolSt.aim.x - c.x), gh = ghostHit(P, c, ang, CUE.BR * 2), len = gh ? gh.t : 30;
+        s += `<line x1="${c.x}" y1="${c.y}" x2="${c.x + Math.cos(ang) * len}" y2="${c.y + Math.sin(ang) * len}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`;
+        if (gh) { const bx = gh.b.x - gh.x, by = gh.b.y - gh.y, bl = Math.hypot(bx, by) || 1;
+          s += `<circle cx="${gh.x}" cy="${gh.y}" r="${CUE.BR}" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width=".3" stroke-dasharray=".8 .6"/><line x1="${gh.b.x}" y1="${gh.b.y}" x2="${gh.b.x + bx / bl * 9}" y2="${gh.b.y + by / bl * 9}" stroke="#f2b441" stroke-width=".4" stroke-dasharray="1 .8"/>`; }
+        s += stick2d(c, ang, CUE.BR + pullOf(poolSt, 1, 9));
+        AIMFX.loop(() => { if (!poolSt.aim || !poolSt.S || !poolSt.S.turn || !$('plSvg')) return false; poolUI.draw(); return true; });
       }
       $('plSvg').innerHTML = s;
       if ($('plShoot')) $('plShoot').disabled = !(my && poolSt.aim && !(my.data.inHand && !poolSt.place));
     },
     mount(stage, ctl) {
-      poolSt.aim = null; poolSt.place = null; poolSt.anim = null; poolSt.seq = -1; clearInterval(poolSt.timer);
+      poolSt.aim = null; poolSt.place = null; poolSt.anim = null; poolSt.seq = -1; poolSt.th = 0; poolSt.firing = false; clearInterval(poolSt.timer);
       stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="plSeats"></div><svg class="cue-svg" id="plSvg" viewBox="${VB.x} ${VB.y} ${VB.w} ${VB.h}" role="img" aria-label="Pool table"></svg><div class="pz-label" id="plMsg"></div><div class="banner" id="plBanner" aria-live="polite"></div></section>`;
       ctl.innerHTML = `<div class="act" id="plAct" hidden><div class="betrow"><label class="hint" for="plPow">Power</label><input type="range" id="plPow" min="10" max="100" value="60"><span class="hint" id="plPowV">60%</span></div>
         <div class="betrow"><button type="button" class="b gold" id="plShoot" disabled>Shoot</button><button type="button" class="ghost" id="plReset">Reset</button></div><p class="hint bt-hint" id="plHint"></p></div>`;
       $('plSvg').onclick = e => { const p = pt($('plSvg'), e, VB); poolUI.tap(p.x, p.y); };
-      $('plPow').oninput = () => { poolSt.pw = +$('plPow').value / 100; $('plPowV').textContent = $('plPow').value + '%'; };
+      $('plPow').oninput = () => { poolSt.pw = +$('plPow').value / 100; $('plPowV').textContent = $('plPow').value + '%'; poolUI.draw(); };
       $('plReset').onclick = () => { poolSt.aim = null; poolSt.place = null; if (poolSt.S) poolUI.update(poolSt.S); };
-      $('plShoot').onclick = () => { const S = poolSt.S; if (!S || !S.turn || !poolSt.aim) return; const m = { t: 'shot', x: poolSt.aim.x, y: poolSt.aim.y, p: poolSt.pw, place: S.turn.data.inHand ? poolSt.place : null }; poolSt.aim = null; poolSt.place = null; S.send(m); };
+      $('plShoot').onclick = () => { const S = poolSt.S; if (!S || !S.turn || !poolSt.aim) return; const m = { t: 'shot', x: poolSt.aim.x, y: poolSt.aim.y, p: poolSt.pw, place: S.turn.data.inHand ? poolSt.place : null }; poolSt.pw = poolSt.pw; fire(poolSt, () => { poolSt.aim = null; poolSt.place = null; S.send(m); }); };
     },
     update(S) {
       poolSt.S = S; const V = S.V, g = V.g; if (!S.turn) { poolSt.aim = null; poolSt.place = null; }
@@ -7121,20 +7345,20 @@ const CUE = (() => {
       $('plBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
       $('plAct').hidden = !S.turn;
       if (S.turn) { const hand = S.turn.data.inHand;
-        $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball, then tap to aim.' : 'Tap the table to aim. Set the power, then press Shoot. Pot your group, then the 8 ball.'; }
+        $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball, then tap to aim.' : 'Tap the table to aim: the cue lines up behind the ball and a ghost ball shows where you will hit. Drag the Power slider to pull the cue back, then Shoot.'; }
       poolUI.draw(); return '';
     },
   };
 
   /* ===================== Carrom ===================== */
   const CVB = { x: -3, y: -3, w: 106, h: 106 };
-  const carSt = { aim: null, sx: 50, pw: 0.6, anim: null, seq: -1, timer: null, S: null };
+  const carSt = { aim: null, sx: 50, pw: 0.6, th: 0, firing: false, anim: null, seq: -1, timer: null, S: null };
   const carPlay = player(carSt, () => carromUI.draw());
   const carPositions = g => { if (carSt.anim) { const f = carSt.anim; return { coins: g.coins.map((c, i) => ({ t: c.t, id: c.id, alive: f[2 * i] >= 0, x: f[2 * i] / 10, y: f[2 * i + 1] / 10 })), st: f[2 * g.coins.length] >= 0 ? { x: f[2 * g.coins.length] / 10, y: f[2 * g.coins.length + 1] / 10 } : null }; } return { coins: g.coins, st: null }; };
   const CC = { w: '#f7f0e1', b: '#2a2430', q: '#d6453d' };
   const carromUI = {
     st: carSt,
-    tap(x, y) { const S = carSt.S; if (!S || !S.turn) return; carSt.aim = { x, y }; carromUI.update(S); },
+    tap(x, y) { const S = carSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; carSt.aim = { x, y }; carromUI.update(S); },
     flip() { const S = carSt.S; return !!(S && S.me === 1); },
     draw() {
       const S = carSt.S; if (!S || !$('crSvg')) return; const g = S.V.g, P = carPositions(g), my = S.turn, me = S.me === 1 ? 1 : 0;
@@ -7147,22 +7371,25 @@ const CUE = (() => {
       if (my) {
         const by = CUE.BASE[me], ok = CUE.carromSpot(g.coins, carSt.sx, me);
         s += `<circle cx="${carSt.sx}" cy="${by}" r="${CUE.SR}" fill="${ok ? '#9ac8f0' : '#e06060'}" stroke="#fff" stroke-width=".4"/>`;
-        if (carSt.aim) { const dx = carSt.aim.x - carSt.sx, dy = carSt.aim.y - by, l = Math.hypot(dx, dy) || 1; s += `<line x1="${carSt.sx}" y1="${by}" x2="${carSt.sx + dx / l * 60}" y2="${by + dy / l * 60}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`; }
+        if (carSt.aim) { const dx = carSt.aim.x - carSt.sx, dy = carSt.aim.y - by, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, off = CUE.SR + 1.2 + pullOf(carSt, 0.5, 12);
+          s += `<line x1="${carSt.sx}" y1="${by}" x2="${carSt.sx + ux * 60}" y2="${by + uy * 60}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>` +
+            `<g transform="translate(${carSt.sx - ux * off} ${by - uy * off}) rotate(${Math.atan2(uy, ux) * 180 / Math.PI})"><ellipse cx="-3" cy="0" rx="4.4" ry="1.9" fill="#e5b48a" stroke="#a9744a" stroke-width=".25"/><ellipse cx="-.4" cy="-.6" rx="1.7" ry=".8" fill="#f0c49c"/><ellipse cx="-.4" cy=".6" rx="1.7" ry=".8" fill="#f0c49c"/></g>`;
+          AIMFX.loop(() => { if (!carSt.aim || !carSt.S || !carSt.S.turn || !$('crSvg')) return false; carromUI.draw(); return true; }); }
       }
       $('crSvg').innerHTML = s + '</g>';
       if ($('crShoot')) $('crShoot').disabled = !(my && carSt.aim && CUE.carromSpot(g.coins, carSt.sx, me));
     },
     mount(stage, ctl) {
-      carSt.aim = null; carSt.sx = 50; carSt.anim = null; carSt.seq = -1; clearInterval(carSt.timer);
+      carSt.aim = null; carSt.sx = 50; carSt.anim = null; carSt.seq = -1; carSt.th = 0; carSt.firing = false; clearInterval(carSt.timer);
       stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="crSeats"></div><svg class="cue-svg carrom" id="crSvg" viewBox="${CVB.x} ${CVB.y} ${CVB.w} ${CVB.h}" role="img" aria-label="Carrom board"></svg><div class="pz-label" id="crMsg"></div><div class="banner" id="crBanner" aria-live="polite"></div></section>`;
       ctl.innerHTML = `<div class="act" id="crAct" hidden><div class="betrow"><label class="hint" for="crSx">Striker</label><input type="range" id="crSx" min="20" max="80" value="50"></div>
         <div class="betrow"><label class="hint" for="crPow">Power</label><input type="range" id="crPow" min="10" max="100" value="60"><span class="hint" id="crPowV">60%</span></div>
         <div class="betrow"><button type="button" class="b gold" id="crShoot" disabled>Flick</button><button type="button" class="ghost" id="crReset">Reset</button></div><p class="hint bt-hint" id="crHint"></p></div>`;
       $('crSvg').onclick = e => { const p = pt($('crSvg'), e, CVB); carromUI.tap(carromUI.flip() ? 100 - p.x : p.x, carromUI.flip() ? 100 - p.y : p.y); };
       $('crSx').oninput = () => { carSt.sx = +$('crSx').value; carromUI.draw(); };
-      $('crPow').oninput = () => { carSt.pw = +$('crPow').value / 100; $('crPowV').textContent = $('crPow').value + '%'; };
+      $('crPow').oninput = () => { carSt.pw = +$('crPow').value / 100; $('crPowV').textContent = $('crPow').value + '%'; carromUI.draw(); };
       $('crReset').onclick = () => { carSt.aim = null; if (carSt.S) carromUI.update(carSt.S); };
-      $('crShoot').onclick = () => { const S = carSt.S; if (!S || !S.turn || !carSt.aim) return; const m = { t: 'shot', sx: carSt.sx, x: carSt.aim.x, y: carSt.aim.y, p: carSt.pw }; carSt.aim = null; S.send(m); };
+      $('crShoot').onclick = () => { const S = carSt.S; if (!S || !S.turn || !carSt.aim) return; const m = { t: 'shot', sx: carSt.sx, x: carSt.aim.x, y: carSt.aim.y, p: carSt.pw }; fire(carSt, () => { carSt.aim = null; S.send(m); }); };
     },
     update(S) {
       carSt.S = S; const V = S.V, g = V.g; if (!S.turn) carSt.aim = null;
@@ -7171,7 +7398,7 @@ const CUE = (() => {
       $('crMsg').textContent = g.over ? '' : g.msg;
       $('crBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
       $('crAct').hidden = !S.turn;
-      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker along your line, tap the board to aim, set the power and flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
+      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker along your line, tap the board to aim, then drag Power to pull your finger back, and flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
       carromUI.draw(); return '';
     },
   };
@@ -7214,7 +7441,7 @@ const CUE = (() => {
     for (let i = 0; i < 16; i++) { const id = i === 0 ? 0 : -1; balls.push(null); }
     const mkBall = id => { const m = new TH.Mesh(new TH.SphereGeometry(BRW, 24, 16), new TH.MeshStandardMaterial({ map: id === 0 ? null : numTex(id), color: id === 0 ? 0xfbf6ea : 0xffffff, roughness: 0.25, metalness: 0.05 })); m.castShadow = true; sc.add(m); return m; };
     const plane = T3.mk(sc, new TH.PlaneGeometry(18, 10), new TH.MeshBasicMaterial({ visible: false }), 0, TY + BRW, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
-    const stick = new TH.Group(); T3.mk(stick, new TH.CylinderGeometry(0.035, 0.07, 5.2, 10), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0, 0).rotation.z = Math.PI / 2; T3.mk(stick, new TH.CylinderGeometry(0.037, 0.037, 0.12, 10), T3.mat('#3f8be8'), -2.62, 0, 0).rotation.z = Math.PI / 2; stick.visible = false; sc.add(stick);
+    const stick = new TH.Group(); T3.mk(stick, new TH.CylinderGeometry(0.03, 0.06, 3.6, 10), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0, 0).rotation.z = Math.PI / 2; T3.mk(stick, new TH.CylinderGeometry(0.032, 0.032, 0.1, 10), T3.mat('#3f8be8'), -1.8, 0, 0).rotation.z = Math.PI / 2; stick.visible = false; sc.add(stick);
     const dots = []; for (let i = 0; i < 16; i++) dots.push(T3.mk(sc, T3.SPH(0.035, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + BRW, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const ring = T3.mk(sc, new TH.TorusGeometry(BRW * 1.25, 0.03, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), 0, TY + 0.02, 0, { noCast: true }); ring.rotation.x = Math.PI / 2; ring.visible = false;
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -3.4); sc.add(msg.sprite);
@@ -7251,7 +7478,7 @@ const CUE = (() => {
         if (hand && !st.place) { ring.visible = true; ring.position.set(0, TY + 0.02, 0); ring.visible = false; }
         if (c && st.aim && !(hand && !st.place)) {
           const ang = Math.atan2(st.aim.y - c.y, st.aim.x - c.x), px = wx(c.x), pz = wz(c.y);
-          stick.visible = true; stick.rotation.y = -ang; stick.position.set(px - Math.cos(ang) * (2.9 + (0.5 + 0.5 * Math.sin(t * 2.2)) * 0.15), TY + BRW + 0.12, pz - Math.sin(ang) * (2.9 + (0.5 + 0.5 * Math.sin(t * 2.2)) * 0.15));
+          stick.visible = true; stick.rotation.y = -ang; { const po = 1.85 + pullOf(st, 0.05, 1.8) * (1 - (st.th || 0)) + 0.1 * (st.th || 0); stick.position.set(px - Math.cos(ang) * po, TY + BRW + 0.12 + 0.18 * (1 - (st.th || 0)), pz - Math.sin(ang) * po); stick.rotation.z = 0.06; }
           dots.forEach((d, k) => { d.visible = true; d.position.set(px + Math.cos(ang) * (0.5 + k * 0.5), TY + BRW, pz + Math.sin(ang) * (0.5 + k * 0.5)); });
         }
         if (hand && st.place) { const m = balls[0]; if (m) { m.visible = true; place(m, st.place); } }
@@ -7300,6 +7527,7 @@ const CUE = (() => {
     const plane = T3.mk(sc, new TH.PlaneGeometry(12, 12), new TH.MeshBasicMaterial({ visible: false }), 0, TY + 0.1, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
     const dots = []; for (let i = 0; i < 18; i++) dots.push(T3.mk(sc, T3.SPH(0.03, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + 0.1, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -2.6); sc.add(msg.sprite);
+    const finger = new TH.Group(); T3.mk(finger, new TH.CylinderGeometry(0.12, 0.16, 1.1, 10), T3.mat('#e5b48a', { roughness: 0.6 }), 0, 0, 0).rotation.z = Math.PI / 2; finger.visible = false; sc.add(finger);
     const spots = [[0, 7.4, Math.PI], [0, -7.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', play = null, seq = -1, flip = false, first = true; s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
     const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
     s.setViews(views(false), 'seat', true);
@@ -7317,9 +7545,9 @@ const CUE = (() => {
         if (kf > play.f.length + 1) { play = null; striker.visible = false; s.sync(SS); }
         return;
       }
-      dots.forEach(d => { d.visible = false; }); striker.visible = false;
+      dots.forEach(d => { d.visible = false; }); striker.visible = false; finger.visible = false;
       if (SS.turn && SS.me >= 0) { const me = SS.me === 1 ? 1 : 0, by = CUE.BASE[me]; striker.visible = true; striker.position.set(wx(carSt.sx), TY, wz(by));
-        if (carSt.aim) { const ang = Math.atan2(carSt.aim.y - by, carSt.aim.x - carSt.sx); dots.forEach((d, k) => { d.visible = true; d.position.set(wx(carSt.sx) + Math.cos(ang) * (0.4 + k * 0.4), TY + 0.1, wz(by) + Math.sin(ang) * (0.4 + k * 0.4)); }); } }
+        if (carSt.aim) { const ang = Math.atan2(carSt.aim.y - by, carSt.aim.x - carSt.sx); const fo = (SRW + 0.45 + pullOf(carSt, 0.5, 12) * K); finger.visible = true; finger.rotation.y = -ang; finger.position.set(wx(carSt.sx) - Math.cos(ang) * fo, TY + 0.14, wz(by) - Math.sin(ang) * fo); dots.forEach((d, k) => { d.visible = true; d.position.set(wx(carSt.sx) + Math.cos(ang) * (0.4 + k * 0.4), TY + 0.1, wz(by) + Math.sin(ang) * (0.4 + k * 0.4)); }); } }
     });
     s.sync = S => {
       SS = S; const g = S.V.g; const key = S.me + '|' + S.V.seats.length; if (key !== peopleKey) { peopleKey = key; pe.build(S); }
@@ -7401,7 +7629,7 @@ function makeGame(o) {
   const G = { id: o.id, name: o.name, game: o.game, hostId: o.hostId, mode: '', max: o.max || D.max, minP: o.min || D.min, status: o.status, players: [],
     round: 0, done: false, summary: [], log: [], seq: Date.now(), prompt: null, waitHuman: false, pendingHuman: null,
     dl: 0, nextAt: 0, fast: false, closed: false, joinSet: new Set(), startResolve: null, nextResolve: null,
-    privKey: {}, privQ: {}, nicks: {} };
+    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [] };
   G.nicks[o.hostId] = myNick;
   G.players.push(mkPlayer({ uid: o.hostId, human: true }));
   for (let i = 0; i < (o.bots || 0); i++) { const b = mkBot(G); if (b) G.players.push(b); }
@@ -7413,7 +7641,7 @@ function makeGame(o) {
 function buildView(G) {
   const hold = G.done || G.status === 'waiting' || G.round === 0;
   return {
-    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips,
+    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [],
     seats: G.players.map(p => ({ u: p.human ? p.uid : null, nm: p.human ? (G.nicks[p.uid] || '') : '', w: p.wins || 0, n: p.human ? '' : p.name, st: p.human ? '' : p.style, stack: p.stack })),
     g: G.players.length ? gameOf(G).view(G) : {},
     prompt: G.prompt, dl: G.dl, wait: G.waitHuman, done: G.done, summary: G.summary,
@@ -7591,11 +7819,12 @@ function startSolo(gid, count) {
   enterRoom({ mode: 'solo', game: gid, id: 'solo', uid: myUid, G, V: null, subs: [], sentSeq: 0 });
   renderG(G); hostLoop(G);
 }
-async function createTable(gid) {
-  const name = ($('tName').value.trim() || 'Card night').slice(0, 28);
+async function createTable(gid, opt) {
+  opt = opt || {};
+  const name = (opt.name || $('tName').value.trim() || 'Card night').slice(0, 28);
   const id = 't' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
-  const mx = +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, +$('hMin').value || Club.games[gid].min);
-  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx });
+  const mx = opt.max || +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, opt.min || +$('hMin').value || Club.games[gid].min);
+  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [] });
   G.mode = 'host';
   const ref = DB.doc('tables/' + id);
   $('createBtn').disabled = true;
@@ -7610,7 +7839,7 @@ async function resumeTable(id) {
   let V;
   try { const s = await DB.doc('tables/' + id).get(); if (!s.exists) return; V = s.data(); } catch { return; }
   if (!Club.games[V.game]) return;
-  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max });
+  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [] });
   G.mode = 'host';
   G.players = V.seats.map((s, i) => {
     const p = s.u ? mkPlayer({ uid: s.u, human: true }) : (mkBot(G, s.n) || mkPlayer({ name: s.n, style: s.st }));
@@ -7696,6 +7925,11 @@ let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(
 function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
 const inCat = inCatEarly;
 let gpMode = 'solo', frN = 0, soloC = -1;
+const lc = t => cleanNick(t).toLowerCase();
+const getFriends = () => { const f = store.load().friends; return Array.isArray(f) ? f.map(cleanNick).filter(x => x.length >= 2).slice(0, 40) : []; };
+const setFriends = f => { const s = store.load(); s.friends = f; store.save(s); };
+let frPick = new Set();
+const invitedMe = V => Array.isArray(V.inv) && V.inv.length && V.inv.includes(lc(myNick));
 const playersTxt = D => (D.min === D.max ? D.min : D.min + ' to ' + D.max) + ' players';
 function chipsHTML(vals, sel, label) { return vals.map(v => `<button type="button" class="cp${v === sel ? ' on' : ''}" data-v="${v}" aria-pressed="${v === sel}">${label(v)}</button>`).join(''); }
 function renderHome() {
@@ -7718,9 +7952,9 @@ function renderHome() {
     if (!totals.includes(soloC + 1)) soloC = Math.max(0, lo - 1);
     sel.innerHTML = totals.map(k => `<option value="${k}"${k === soloC + 1 ? ' selected' : ''}>${k}</option>`).join('');
     $('soloChips').innerHTML = chipsHTML(totals.map(k => k - 1), soloC, c => (c === 0 ? 'None (just me)' : c + (c === 1 ? ' computer' : ' computers')));
-    const frs = Array.from({ length: D.max - 1 }, (_, k) => k + 1).filter(f => f + 1 >= Math.max(2, D.min));
-    if (!frs.includes(frN)) frN = frs[Math.min(frs.length - 1, 1)] || frs[0] || 1;
-    $('frChips').innerHTML = chipsHTML(frs, frN, f => f + (f === 1 ? ' friend' : ' friends'));
+    const fl = getFriends(); frPick = new Set([...frPick].filter(x => fl.includes(x)));
+    $('frList').innerHTML = fl.length ? fl.map(f => `<span class="frchip${frPick.has(f) ? ' on' : ''}"><button type="button" class="cp${frPick.has(f) ? ' on' : ''}" data-fr="${esc(f)}" aria-pressed="${frPick.has(f)}">${esc(f)}</button><button type="button" class="frx" data-frx="${esc(f)}" aria-label="Remove ${esc(f)}">&times;</button></span>`).join('') : '<p class="empty">No friends added yet. Type a friend’s username above (they can see it in the top corner of their screen).</p>';
+    const room = D.max - 1, ns = Math.min(frPick.size, room);
     const hm = $('hMax');
     if (hm.dataset.g !== selGame) {
       hm.dataset.g = selGame;
@@ -7731,17 +7965,22 @@ function renderHome() {
     $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
     document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
     $('mSolo').hidden = gpMode !== 'solo'; $('mFriends').hidden = gpMode !== 'friends'; $('mCreate').hidden = gpMode !== 'create';
-    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite;
-    $('friendBtn').textContent = `Create a table for ${frN} friend${frN === 1 ? '' : 's'}`;
+    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite || !frPick.size;
+    $('friendBtn').textContent = frPick.size ? `Invite ${frPick.size} friend${frPick.size === 1 ? '' : 's'} to ${D.name}` : 'Tick a friend to invite';
     const offline = !online ? 'Playing with friends needs the shared-data feature, which is not available here. You can still play solo with computers.' : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.' : '';
     $('createNote').textContent = offline || 'Friends find your table in the list and join from their own screen.';
-    $('friendNote').textContent = offline || 'You get a code and a link to send. Friends can also find the table in the list below.';
+    $('friendNote').textContent = offline || (frPick.size > room ? `${D.name} seats ${D.max}, so only the first ${room} ticked friend${room === 1 ? '' : 's'} will be invited.` : 'Only the friends you invite can see this table in their list. You also get a code and link to send.');
     (gpMode === 'friends' ? $('joinSlot') : $('browse')).appendChild(jw);
   } else { $('browse').appendChild(jw); }
   $('listTitle').textContent = D ? `Open ${D.name} tables` : 'Open tables';
   const el = $('tableList');
   if (!online) { el.innerHTML = '<p class="empty">Open tables appear here when this page is opened from claude.ai with access to its shared data.</p>'; return; }
-  const live = tables.filter(t => Date.now() - t.V.updated < 30 * 60000 && (!D || t.V.game === selGame)).sort((a, b) => b.V.updated - a.V.updated);
+  const fresh = t => Date.now() - t.V.updated < 30 * 60000;
+  const vis = t => !(t.V.inv && t.V.inv.length) || t.V.hostId === myUid || invitedMe(t.V) || t.V.seats.some(s => s.u === myUid);
+  const inv = tables.filter(t => fresh(t) && t.V.hostId !== myUid && invitedMe(t.V) && !t.V.seats.some(s => s.u === myUid));
+  $('invitesBox').innerHTML = D && inv.length ? '<h3>Invitations for you</h3>' + inv.map(t => `<div class="trow"><div class="tinfo"><b>${esc(t.V.name)}</b><span><em>${esc(Club.games[t.V.game].name)}</em> · ${esc(hostName(t.V))} invited you</span></div><div class="tbtns"><button type="button" class="b small gold" data-a="join" data-id="${esc(t.id)}" data-g="${esc(t.V.game)}">Join</button></div></div>`).join('') : '';
+  $('invitesBox').onclick = $('tableList').onclick;
+  const live = tables.filter(t => fresh(t) && vis(t) && (!D || t.V.game === selGame)).sort((a, b) => b.V.updated - a.V.updated);
   if (!live.length) { el.innerHTML = `<p class="empty">No tables are open right now. ${D ? 'Host one and send friends the link to this page.' : 'Pick a game above to host one.'}</p>`; return; }
   el.innerHTML = live.map(t => {
     const V = t.V, G = Club.games[V.game], n = V.seats.length, bots = V.seats.filter(s => !s.u).length;
@@ -7823,6 +8062,7 @@ function renderRoom() {
     $('sitBtn').hidden = c.joined || !canWrite || !canTake;
   }
   $('next').hidden = !(c.mode !== 'guest' && V.done && !waiting);
+  if (!waiting && !c.gone) Snd.observe(c, V, me, turn, D);
   renderStatus();
 }
 function renderStatus() {
@@ -7884,12 +8124,21 @@ $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value
 $('backBtn').onclick = () => selectGame(null);
 $('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
 $('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
-$('frChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { frN = +b.dataset.v; renderHome(); } };
+$('frList').onclick = e => {
+  const x = e.target.closest('[data-frx]'); if (x) { setFriends(getFriends().filter(f => f !== x.dataset.frx)); renderHome(); return; }
+  const b = e.target.closest('[data-fr]'); if (b) { const f = b.dataset.fr; frPick.has(f) ? frPick.delete(f) : frPick.add(f); renderHome(); }
+};
+$('addFrForm').onsubmit = e => {
+  e.preventDefault(); const n = cleanNick($('frIn').value), fl = getFriends();
+  if (n.length < 2) { $('frNote').textContent = 'A username needs at least 2 letters or numbers.'; return; }
+  if (lc(n) === lc(myNick)) { $('frNote').textContent = 'That is your own username.'; return; }
+  if (fl.some(f => lc(f) === lc(n))) { $('frNote').textContent = `${n} is already in your list.`; return; }
+  setFriends(fl.concat(n)); frPick.add(n); $('frIn').value = ''; $('frNote').textContent = `${n} added. They see invitations when they open this page with that username.`; renderHome();
+};
 $('friendBtn').onclick = () => {
-  if (!(online && canWrite && selGame)) return;
-  const D = Club.games[selGame]; $('tName').value = `${myNick}'s table`.slice(0, 28);
-  $('hMax').value = String(Math.min(D.max, frN + 1)); $('hMin').value = String(Math.min(Math.max(D.min, 2), Math.min(D.max, frN + 1)));
-  createTable(selGame);
+  if (!(online && canWrite && selGame && frPick.size)) return;
+  const D = Club.games[selGame], ids = [...frPick].slice(0, D.max - 1), mx = ids.length + 1;
+  createTable(selGame, { name: `${myNick}'s table`, max: mx, min: Math.max(2, Math.min(D.min, mx)), inv: ids.map(lc) });
 };
 $('createForm').onsubmit = e => { e.preventDefault(); if (online && canWrite && selGame) createTable(selGame); };
 $('gameGrid').onclick = e => {

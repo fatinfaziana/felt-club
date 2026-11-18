@@ -103,9 +103,10 @@ function draw() {
 }
 function playShot(shot) {
   if (!shot || shot.seq === animSeq) return;
-  animSeq = shot.seq; clearInterval(animT); let k = 0;
+  const first = animSeq < 0; animSeq = shot.seq; clearInterval(animT); let k = 0; if (!first) Snd.p('putt');
   animT = setInterval(() => {
-    if (k >= shot.path.length) { clearInterval(animT); anim = null; draw(); return; }
+    if (k >= shot.path.length) { clearInterval(animT); anim = null; draw(); const L = shot.path[shot.path.length - 1], H = HOLES[SM.V.g.hole] || HOLES[0]; if (!first && L[0] === H.hole.x && L[1] === H.hole.y) Snd.p('sink'); return; }
+    if (!first && k > 2) { const a = shot.path[k - 2], b = shot.path[k - 1], c = shot.path[k], u = [b[0] - a[0], b[1] - a[1]], v = [c[0] - b[0], c[1] - b[1]], lu = Math.hypot(...u), lv = Math.hypot(...v); if (lu > 0.3 && lv > 0.3 && (u[0] * v[0] + u[1] * v[1]) / (lu * lv) < 0.6) Snd.p('clack'); }
     anim = { p: shot.p, x: shot.path[k][0], y: shot.path[k][1] }; k++; draw();
   }, 33);
 }
@@ -113,11 +114,14 @@ const ui = {
   mount(stage, ctl) {
     mAim = null; animSeq = -1; anim = null; clearInterval(animT);
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="mgSeats"></div><svg class="mg-svg" id="mgSvg" viewBox="0 0 100 60" role="img" aria-label="Mini golf course"></svg><div class="pz-label" id="mgMsg"></div><div class="banner" id="mgBanner" aria-live="polite"></div></section>`;
-    ctl.innerHTML = `<div class="act" id="mgAct" hidden><div class="betrow"><button type="button" class="b gold" id="mgHit" disabled>Hit ball</button></div><p class="hint bt-hint" id="mgHint"></p></div>`;
+    ctl.innerHTML = `<div class="act" id="mgAct" hidden><div class="powrow"><span>Power</span><input type="range" id="mgPow" min="8" max="100" value="50" aria-label="Shot power"><b id="mgPowV">50%</b></div><div class="powbar"><i id="mgPowBar"></i></div><div class="betrow"><button type="button" class="b gold" id="mgHit" disabled>Hit ball</button></div><p class="hint bt-hint" id="mgHint"></p></div>`;
     $('mgSvg').onclick = e => {
       if (!SM || !SM.turn) return; const r = $('mgSvg').getBoundingClientRect();
       mAim = { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 60 }; ui.update(SM);
     };
+    $('mgPow').oninput = () => { const me = SM && SM.V.g.ps[SM.me]; if (!SM || !SM.turn || !me || !me.pos) return;
+      const pw = $('mgPow').value / 100, ang = mAim ? toShot(me.pos, mAim.x, mAim.y).ang : Math.atan2(HOLES[SM.V.g.hole].hole.y - me.pos.y, HOLES[SM.V.g.hole].hole.x - me.pos.x);
+      mAim = target(me.pos, ang, pw); ui.update(SM); };
     $('mgHit').onclick = () => { if (SM.turn && mAim) { const a = mAim; mAim = null; SM.send({ t: 'shot', x: a.x, y: a.y }); } };
   },
   update(S) {
@@ -130,7 +134,9 @@ const ui = {
     $('mgAct').hidden = !S.turn;
     if (S.turn) { const me = g.ps[S.me]; let pw = '';
       if (mAim && me && me.pos) pw = ` Power ${Math.round(toShot(me.pos, mAim.x, mAim.y).pw * 100)}%.`;
-      $('mgHint').textContent = `Stroke ${S.turn.data.stroke}. Tap the course to aim: further from your ball means a harder hit. Walls bounce the ball, sand slows it, and a ball that is too fast skips over the hole.${pw}`; }
+      const pp = mAim && me && me.pos ? Math.round(toShot(me.pos, mAim.x, mAim.y).pw * 100) : +$('mgPow').value;
+      $('mgPow').value = pp; $('mgPowV').textContent = pp + '%'; $('mgPowBar').style.width = pp + '%'; $('mgPowBar').style.background = pp < 40 ? '#5cc8b0' : pp < 75 ? '#f2b441' : '#e0443c';
+      $('mgHint').textContent = `Stroke ${S.turn.data.stroke}. Tap the course to point the shot, then set the Power slider (or tap further away for a harder hit). Walls bounce the ball, sand slows it, and a ball that is too fast skips over the hole.${pw}`; }
     draw();
     return '';
   },
@@ -254,7 +260,7 @@ function golf3d(box, S) {
     else if (g.shot && g.shot.seq !== lastSeq) { lastSeq = g.shot.seq; if (!anim) startAnim(g.shot); }
     place(g);
     people.forEach((pp, i) => { pp.visible = i < g.ps.length; pp.userData.lb.set(S2.nameOf(i) + (g.ps[i].sunk ? ' ✓' : ''), g.turn === i ? '#f2b441' : '#f7f0e1'); });
-    if (!S2.turn) { s.hint(''); ring.visible = false; dots.forEach(d => { d.visible = false; }); } else if (!mAim) s.hint('Your stroke: tap the course to aim. Further from the ball means a harder hit.');
+    if (!S2.turn) { s.hint(''); ring.visible = false; dots.forEach(d => { d.visible = false; }); } else if (!mAim) s.hint('Your stroke: tap the course to aim, then adjust the Power slider.');
     paintAim();
   };
   return s;
@@ -265,7 +271,7 @@ Club.register({
   art: () => ['⛳', '●', '3'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> get your ball in the hole in the fewest strokes. Play three holes; the lowest total wins.</p>
     <ol><li>Everyone starts at the white tee circle. Players take turns, one stroke at a time, until every ball is in the hole.</li>
-    <li>Tap the course to aim. The line goes from your ball to where you tapped. <b>The further away you tap, the harder you hit</b> (shown as a power percentage). Press <b>Hit ball</b>.</li>
+    <li>Tap the course to aim. The line goes from your ball to where you tapped. Then set the <b>Power slider</b> (or tap further away for a harder hit). Press <b>Hit ball</b>.</li>
     <li>The ball rolls and slows down. <b>Brown walls</b> make it bounce, so you can bank shots. <b>Sand</b> slows it quickly.</li>
     <li>The ball drops in only if it is rolling slowly enough. A fast ball skips over the hole.</li>
     <li>Balls do not bump into each other. If a ball is not in after ${MAXS} strokes, it scores ${MAXS + 1} for that hole.</li>

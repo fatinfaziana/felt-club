@@ -33,7 +33,7 @@ function makeGame(o) {
   const G = { id: o.id, name: o.name, game: o.game, hostId: o.hostId, mode: '', max: o.max || D.max, minP: o.min || D.min, status: o.status, players: [],
     round: 0, done: false, summary: [], log: [], seq: Date.now(), prompt: null, waitHuman: false, pendingHuman: null,
     dl: 0, nextAt: 0, fast: false, closed: false, joinSet: new Set(), startResolve: null, nextResolve: null,
-    privKey: {}, privQ: {}, nicks: {} };
+    privKey: {}, privQ: {}, nicks: {}, inv: o.inv || [] };
   G.nicks[o.hostId] = myNick;
   G.players.push(mkPlayer({ uid: o.hostId, human: true }));
   for (let i = 0; i < (o.bots || 0); i++) { const b = mkBot(G); if (b) G.players.push(b); }
@@ -45,7 +45,7 @@ function makeGame(o) {
 function buildView(G) {
   const hold = G.done || G.status === 'waiting' || G.round === 0;
   return {
-    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips,
+    game: G.game, id: G.id, name: G.name, hostId: G.hostId, status: G.status, round: G.round, max: G.max, min: G.minP, nc: !!gameOf(G).noChips, inv: G.inv || [],
     seats: G.players.map(p => ({ u: p.human ? p.uid : null, nm: p.human ? (G.nicks[p.uid] || '') : '', w: p.wins || 0, n: p.human ? '' : p.name, st: p.human ? '' : p.style, stack: p.stack })),
     g: G.players.length ? gameOf(G).view(G) : {},
     prompt: G.prompt, dl: G.dl, wait: G.waitHuman, done: G.done, summary: G.summary,
@@ -223,11 +223,12 @@ function startSolo(gid, count) {
   enterRoom({ mode: 'solo', game: gid, id: 'solo', uid: myUid, G, V: null, subs: [], sentSeq: 0 });
   renderG(G); hostLoop(G);
 }
-async function createTable(gid) {
-  const name = ($('tName').value.trim() || 'Card night').slice(0, 28);
+async function createTable(gid, opt) {
+  opt = opt || {};
+  const name = (opt.name || $('tName').value.trim() || 'Card night').slice(0, 28);
   const id = 't' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
-  const mx = +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, +$('hMin').value || Club.games[gid].min);
-  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx });
+  const mx = opt.max || +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, opt.min || +$('hMin').value || Club.games[gid].min);
+  const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [] });
   G.mode = 'host';
   const ref = DB.doc('tables/' + id);
   $('createBtn').disabled = true;
@@ -242,7 +243,7 @@ async function resumeTable(id) {
   let V;
   try { const s = await DB.doc('tables/' + id).get(); if (!s.exists) return; V = s.data(); } catch { return; }
   if (!Club.games[V.game]) return;
-  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max });
+  const G = makeGame({ id, name: V.name, game: V.game, hostId: V.hostId, bots: 0, status: V.status === 'waiting' ? 'waiting' : 'playing', min: V.min, max: V.max, inv: V.inv || [] });
   G.mode = 'host';
   G.players = V.seats.map((s, i) => {
     const p = s.u ? mkPlayer({ uid: s.u, human: true }) : (mkBot(G, s.n) || mkPlayer({ name: s.n, style: s.st }));
@@ -328,6 +329,11 @@ let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(
 function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
 const inCat = inCatEarly;
 let gpMode = 'solo', frN = 0, soloC = -1;
+const lc = t => cleanNick(t).toLowerCase();
+const getFriends = () => { const f = store.load().friends; return Array.isArray(f) ? f.map(cleanNick).filter(x => x.length >= 2).slice(0, 40) : []; };
+const setFriends = f => { const s = store.load(); s.friends = f; store.save(s); };
+let frPick = new Set();
+const invitedMe = V => Array.isArray(V.inv) && V.inv.length && V.inv.includes(lc(myNick));
 const playersTxt = D => (D.min === D.max ? D.min : D.min + ' to ' + D.max) + ' players';
 function chipsHTML(vals, sel, label) { return vals.map(v => `<button type="button" class="cp${v === sel ? ' on' : ''}" data-v="${v}" aria-pressed="${v === sel}">${label(v)}</button>`).join(''); }
 function renderHome() {
@@ -350,9 +356,9 @@ function renderHome() {
     if (!totals.includes(soloC + 1)) soloC = Math.max(0, lo - 1);
     sel.innerHTML = totals.map(k => `<option value="${k}"${k === soloC + 1 ? ' selected' : ''}>${k}</option>`).join('');
     $('soloChips').innerHTML = chipsHTML(totals.map(k => k - 1), soloC, c => (c === 0 ? 'None (just me)' : c + (c === 1 ? ' computer' : ' computers')));
-    const frs = Array.from({ length: D.max - 1 }, (_, k) => k + 1).filter(f => f + 1 >= Math.max(2, D.min));
-    if (!frs.includes(frN)) frN = frs[Math.min(frs.length - 1, 1)] || frs[0] || 1;
-    $('frChips').innerHTML = chipsHTML(frs, frN, f => f + (f === 1 ? ' friend' : ' friends'));
+    const fl = getFriends(); frPick = new Set([...frPick].filter(x => fl.includes(x)));
+    $('frList').innerHTML = fl.length ? fl.map(f => `<span class="frchip${frPick.has(f) ? ' on' : ''}"><button type="button" class="cp${frPick.has(f) ? ' on' : ''}" data-fr="${esc(f)}" aria-pressed="${frPick.has(f)}">${esc(f)}</button><button type="button" class="frx" data-frx="${esc(f)}" aria-label="Remove ${esc(f)}">&times;</button></span>`).join('') : '<p class="empty">No friends added yet. Type a friend’s username above (they can see it in the top corner of their screen).</p>';
+    const room = D.max - 1, ns = Math.min(frPick.size, room);
     const hm = $('hMax');
     if (hm.dataset.g !== selGame) {
       hm.dataset.g = selGame;
@@ -363,17 +369,22 @@ function renderHome() {
     $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
     document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
     $('mSolo').hidden = gpMode !== 'solo'; $('mFriends').hidden = gpMode !== 'friends'; $('mCreate').hidden = gpMode !== 'create';
-    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite;
-    $('friendBtn').textContent = `Create a table for ${frN} friend${frN === 1 ? '' : 's'}`;
+    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite || !frPick.size;
+    $('friendBtn').textContent = frPick.size ? `Invite ${frPick.size} friend${frPick.size === 1 ? '' : 's'} to ${D.name}` : 'Tick a friend to invite';
     const offline = !online ? 'Playing with friends needs the shared-data feature, which is not available here. You can still play solo with computers.' : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.' : '';
     $('createNote').textContent = offline || 'Friends find your table in the list and join from their own screen.';
-    $('friendNote').textContent = offline || 'You get a code and a link to send. Friends can also find the table in the list below.';
+    $('friendNote').textContent = offline || (frPick.size > room ? `${D.name} seats ${D.max}, so only the first ${room} ticked friend${room === 1 ? '' : 's'} will be invited.` : 'Only the friends you invite can see this table in their list. You also get a code and link to send.');
     (gpMode === 'friends' ? $('joinSlot') : $('browse')).appendChild(jw);
   } else { $('browse').appendChild(jw); }
   $('listTitle').textContent = D ? `Open ${D.name} tables` : 'Open tables';
   const el = $('tableList');
   if (!online) { el.innerHTML = '<p class="empty">Open tables appear here when this page is opened from claude.ai with access to its shared data.</p>'; return; }
-  const live = tables.filter(t => Date.now() - t.V.updated < 30 * 60000 && (!D || t.V.game === selGame)).sort((a, b) => b.V.updated - a.V.updated);
+  const fresh = t => Date.now() - t.V.updated < 30 * 60000;
+  const vis = t => !(t.V.inv && t.V.inv.length) || t.V.hostId === myUid || invitedMe(t.V) || t.V.seats.some(s => s.u === myUid);
+  const inv = tables.filter(t => fresh(t) && t.V.hostId !== myUid && invitedMe(t.V) && !t.V.seats.some(s => s.u === myUid));
+  $('invitesBox').innerHTML = D && inv.length ? '<h3>Invitations for you</h3>' + inv.map(t => `<div class="trow"><div class="tinfo"><b>${esc(t.V.name)}</b><span><em>${esc(Club.games[t.V.game].name)}</em> · ${esc(hostName(t.V))} invited you</span></div><div class="tbtns"><button type="button" class="b small gold" data-a="join" data-id="${esc(t.id)}" data-g="${esc(t.V.game)}">Join</button></div></div>`).join('') : '';
+  $('invitesBox').onclick = $('tableList').onclick;
+  const live = tables.filter(t => fresh(t) && vis(t) && (!D || t.V.game === selGame)).sort((a, b) => b.V.updated - a.V.updated);
   if (!live.length) { el.innerHTML = `<p class="empty">No tables are open right now. ${D ? 'Host one and send friends the link to this page.' : 'Pick a game above to host one.'}</p>`; return; }
   el.innerHTML = live.map(t => {
     const V = t.V, G = Club.games[V.game], n = V.seats.length, bots = V.seats.filter(s => !s.u).length;
@@ -455,6 +466,7 @@ function renderRoom() {
     $('sitBtn').hidden = c.joined || !canWrite || !canTake;
   }
   $('next').hidden = !(c.mode !== 'guest' && V.done && !waiting);
+  if (!waiting && !c.gone) Snd.observe(c, V, me, turn, D);
   renderStatus();
 }
 function renderStatus() {
@@ -516,12 +528,21 @@ $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value
 $('backBtn').onclick = () => selectGame(null);
 $('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
 $('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
-$('frChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { frN = +b.dataset.v; renderHome(); } };
+$('frList').onclick = e => {
+  const x = e.target.closest('[data-frx]'); if (x) { setFriends(getFriends().filter(f => f !== x.dataset.frx)); renderHome(); return; }
+  const b = e.target.closest('[data-fr]'); if (b) { const f = b.dataset.fr; frPick.has(f) ? frPick.delete(f) : frPick.add(f); renderHome(); }
+};
+$('addFrForm').onsubmit = e => {
+  e.preventDefault(); const n = cleanNick($('frIn').value), fl = getFriends();
+  if (n.length < 2) { $('frNote').textContent = 'A username needs at least 2 letters or numbers.'; return; }
+  if (lc(n) === lc(myNick)) { $('frNote').textContent = 'That is your own username.'; return; }
+  if (fl.some(f => lc(f) === lc(n))) { $('frNote').textContent = `${n} is already in your list.`; return; }
+  setFriends(fl.concat(n)); frPick.add(n); $('frIn').value = ''; $('frNote').textContent = `${n} added. They see invitations when they open this page with that username.`; renderHome();
+};
 $('friendBtn').onclick = () => {
-  if (!(online && canWrite && selGame)) return;
-  const D = Club.games[selGame]; $('tName').value = `${myNick}'s table`.slice(0, 28);
-  $('hMax').value = String(Math.min(D.max, frN + 1)); $('hMin').value = String(Math.min(Math.max(D.min, 2), Math.min(D.max, frN + 1)));
-  createTable(selGame);
+  if (!(online && canWrite && selGame && frPick.size)) return;
+  const D = Club.games[selGame], ids = [...frPick].slice(0, D.max - 1), mx = ids.length + 1;
+  createTable(selGame, { name: `${myNick}'s table`, max: mx, min: Math.max(2, Math.min(D.min, mx)), inv: ids.map(lc) });
 };
 $('createForm').onsubmit = e => { e.preventDefault(); if (online && canWrite && selGame) createTable(selGame); };
 $('gameGrid').onclick = e => {

@@ -5,13 +5,27 @@
   const colOf = id => (id === 0 ? '#fff' : id === 8 ? '#16161c' : BCOL[id > 8 ? id - 8 : id]);
   const PCOL = ['#f2b441', '#f7f0e1'];
 
+  /* aiming effects: breathing wobble, cue/finger pull-back with power, thrust before the shot, ghost ball */
+  const AIMFX = { raf: 0, loop(fn) { if (this.raf) return; const f = () => { this.raf = 0; if (fn()) this.raf = requestAnimationFrame(f); }; this.raf = requestAnimationFrame(f); } };
+  const wob = () => Math.sin(performance.now() / 380) * 0.5 + 0.5;
+  const pullOf = (st, base, per) => { const th = st.th || 0; return (base + st.pw * per + wob() * 0.25 * per / 10) * (1 - th * th) + 0.15 * th * th; };
+  function fire(st, send) { if (st.firing) return; st.firing = true; const t0 = performance.now(); const step = () => { const k = Math.min(1, (performance.now() - t0) / 220); st.th = k; if (k < 1) requestAnimationFrame(step); else { st.th = 0; st.firing = false; send(); } }; step(); }
+  function ghostHit(P, c, ang, R) { const dx = Math.cos(ang), dy = Math.sin(ang); let best = null;
+    for (let i = 1; i < P.length; i++) { const b = P[i]; if (!b.alive) continue; const rx = b.x - c.x, ry = b.y - c.y, t = rx * dx + ry * dy; if (t <= 0) continue; const d2 = rx * rx + ry * ry - t * t; if (d2 > R * R) continue; const tc = t - Math.sqrt(R * R - d2); if (tc > 0 && (!best || tc < best.t)) best = { t: tc, b }; }
+    return best && { x: c.x + dx * best.t, y: c.y + dy * best.t, b: best.b, t: best.t }; }
+  const stick2d = (c, ang, off) => { const dx = Math.cos(ang), dy = Math.sin(ang), x0 = c.x - dx * off, y0 = c.y - dy * off, x1 = x0 - dx * 34, y1 = y0 - dy * 34;
+    return `<line x1="${x0 + 0.2}" y1="${y0 + 0.3}" x2="${x1 + 0.2}" y2="${y1 + 0.3}" stroke="#000" stroke-opacity=".3" stroke-width="1.1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#d9b36b" stroke-width=".9" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x0 - dx * 20}" y2="${y0 - dy * 20}" stroke="#5a3418" stroke-width="1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x0 - dx * 1.2}" y2="${y0 - dy * 1.2}" stroke="#3f8be8" stroke-width=".95" stroke-linecap="round"/>`; };
+
   /* shared: play the recorded frames on a flat screen */
   function player(st, redraw) {
     return shot => {
       if (!shot || shot.seq === st.seq) return; st.seq = shot.seq; clearInterval(st.timer); let k = 0;
       st.timer = setInterval(() => {
         if (k >= shot.frames.length) { clearInterval(st.timer); st.anim = null; redraw(); return; }
-        st.anim = shot.frames[k++]; redraw();
+        const f = shot.frames[k], q = k > 1 ? shot.frames[k - 1] : null, r = k > 2 ? shot.frames[k - 2] : null; k++;
+        if (q && r && !st.mute) { let hit = 0, pk = 0; for (let i = 0; i < f.length; i += 2) { if (f[i] < 0 && q[i] >= 0) pk++; else if (f[i] >= 0 && q[i] >= 0 && r[i] >= 0) { const dv = Math.hypot((f[i] - q[i]) - (q[i] - r[i]), (f[i + 1] - q[i + 1]) - (q[i + 1] - r[i + 1])); if (dv > 7) hit++; } }
+          if (pk) Snd.p('pocket'); else if (hit) Snd.p('clack'); }
+        st.anim = f; redraw();
       }, 66);
     };
   }
@@ -25,7 +39,7 @@
   const poolUI = {
     st: poolSt,
     tap(x, y) {
-      const S = poolSt.S; if (!S || !S.turn) return; const g = S.V.g;
+      const S = poolSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; const g = S.V.g;
       if (S.turn.data.inHand && !poolSt.place) { if (CUE.freeSpot(g.balls, x, y, 0)) poolSt.place = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }; }
       else poolSt.aim = { x, y };
       poolUI.update(S);
@@ -43,21 +57,25 @@
         if (id > 0) s += `<text x="${x}" y="${y + 0.45}" font-size="1.2" text-anchor="middle" fill="${id > 8 || id === 0 ? '#111' : '#fff'}" font-weight="700">${id}</text>`;
       });
       if (my && poolSt.aim && !(my.data.inHand && !poolSt.place) && cue) {
-        const c = place || cue, dx = poolSt.aim.x - c.x, dy = poolSt.aim.y - c.y, l = Math.hypot(dx, dy) || 1;
-        s += `<line x1="${c.x}" y1="${c.y}" x2="${c.x + dx / l * 30}" y2="${c.y + dy / l * 30}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`;
+        const c = place || cue, ang = Math.atan2(poolSt.aim.y - c.y, poolSt.aim.x - c.x), gh = ghostHit(P, c, ang, CUE.BR * 2), len = gh ? gh.t : 30;
+        s += `<line x1="${c.x}" y1="${c.y}" x2="${c.x + Math.cos(ang) * len}" y2="${c.y + Math.sin(ang) * len}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`;
+        if (gh) { const bx = gh.b.x - gh.x, by = gh.b.y - gh.y, bl = Math.hypot(bx, by) || 1;
+          s += `<circle cx="${gh.x}" cy="${gh.y}" r="${CUE.BR}" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width=".3" stroke-dasharray=".8 .6"/><line x1="${gh.b.x}" y1="${gh.b.y}" x2="${gh.b.x + bx / bl * 9}" y2="${gh.b.y + by / bl * 9}" stroke="#f2b441" stroke-width=".4" stroke-dasharray="1 .8"/>`; }
+        s += stick2d(c, ang, CUE.BR + pullOf(poolSt, 1, 9));
+        AIMFX.loop(() => { if (!poolSt.aim || !poolSt.S || !poolSt.S.turn || !$('plSvg')) return false; poolUI.draw(); return true; });
       }
       $('plSvg').innerHTML = s;
       if ($('plShoot')) $('plShoot').disabled = !(my && poolSt.aim && !(my.data.inHand && !poolSt.place));
     },
     mount(stage, ctl) {
-      poolSt.aim = null; poolSt.place = null; poolSt.anim = null; poolSt.seq = -1; clearInterval(poolSt.timer);
+      poolSt.aim = null; poolSt.place = null; poolSt.anim = null; poolSt.seq = -1; poolSt.th = 0; poolSt.firing = false; clearInterval(poolSt.timer);
       stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="plSeats"></div><svg class="cue-svg" id="plSvg" viewBox="${VB.x} ${VB.y} ${VB.w} ${VB.h}" role="img" aria-label="Pool table"></svg><div class="pz-label" id="plMsg"></div><div class="banner" id="plBanner" aria-live="polite"></div></section>`;
       ctl.innerHTML = `<div class="act" id="plAct" hidden><div class="betrow"><label class="hint" for="plPow">Power</label><input type="range" id="plPow" min="10" max="100" value="60"><span class="hint" id="plPowV">60%</span></div>
         <div class="betrow"><button type="button" class="b gold" id="plShoot" disabled>Shoot</button><button type="button" class="ghost" id="plReset">Reset</button></div><p class="hint bt-hint" id="plHint"></p></div>`;
       $('plSvg').onclick = e => { const p = pt($('plSvg'), e, VB); poolUI.tap(p.x, p.y); };
-      $('plPow').oninput = () => { poolSt.pw = +$('plPow').value / 100; $('plPowV').textContent = $('plPow').value + '%'; };
+      $('plPow').oninput = () => { poolSt.pw = +$('plPow').value / 100; $('plPowV').textContent = $('plPow').value + '%'; poolUI.draw(); };
       $('plReset').onclick = () => { poolSt.aim = null; poolSt.place = null; if (poolSt.S) poolUI.update(poolSt.S); };
-      $('plShoot').onclick = () => { const S = poolSt.S; if (!S || !S.turn || !poolSt.aim) return; const m = { t: 'shot', x: poolSt.aim.x, y: poolSt.aim.y, p: poolSt.pw, place: S.turn.data.inHand ? poolSt.place : null }; poolSt.aim = null; poolSt.place = null; S.send(m); };
+      $('plShoot').onclick = () => { const S = poolSt.S; if (!S || !S.turn || !poolSt.aim) return; const m = { t: 'shot', x: poolSt.aim.x, y: poolSt.aim.y, p: poolSt.pw, place: S.turn.data.inHand ? poolSt.place : null }; poolSt.pw = poolSt.pw; fire(poolSt, () => { poolSt.aim = null; poolSt.place = null; S.send(m); }); };
     },
     update(S) {
       poolSt.S = S; const V = S.V, g = V.g; if (!S.turn) { poolSt.aim = null; poolSt.place = null; }
@@ -68,20 +86,20 @@
       $('plBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
       $('plAct').hidden = !S.turn;
       if (S.turn) { const hand = S.turn.data.inHand;
-        $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball, then tap to aim.' : 'Tap the table to aim. Set the power, then press Shoot. Pot your group, then the 8 ball.'; }
+        $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball, then tap to aim.' : 'Tap the table to aim: the cue lines up behind the ball and a ghost ball shows where you will hit. Drag the Power slider to pull the cue back, then Shoot.'; }
       poolUI.draw(); return '';
     },
   };
 
   /* ===================== Carrom ===================== */
   const CVB = { x: -3, y: -3, w: 106, h: 106 };
-  const carSt = { aim: null, sx: 50, pw: 0.6, anim: null, seq: -1, timer: null, S: null };
+  const carSt = { aim: null, sx: 50, pw: 0.6, th: 0, firing: false, anim: null, seq: -1, timer: null, S: null };
   const carPlay = player(carSt, () => carromUI.draw());
   const carPositions = g => { if (carSt.anim) { const f = carSt.anim; return { coins: g.coins.map((c, i) => ({ t: c.t, id: c.id, alive: f[2 * i] >= 0, x: f[2 * i] / 10, y: f[2 * i + 1] / 10 })), st: f[2 * g.coins.length] >= 0 ? { x: f[2 * g.coins.length] / 10, y: f[2 * g.coins.length + 1] / 10 } : null }; } return { coins: g.coins, st: null }; };
   const CC = { w: '#f7f0e1', b: '#2a2430', q: '#d6453d' };
   const carromUI = {
     st: carSt,
-    tap(x, y) { const S = carSt.S; if (!S || !S.turn) return; carSt.aim = { x, y }; carromUI.update(S); },
+    tap(x, y) { const S = carSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; carSt.aim = { x, y }; carromUI.update(S); },
     flip() { const S = carSt.S; return !!(S && S.me === 1); },
     draw() {
       const S = carSt.S; if (!S || !$('crSvg')) return; const g = S.V.g, P = carPositions(g), my = S.turn, me = S.me === 1 ? 1 : 0;
@@ -94,22 +112,25 @@
       if (my) {
         const by = CUE.BASE[me], ok = CUE.carromSpot(g.coins, carSt.sx, me);
         s += `<circle cx="${carSt.sx}" cy="${by}" r="${CUE.SR}" fill="${ok ? '#9ac8f0' : '#e06060'}" stroke="#fff" stroke-width=".4"/>`;
-        if (carSt.aim) { const dx = carSt.aim.x - carSt.sx, dy = carSt.aim.y - by, l = Math.hypot(dx, dy) || 1; s += `<line x1="${carSt.sx}" y1="${by}" x2="${carSt.sx + dx / l * 60}" y2="${by + dy / l * 60}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`; }
+        if (carSt.aim) { const dx = carSt.aim.x - carSt.sx, dy = carSt.aim.y - by, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, off = CUE.SR + 1.2 + pullOf(carSt, 0.5, 12);
+          s += `<line x1="${carSt.sx}" y1="${by}" x2="${carSt.sx + ux * 60}" y2="${by + uy * 60}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>` +
+            `<g transform="translate(${carSt.sx - ux * off} ${by - uy * off}) rotate(${Math.atan2(uy, ux) * 180 / Math.PI})"><ellipse cx="-3" cy="0" rx="4.4" ry="1.9" fill="#e5b48a" stroke="#a9744a" stroke-width=".25"/><ellipse cx="-.4" cy="-.6" rx="1.7" ry=".8" fill="#f0c49c"/><ellipse cx="-.4" cy=".6" rx="1.7" ry=".8" fill="#f0c49c"/></g>`;
+          AIMFX.loop(() => { if (!carSt.aim || !carSt.S || !carSt.S.turn || !$('crSvg')) return false; carromUI.draw(); return true; }); }
       }
       $('crSvg').innerHTML = s + '</g>';
       if ($('crShoot')) $('crShoot').disabled = !(my && carSt.aim && CUE.carromSpot(g.coins, carSt.sx, me));
     },
     mount(stage, ctl) {
-      carSt.aim = null; carSt.sx = 50; carSt.anim = null; carSt.seq = -1; clearInterval(carSt.timer);
+      carSt.aim = null; carSt.sx = 50; carSt.anim = null; carSt.seq = -1; carSt.th = 0; carSt.firing = false; clearInterval(carSt.timer);
       stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="crSeats"></div><svg class="cue-svg carrom" id="crSvg" viewBox="${CVB.x} ${CVB.y} ${CVB.w} ${CVB.h}" role="img" aria-label="Carrom board"></svg><div class="pz-label" id="crMsg"></div><div class="banner" id="crBanner" aria-live="polite"></div></section>`;
       ctl.innerHTML = `<div class="act" id="crAct" hidden><div class="betrow"><label class="hint" for="crSx">Striker</label><input type="range" id="crSx" min="20" max="80" value="50"></div>
         <div class="betrow"><label class="hint" for="crPow">Power</label><input type="range" id="crPow" min="10" max="100" value="60"><span class="hint" id="crPowV">60%</span></div>
         <div class="betrow"><button type="button" class="b gold" id="crShoot" disabled>Flick</button><button type="button" class="ghost" id="crReset">Reset</button></div><p class="hint bt-hint" id="crHint"></p></div>`;
       $('crSvg').onclick = e => { const p = pt($('crSvg'), e, CVB); carromUI.tap(carromUI.flip() ? 100 - p.x : p.x, carromUI.flip() ? 100 - p.y : p.y); };
       $('crSx').oninput = () => { carSt.sx = +$('crSx').value; carromUI.draw(); };
-      $('crPow').oninput = () => { carSt.pw = +$('crPow').value / 100; $('crPowV').textContent = $('crPow').value + '%'; };
+      $('crPow').oninput = () => { carSt.pw = +$('crPow').value / 100; $('crPowV').textContent = $('crPow').value + '%'; carromUI.draw(); };
       $('crReset').onclick = () => { carSt.aim = null; if (carSt.S) carromUI.update(carSt.S); };
-      $('crShoot').onclick = () => { const S = carSt.S; if (!S || !S.turn || !carSt.aim) return; const m = { t: 'shot', sx: carSt.sx, x: carSt.aim.x, y: carSt.aim.y, p: carSt.pw }; carSt.aim = null; S.send(m); };
+      $('crShoot').onclick = () => { const S = carSt.S; if (!S || !S.turn || !carSt.aim) return; const m = { t: 'shot', sx: carSt.sx, x: carSt.aim.x, y: carSt.aim.y, p: carSt.pw }; fire(carSt, () => { carSt.aim = null; S.send(m); }); };
     },
     update(S) {
       carSt.S = S; const V = S.V, g = V.g; if (!S.turn) carSt.aim = null;
@@ -118,7 +139,7 @@
       $('crMsg').textContent = g.over ? '' : g.msg;
       $('crBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
       $('crAct').hidden = !S.turn;
-      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker along your line, tap the board to aim, set the power and flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
+      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker along your line, tap the board to aim, then drag Power to pull your finger back, and flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
       carromUI.draw(); return '';
     },
   };
@@ -161,7 +182,7 @@
     for (let i = 0; i < 16; i++) { const id = i === 0 ? 0 : -1; balls.push(null); }
     const mkBall = id => { const m = new TH.Mesh(new TH.SphereGeometry(BRW, 24, 16), new TH.MeshStandardMaterial({ map: id === 0 ? null : numTex(id), color: id === 0 ? 0xfbf6ea : 0xffffff, roughness: 0.25, metalness: 0.05 })); m.castShadow = true; sc.add(m); return m; };
     const plane = T3.mk(sc, new TH.PlaneGeometry(18, 10), new TH.MeshBasicMaterial({ visible: false }), 0, TY + BRW, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
-    const stick = new TH.Group(); T3.mk(stick, new TH.CylinderGeometry(0.035, 0.07, 5.2, 10), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0, 0).rotation.z = Math.PI / 2; T3.mk(stick, new TH.CylinderGeometry(0.037, 0.037, 0.12, 10), T3.mat('#3f8be8'), -2.62, 0, 0).rotation.z = Math.PI / 2; stick.visible = false; sc.add(stick);
+    const stick = new TH.Group(); T3.mk(stick, new TH.CylinderGeometry(0.03, 0.06, 3.6, 10), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0, 0).rotation.z = Math.PI / 2; T3.mk(stick, new TH.CylinderGeometry(0.032, 0.032, 0.1, 10), T3.mat('#3f8be8'), -1.8, 0, 0).rotation.z = Math.PI / 2; stick.visible = false; sc.add(stick);
     const dots = []; for (let i = 0; i < 16; i++) dots.push(T3.mk(sc, T3.SPH(0.035, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + BRW, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const ring = T3.mk(sc, new TH.TorusGeometry(BRW * 1.25, 0.03, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), 0, TY + 0.02, 0, { noCast: true }); ring.rotation.x = Math.PI / 2; ring.visible = false;
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -3.4); sc.add(msg.sprite);
@@ -198,7 +219,7 @@
         if (hand && !st.place) { ring.visible = true; ring.position.set(0, TY + 0.02, 0); ring.visible = false; }
         if (c && st.aim && !(hand && !st.place)) {
           const ang = Math.atan2(st.aim.y - c.y, st.aim.x - c.x), px = wx(c.x), pz = wz(c.y);
-          stick.visible = true; stick.rotation.y = -ang; stick.position.set(px - Math.cos(ang) * (2.9 + (0.5 + 0.5 * Math.sin(t * 2.2)) * 0.15), TY + BRW + 0.12, pz - Math.sin(ang) * (2.9 + (0.5 + 0.5 * Math.sin(t * 2.2)) * 0.15));
+          stick.visible = true; stick.rotation.y = -ang; { const po = 1.85 + pullOf(st, 0.05, 1.8) * (1 - (st.th || 0)) + 0.1 * (st.th || 0); stick.position.set(px - Math.cos(ang) * po, TY + BRW + 0.12 + 0.18 * (1 - (st.th || 0)), pz - Math.sin(ang) * po); stick.rotation.z = 0.06; }
           dots.forEach((d, k) => { d.visible = true; d.position.set(px + Math.cos(ang) * (0.5 + k * 0.5), TY + BRW, pz + Math.sin(ang) * (0.5 + k * 0.5)); });
         }
         if (hand && st.place) { const m = balls[0]; if (m) { m.visible = true; place(m, st.place); } }
@@ -247,6 +268,7 @@
     const plane = T3.mk(sc, new TH.PlaneGeometry(12, 12), new TH.MeshBasicMaterial({ visible: false }), 0, TY + 0.1, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
     const dots = []; for (let i = 0; i < 18; i++) dots.push(T3.mk(sc, T3.SPH(0.03, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + 0.1, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
     const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -2.6); sc.add(msg.sprite);
+    const finger = new TH.Group(); T3.mk(finger, new TH.CylinderGeometry(0.12, 0.16, 1.1, 10), T3.mat('#e5b48a', { roughness: 0.6 }), 0, 0, 0).rotation.z = Math.PI / 2; finger.visible = false; sc.add(finger);
     const spots = [[0, 7.4, Math.PI], [0, -7.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', play = null, seq = -1, flip = false, first = true; s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
     const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
     s.setViews(views(false), 'seat', true);
@@ -264,9 +286,9 @@
         if (kf > play.f.length + 1) { play = null; striker.visible = false; s.sync(SS); }
         return;
       }
-      dots.forEach(d => { d.visible = false; }); striker.visible = false;
+      dots.forEach(d => { d.visible = false; }); striker.visible = false; finger.visible = false;
       if (SS.turn && SS.me >= 0) { const me = SS.me === 1 ? 1 : 0, by = CUE.BASE[me]; striker.visible = true; striker.position.set(wx(carSt.sx), TY, wz(by));
-        if (carSt.aim) { const ang = Math.atan2(carSt.aim.y - by, carSt.aim.x - carSt.sx); dots.forEach((d, k) => { d.visible = true; d.position.set(wx(carSt.sx) + Math.cos(ang) * (0.4 + k * 0.4), TY + 0.1, wz(by) + Math.sin(ang) * (0.4 + k * 0.4)); }); } }
+        if (carSt.aim) { const ang = Math.atan2(carSt.aim.y - by, carSt.aim.x - carSt.sx); const fo = (SRW + 0.45 + pullOf(carSt, 0.5, 12) * K); finger.visible = true; finger.rotation.y = -ang; finger.position.set(wx(carSt.sx) - Math.cos(ang) * fo, TY + 0.14, wz(by) - Math.sin(ang) * fo); dots.forEach((d, k) => { d.visible = true; d.position.set(wx(carSt.sx) + Math.cos(ang) * (0.4 + k * 0.4), TY + 0.1, wz(by) + Math.sin(ang) * (0.4 + k * 0.4)); }); } }
     });
     s.sync = S => {
       SS = S; const g = S.V.g; const key = S.me + '|' + S.V.seats.length; if (key !== peopleKey) { peopleKey = key; pe.build(S); }

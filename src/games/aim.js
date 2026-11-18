@@ -4,7 +4,14 @@ const ANTE = 20;
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 const clampN = (v, a) => Math.max(-a, Math.min(a, v));
 const okPt = x => x && typeof x.x === 'number' && typeof x.y === 'number' && Math.abs(x.x) <= 1.3 && Math.abs(x.y) <= 1.3;
-function svgPoint(svg, e) { const r = svg.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width * 2.6 - 1.3), y: ((e.clientY - r.top) / r.height * 2.6 - 1.3) }; }
+function svgPoint(svg, e) { const r = svg.getBoundingClientRect(); if (!r.width || !r.height) return { x: 0, y: 0 }; return { x: ((e.clientX - r.left) / r.width * 2.6 - 1.3), y: ((e.clientY - r.top) / r.height * 2.6 - 1.3) }; }
+/* hand wobble: the reticle drifts around your aim and tires the longer you hold it */
+const SWAY = { t0: 0, amp: 0.07, reset(a) { this.t0 = performance.now(); if (a) this.amp = a; },
+  off() { const t = (performance.now() - this.t0) / 1000, a = this.amp * (1 + Math.min(t, 7) * 0.14);
+    return { x: a * (Math.sin(t * 1.7) + 0.55 * Math.sin(t * 3.3 + 1)), y: a * (Math.cos(t * 1.3) + 0.55 * Math.sin(t * 2.6 + 2)) }; } };
+const live = (p) => { const o = SWAY.off(); return { x: +(p.x + o.x).toFixed(4), y: +(p.y + o.y).toFixed(4) }; };
+const reticle = (p, c) => `<g stroke="#fff" stroke-width="0.012"><circle cx="${p.x}" cy="${p.y}" r="0.05" fill="none"/><line x1="${p.x - 0.09}" y1="${p.y}" x2="${p.x + 0.09}" y2="${p.y}"/><line x1="${p.x}" y1="${p.y - 0.09}" x2="${p.x}" y2="${p.y + 0.09}"/></g><circle cx="${c.x}" cy="${c.y}" r="0.012" fill="#f2b441" opacity=".7"/>`;
+let swayRaf = 0; function swayLoop(fn) { if (swayRaf) return; const f = () => { swayRaf = 0; if (fn()) swayRaf = requestAnimationFrame(f); }; swayRaf = requestAnimationFrame(f); }
 const arc = (r0, r1, a0, a1) => { const p = (r, a) => [(r * Math.sin(a)).toFixed(4), (-r * Math.cos(a)).toFixed(4)]; const [x0, y0] = p(r1, a0), [x1, y1] = p(r1, a1), [x2, y2] = p(r0, a1), [x3, y3] = p(r0, a0); return `M${x0},${y0} A${r1},${r1} 0 0 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 0 0 ${x3},${y3} Z`; };
 
 /* ======================= Darts ======================= */
@@ -38,7 +45,7 @@ async function dartRound(G, io) {
       const a = await io.turn(p, { dart: k + 1, rem: cur }, { auto: { t: 'throw', x: 0, y: 0 },
         validate: x => (x && x.t === 'throw' && okPt(x) ? { t: 'throw', x: x.x, y: x.y } : null),
         bot: () => { const t = dartBotAim(cur); return { t: 'throw', x: t.x, y: t.y }; }, think: 1100 + Math.random() * 500 });
-      const sig = p.human ? 0.06 : 0.1 + (p.agg || 0.5) * 0.04;
+      const sig = p.human ? 0.045 : 0.1 + (p.agg || 0.5) * 0.04;
       const x = clampN(a.x + gauss() * sig, 1.25), y = clampN(a.y + gauss() * sig, 1.25), s = dartScore(x, y);
       D.darts.push({ x, y, pts: s.pts, label: s.label });
       if (s.pts > cur) { bust = true; io.ev(p, `hits ${s.label} and goes bust`, `hit ${s.label} and go bust`); D.bust = true; io.render(); await io.sleep(1100); break; }
@@ -71,25 +78,26 @@ function boardSVG() {
 }
 const dartUI = {
   mount(stage, ctl) {
-    dAim = null;
+    dAim = null; dartUI._n = -1;
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="dtSeats"></div><svg class="dart-svg" id="dtSvg" viewBox="-1.3 -1.3 2.6 2.6" role="img" aria-label="Dartboard"><g>${boardSVG()}</g><g id="dtDarts"></g><g id="dtAim"></g></svg><div class="pz-label" id="dtMsg"></div><div class="banner" id="dtBanner" aria-live="polite"></div></section>`;
     ctl.innerHTML = `<div class="act" id="dtAct" hidden><div class="betrow"><button type="button" class="b gold" id="dtThrow" disabled>Throw dart</button></div><p class="hint bt-hint" id="dtHint"></p></div>`;
-    $('dtSvg').onclick = e => { if (!SD || !SD.turn) return; dAim = svgPoint($('dtSvg'), e); drawAim(); };
-    $('dtThrow').onclick = () => { if (SD.turn && dAim) { const a = dAim; dAim = null; drawAim(); SD.send({ t: 'throw', x: a.x, y: a.y }); } };
+    $('dtSvg').onclick = e => { if (!SD || !SD.turn) return; dAim = svgPoint($('dtSvg'), e); SWAY.reset(0.07); drawAim(); };
+    $('dtThrow').onclick = () => { if (SD.turn && dAim) { const a = live(dAim); dAim = null; drawAim(); SD.send({ t: 'throw', x: a.x, y: a.y }); } };
   },
   update(S) {
     SD = S; const V = S.V, g = V.g;
+    if (dartUI._n >= 0 && g.darts.length > dartUI._n) { Snd.p('thud', 0.35); } dartUI._n = g.darts.length;
     if (!S.turn) dAim = null;
     $('dtSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Throwing…', extra: i => `${g.rem[i]} left` });
     $('dtDarts').innerHTML = g.darts.map((d, k) => `<g><circle cx="${d.x}" cy="${d.y}" r="0.028" fill="#f2b441" stroke="#000" stroke-width="0.01"/><text x="${d.x + 0.04}" y="${d.y - 0.04}" font-size="0.085" fill="#fff" stroke="#000" stroke-width="0.012" paint-order="stroke">${k + 1}</text></g>`).join('');
     $('dtMsg').textContent = g.darts.length ? `${g.darts.map(d => d.label).join(' · ')}${g.bust ? ' · Bust! Score unchanged' : ''}` : '';
     $('dtBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : '';
     $('dtAct').hidden = !S.turn; drawAim();
-    $('dtHint').textContent = S.turn ? `Dart ${S.turn.data.dart} of 3. You need ${S.turn.data.rem}. Tap the board where you want to aim, then press Throw. Your dart lands close to your aim, not exactly on it.` : '';
+    $('dtHint').textContent = S.turn ? `Dart ${S.turn.data.dart} of 3. You need ${S.turn.data.rem}. Tap the board to set your aim. Your hand wobbles and gets tired, so press Throw (or Enter) when the cross drifts over your target. The dart can still fly a little off.` : '';
     return '';
   },
 };
-function drawAim() { $('dtAim').innerHTML = dAim ? `<g stroke="#fff" stroke-width="0.012"><circle cx="${dAim.x}" cy="${dAim.y}" r="0.05" fill="none"/><line x1="${dAim.x - 0.09}" y1="${dAim.y}" x2="${dAim.x + 0.09}" y2="${dAim.y}"/><line x1="${dAim.x}" y1="${dAim.y - 0.09}" x2="${dAim.x}" y2="${dAim.y + 0.09}"/></g>` : ''; if ($('dtThrow')) $('dtThrow').disabled = !(SD && SD.turn && dAim); }
+function drawAim() { $('dtAim').innerHTML = dAim ? reticle(live(dAim), dAim) : ''; if ($('dtThrow')) $('dtThrow').disabled = !(SD && SD.turn && dAim); if (dAim) swayLoop(() => { if (!dAim || !$('dtAim')) return false; $('dtAim').innerHTML = reticle(live(dAim), dAim); return true; }); }
 
 /* ----- 3D pub: dartboard on the wall ----- */
 function makeDart(col) {
@@ -159,9 +167,9 @@ function darts3d(box, S) {
   function clear() { darts.forEach(d => bg.remove(d)); darts.length = 0; shown = 0; }
   s.onTap(e => {
     if (!SS || !SS.turn) return; const h = s.pick(e, [hitPlane]); if (!h.length) return;
-    const p = bg.worldToLocal(h[0].point.clone()); dAim = { x: p.x, y: -p.y }; drawAim(); paint();
+    const p = bg.worldToLocal(h[0].point.clone()); dAim = { x: p.x, y: -p.y }; SWAY.reset(0.07); drawAim(); paint();
   });
-  function paint() { ch.visible = !!(dAim && SS && SS.turn); if (dAim) ch.position.set(dAim.x, -dAim.y, 0.16); s.hint(SS && SS.turn ? (dAim ? 'Press Throw dart. Your dart lands close to the cross.' : 'Your throw: tap the board where you want to aim.') : ''); }
+  function paint() { ch.visible = !!(dAim && SS && SS.turn); if (dAim) { const o = live(dAim); ch.position.set(o.x, -o.y, 0.16); } s.hint(SS && SS.turn ? (dAim ? 'Press Throw dart when the cross drifts over your target. Your hand wobbles!' : 'Your throw: tap the board where you want to aim.') : ''); }
   s.on((dt, t) => {
     const g = SS.V.g;
     people.forEach((pp, i) => {
@@ -170,6 +178,7 @@ function darts3d(box, S) {
       pp.rotation.y += (((Math.PI - pp.rotation.y) + Math.PI * 3) % (Math.PI * 2) - Math.PI) * Math.min(1, dt * 6);
       const ar = pp.userData.arms[1]; if (!ar.userData.busy) ar.rotation.x += ((act ? -1.4 : 0.05) - ar.rotation.x) * Math.min(1, dt * 5);
     });
+    if (dAim && SS.turn) paint();
     held.visible = !!SS.turn && s.view === 'aim'; held.position.y = -0.42 + Math.sin(t * 1.6) * 0.012; held.position.x = 0.3 + Math.cos(t * 1.1) * 0.01;
   });
   s.onView = n => { people.forEach((pp, i) => { pp.visible = !(n === 'aim' && i === SS.me && SS.turn); }); };
@@ -191,7 +200,7 @@ Club.register({
   art: () => ['20', '◎', '3'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to bring your score from 101 down to exactly zero.</p>
     <ol><li>Everyone starts on 101. On your turn you throw <b>three darts</b>.</li>
-    <li>Tap the dartboard to place your aim (a crosshair appears; tap again to move it), then press <b>Throw dart</b>. Your dart lands <b>near</b> your aim, with a little wobble, so aim carefully.</li>
+    <li>Tap the dartboard to place your aim (a crosshair appears; tap again to move it), then press <b>Throw dart</b>. Your hand <b>wobbles</b> and gets tired the longer you hold the aim, so press Throw (or Enter) as the cross drifts over your target. The dart can still fly a little off.</li>
     <li>The score of each dart is taken off your total. The outer thin ring counts <b>double</b>, the inner thin ring counts <b>triple</b>, the small green ring is 25 and the red centre is 50.</li>
     <li>You must finish on <b>exactly zero</b>. If a dart takes you below zero, you <b>bust</b>: your score goes back to what it was at the start of your turn.</li>
     <li>First to zero wins the pot. If nobody finishes after 15 turns each, the lowest score wins.</li>
@@ -234,15 +243,16 @@ const PCOL = ['#f2b441', '#f7f0e1', '#5cc8b0', '#e8708a', '#a063d8', '#8ab4ff'];
 let SA = null, aAim = null;
 const archUI = {
   mount(stage, ctl) {
-    aAim = null;
+    aAim = null; archUI._n = -1;
     let t = ''; for (let k = 0; k < 10; k++) t += `<circle r="${(1 - k * 0.1).toFixed(2)}" fill="${RING_COL[k]}" stroke="${k > 1 && k < 4 ? '#f7f0e1' : '#000'}" stroke-width="0.006"/>`;
     stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="arSeats"></div><div class="ar-wind" id="arWind"></div><svg class="dart-svg" id="arSvg" viewBox="-1.3 -1.3 2.6 2.6" role="img" aria-label="Archery target"><rect x="-1.3" y="-1.3" width="2.6" height="2.6" fill="#3a6b45" rx="0.1"/>${t}<g id="arShots"></g><g id="arAim"></g></svg><div class="banner" id="arBanner" aria-live="polite"></div></section>`;
     ctl.innerHTML = `<div class="act" id="arAct" hidden><div class="betrow"><button type="button" class="b gold" id="arGo" disabled>Release arrow</button></div><p class="hint bt-hint" id="arHint"></p></div>`;
-    $('arSvg').onclick = e => { if (!SA || !SA.turn) return; aAim = svgPoint($('arSvg'), e); drawA(); };
-    $('arGo').onclick = () => { if (SA.turn && aAim) { const a = aAim; aAim = null; drawA(); SA.send({ t: 'shoot', x: a.x, y: a.y }); } };
+    $('arSvg').onclick = e => { if (!SA || !SA.turn) return; aAim = svgPoint($('arSvg'), e); SWAY.reset(0.055); drawA(); };
+    $('arGo').onclick = () => { if (SA.turn && aAim) { const a = live(aAim); aAim = null; drawA(); SA.send({ t: 'shoot', x: a.x, y: a.y }); } };
   },
   update(S) {
     SA = S; const V = S.V, g = V.g;
+    if (archUI._n >= 0 && g.shots.length > archUI._n) { Snd.p('twang'); Snd.p('thud', 0.6); } archUI._n = g.shots.length;
     if (!S.turn) aAim = null;
     $('arSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Aiming…', extra: i => `${g.score[i]} points` });
     const w = g.wind, rd = Math.round(Math.abs(w.dx) / 0.1 * 10) / 10, rv = Math.round(Math.abs(w.dy) / 0.1 * 10) / 10;
@@ -250,11 +260,11 @@ const archUI = {
     $('arShots').innerHTML = g.shots.map((s, k) => `<circle cx="${s.x}" cy="${s.y}" r="0.03" fill="${PCOL[s.p % 6]}" stroke="#000" stroke-width="0.01"${k === g.shots.length - 1 ? ' class="ar-last"' : ''}/>`).join('');
     $('arBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : (g.last && g.turn >= 0 ? `<span>${S.nameOf(g.last.p)} scored ${g.last.pts}</span>` : '');
     $('arAct').hidden = !S.turn; drawA();
-    $('arHint').textContent = S.turn ? 'Tap the target where you want to aim. The wind will push your arrow, so aim the opposite way to cancel it. Then press Release arrow.' : '';
+    $('arHint').textContent = S.turn ? 'Tap the target to set your aim, against the wind. Your bow arm wobbles and tires, so press Release arrow (or Enter) as the cross drifts over your spot.' : '';
     return '';
   },
 };
-function drawA() { $('arAim').innerHTML = aAim ? `<g stroke="#fff" stroke-width="0.012"><circle cx="${aAim.x}" cy="${aAim.y}" r="0.05" fill="none"/><line x1="${aAim.x - 0.09}" y1="${aAim.y}" x2="${aAim.x + 0.09}" y2="${aAim.y}"/><line x1="${aAim.x}" y1="${aAim.y - 0.09}" x2="${aAim.x}" y2="${aAim.y + 0.09}"/></g>` : ''; if ($('arGo')) $('arGo').disabled = !(SA && SA.turn && aAim); }
+function drawA() { $('arAim').innerHTML = aAim ? reticle(live(aAim), aAim) : ''; if ($('arGo')) $('arGo').disabled = !(SA && SA.turn && aAim); if (aAim) swayLoop(() => { if (!aAim || !$('arAim')) return false; $('arAim').innerHTML = reticle(live(aAim), aAim); return true; }); }
 
 /* ----- 3D range: target in a field ----- */
 function makeArrow(col) {
@@ -323,13 +333,14 @@ function archery3d(box, S) {
   }
   s.onTap(e => {
     if (!SS || !SS.turn) return; const h = s.pick(e, [hit]); if (!h.length) return;
-    const p = h[0].point; aAim = { x: p.x / TR, y: (TY - p.y) / TR }; drawA(); paint();
+    const p = h[0].point; aAim = { x: p.x / TR, y: (TY - p.y) / TR }; SWAY.reset(0.055); drawA(); paint();
   });
-  function paint() { ch.visible = !!(aAim && SS && SS.turn); if (aAim) ch.position.set(aAim.x * TR, TY - aAim.y * TR, 0.1); s.hint(SS && SS.turn ? (aAim ? 'Press Release arrow. The wind will push your arrow.' : 'Look at the wind socks, then tap the target where you want to aim.') : ''); }
+  function paint() { ch.visible = !!(aAim && SS && SS.turn); if (aAim) { const o = live(aAim); ch.position.set(o.x * TR, TY - o.y * TR, 0.1); } s.hint(SS && SS.turn ? (aAim ? 'Press Release arrow as the cross drifts over your spot. Your arm wobbles and the wind pushes.' : 'Look at the wind socks, then tap the target where you want to aim.') : ''); }
   s.on((dt, t) => {
     const g = SS.V.g, w = g.wind || { dx: 0, dy: 0 }, str = Math.min(1, Math.abs(w.dx) / 0.12);
     socks.forEach((p, i) => { p.rotation.y = w.dx >= 0 ? 0 : Math.PI; p.rotation.z = -(1 - str) * 1.25 + Math.sin(t * 7 + i) * 0.05 * (0.3 + str); });
     people.forEach((pp, i) => { const act = g.turn === i && !g.over, ar = pp.userData.arms; const v = act ? -1.45 : 0.05; ar[0].rotation.x += (v - ar[0].rotation.x) * Math.min(1, dt * 5); if (!act) ar[1].rotation.x += (0.05 - ar[1].rotation.x) * Math.min(1, dt * 5); else if (!s.tweens.length) ar[1].rotation.x += (-1.45 - ar[1].rotation.x) * Math.min(1, dt * 5); });
+    if (aAim && SS.turn) paint();
     fp.visible = !!SS.turn && s.view === 'aim'; fp.position.y = Math.sin(t * 1.3) * 0.01;
   });
   s.onView = n => { people.forEach((pp, i) => { pp.visible = !(n === 'aim' && i === SS.me && SS.turn); }); };
@@ -351,7 +362,7 @@ Club.register({
   rules: `<p><b>Goal:</b> score the most points with your arrows. Each player shoots ${ENDS * PER_END} arrows.</p>
     <ol><li>A round target has ten rings. The gold centre scores 10, the outer white ring scores 1, and missing the target scores 0.</li>
     <li>Players take turns shooting one arrow at a time. For each arrow, a new <b>wind</b> is shown above the target: how far it will push your arrow left, right, up or down.</li>
-    <li>Tap the target to place your aim, then press <b>Release arrow</b>. The wind pushes your arrow, and it lands with a little wobble. Aim <b>against</b> the wind to cancel it out: if the wind pushes 2 rings right, aim 2 rings left of the centre.</li>
+    <li>Tap the target to place your aim, then press <b>Release arrow</b>. Your arm wobbles and gets tired the longer you hold, and the wind pushes your arrow, so time your release. Aim <b>against</b> the wind to cancel it out: if the wind pushes 2 rings right, aim 2 rings left of the centre.</li>
     <li>Your arrows stay on the target, shown in your colour.</li>
     <li>After ${ENDS * PER_END} arrows each, the highest total wins the pot. Ties share it.</li>
     <li>Each player puts in ${ANTE} free chips. Chips have no cash value.</li></ol>`,

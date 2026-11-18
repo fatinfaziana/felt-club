@@ -8,7 +8,7 @@ rd = lambda p: (src / p).read_text()
 
 css = rd("css/club.css") + "\n" + rd("css/games.css")
 games = ["poker", "bigtwo", "rush", "blackjack", "puzzle", "hangman", "fourinrow", "checkers", "ladders", "tictactoe", "memory", "codebreaker", "numberhunt", "bluffdice", "nim", "rps", "patternmem", "sealed", "hilo", "quiz", "reversi", "gomoku", "mancala", "dotsboxes", "chess", "sudoku", "dice", "chipgames", "aim", "casino", "casino2", "golf", "cue", "cueui", "modes"]
-js = rd("lib.js") + "\n" + rd("covers.js") + "\n" + rd("three3d.js") + "\n" + "\n".join(rd(f"games/{g}.js") for g in games) + "\n" + rd("core.js")
+js = rd("lib.js") + "\n" + rd("covers.js") + "\n" + rd("sfx.js") + "\n" + rd("three3d.js") + "\n" + "\n".join(rd(f"games/{g}.js") for g in games) + "\n" + rd("core.js")
 
 page = f"""<title>Felt Club</title>
 <meta name="claude:viewport-fit-sides" content="cover">

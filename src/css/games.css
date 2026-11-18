@@ -324,3 +324,15 @@
 @media (max-width: 640px) { .s3d-hint { display: none; } } .plate { max-width: 170px; }
 .s3d-views button[data-z] { padding: 5px 9px; font-size: 14px; line-height: 1; }
 .s3d canvas { cursor: grab; } .s3d canvas:active { cursor: grabbing; }
+
+/* mancala pebbles */
+.mc-p, .mc-s { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #2a170d 0%, #4a2a1b 75%); box-shadow: inset 0 4px 10px rgba(0,0,0,.65); }
+.mc-p.ok { background: radial-gradient(circle at 50% 40%, #3a2012 0%, #6a4028 80%); box-shadow: inset 0 4px 10px rgba(0,0,0,.55), 0 0 0 2px var(--gold); }
+.mc-s.me { background: radial-gradient(ellipse at 50% 40%, #2a170d 0%, #5a3624 85%); }
+.stone { position: absolute; border-radius: 50%; background: radial-gradient(circle at 32% 28%, #fff9 0, transparent 38%), radial-gradient(circle at 50% 55%, var(--sc) 55%, rgba(0,0,0,.38) 120%); box-shadow: 0 1.5px 2px rgba(0,0,0,.6); pointer-events: none; }
+.mc-p b, .mc-s b { position: absolute; right: 6%; bottom: 4%; z-index: 2; font-size: clamp(10px, 2.6vw, 13px); background: rgba(20,10,5,.7); border-radius: 99px; padding: 0 6px; line-height: 1.5; }
+.powrow{display:flex;align-items:center;gap:10px;justify-content:center;margin:2px 0 4px;font-weight:600}
+.powrow input[type=range]{flex:1;max-width:320px;accent-color:#f2b441}
+.powrow b{min-width:44px;text-align:right}
+.powbar{height:6px;border-radius:4px;background:rgba(255,255,255,.12);max-width:380px;margin:0 auto 6px;overflow:hidden}
+.powbar i{display:block;height:100%;width:50%;background:#f2b441;transition:width .1s}

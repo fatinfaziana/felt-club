@@ -3,7 +3,7 @@
     <h1 class="brand"><a href="#" id="brandLink">Felt Club</a><small id="brandSub">Card games</small></h1>
     <div class="meta">
       <button type="button" class="nick" id="nickBtn" aria-label="Change your name">Playing as <b id="nickName"></b><span>Change</span></button>
-      <span id="roundNo"></span>
+      <button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><span id="roundNo"></span>
       <span class="free">Play chips only. No real money.</span>
     </div>
   </header>
@@ -43,8 +43,8 @@
 
       <div class="modes" id="modes" role="group" aria-label="How do you want to play?">
         <button type="button" class="mode" data-mode="solo" aria-pressed="true"><b>Solo</b><span>Play with computers</span></button>
-        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite or join</span></button>
-        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Choose the size</span></button>
+        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite by username</span></button>
+        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Open to anyone</span></button>
       </div>
 
       <div class="modebody" id="mSolo">
@@ -55,10 +55,13 @@
       </div>
 
       <div class="modebody" id="mFriends" hidden>
-        <h3>How many friends are joining?</h3>
-        <div class="chips-pick" id="frChips" role="group" aria-label="Number of friends"></div>
-        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Create a table for friends</button></div>
+        <h3>Your friends</h3>
+        <form class="addfr" id="addFrForm" autocomplete="off"><input id="frIn" maxlength="16" placeholder="Friend's username" aria-label="Friend's username"><button type="submit" class="b small gold">Add friend</button></form>
+        <p class="hint" id="frNote"></p>
+        <div class="chips-pick" id="frList" role="group" aria-label="Your friends. Tick the ones to invite"></div>
+        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Invite friends</button></div>
         <p class="hint" id="friendNote"></p>
+        <div id="invitesBox"></div>
         <div id="joinSlot"></div>
       </div>
 
@@ -84,7 +87,7 @@
   <section id="room" hidden>
     <div class="roombar">
       <div><b id="roomName"></b><span id="roomSub"></span></div>
-      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
     </div>
     <div class="notice" id="notice" hidden></div>
     <div class="invite" id="invite" hidden>

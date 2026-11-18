@@ -57,11 +57,22 @@ function view(G) {
   return { b: M.b, turn: M.over ? -1 : M.turn, over: M.over, winner: M.winner, last: M.last, delta: G.players.map(p => (M.over ? p.delta || 0 : 0)) };
 }
 let S0 = null;
+// real pebbles: glossy stones scattered in each pit (deterministic, so they do not jump about between redraws)
+const STONE = ['#f3ead8', '#c9c2b4', '#8fb8a8', '#d9b38c', '#a8a29a', '#e8d2a6', '#7f9bb0'];
+function stones(n, seed, wide) {
+  const d = Math.max(10, Math.min(30, 72 / Math.sqrt(n + 1))), out = [];
+  for (let k = 0; k < n; k++) {
+    const a = k * 2.399963 + seed * 1.7, r = Math.sqrt((k + 0.5) / n) * (wide ? 40 : 34), x = 50 + Math.cos(a) * r * (wide ? 0.62 : 1), y = 50 + Math.sin(a) * r * (wide ? 1.15 : 1);
+    const c = STONE[(seed * 3 + k * 5) % STONE.length], rot = (k * 47 + seed * 31) % 180;
+    out.push(`<i class="stone" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${d}%;height:${(d * (wide ? 0.62 : 0.82)).toFixed(1)}%;--sc:${c};transform:translate(-50%,-50%) rotate(${rot}deg)"></i>`);
+  }
+  return out.join('');
+}
 function draw() {
   const S = S0, g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me, can = S.turn ? legal(g.b, me) : [];
-  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp"><b>${g.b[opp * 7 + p]}</b></div>`).join('');
-  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds"><b>${g.b[me * 7 + p]}</b></button>`).join('');
-  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store"><b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store"><b>${g.b[store(me)]}</b></div>`;
+  const top = [5, 4, 3, 2, 1, 0].map(p => `<div class="mc-p opp">${stones(g.b[opp * 7 + p], opp * 7 + p)}<b>${g.b[opp * 7 + p]}</b></div>`).join('');
+  const bot = [0, 1, 2, 3, 4, 5].map(p => `<button type="button" class="mc-p${can.includes(p) ? ' ok' : ''}${g.last === me * 7 + p ? ' last' : ''}" data-p="${p}" ${can.includes(p) ? '' : 'disabled'} aria-label="Your pit ${p + 1}, ${g.b[me * 7 + p]} seeds">${stones(g.b[me * 7 + p], me * 7 + p)}<b>${g.b[me * 7 + p]}</b></button>`).join('');
+  $('mc').innerHTML = `<div class="mc-s opp" aria-label="Opponent store">${stones(g.b[store(opp)], store(opp), true)}<b>${g.b[store(opp)]}</b></div><div class="mc-rows"><div class="mc-r">${top}</div><div class="mc-r">${bot}</div></div><div class="mc-s me" aria-label="Your store">${stones(g.b[store(me)], store(me), true)}<b>${g.b[store(me)]}</b></div>`;
 }
 const ui = {
   mount(stage) {
