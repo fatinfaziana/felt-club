@@ -90,6 +90,12 @@ function draw() {
     if (g.last && g.last.i === i && !g.last.ok) cls.push('bad');
     return `<button type="button" class="${cls.join(' ')}" data-i="${i}" aria-label="Row ${r + 1}, column ${c + 1}${v ? ', ' + v : ', empty'}">${v || ''}</button>`;
   }).join('');
+  pad();
+}
+function pad() {
+  const my = !!(S0 && S0.turn);
+  document.querySelectorAll('#suPad .su-d').forEach(b => { b.disabled = !my || cell < 0; });
+  $('suHint').textContent = my ? (cell < 0 ? 'Your turn. Tap an empty square, then a number.' : 'Now tap the number (or press a key 1 to 9).') : '';
 }
 const ui = {
   mount(stage, ctl) {
@@ -106,8 +112,6 @@ const ui = {
     $('suSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, doing: 'Placing…', extra: i => `${g.score[i]} point${Math.abs(g.score[i]) === 1 ? '' : 's'}` });
     draw();
     $('suBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') : '';
-    document.querySelectorAll('#suPad .su-d').forEach(b => { b.disabled = !S.turn || cell < 0; });
-    $('suHint').textContent = S.turn ? (cell < 0 ? 'Your turn. Tap an empty square, then a number.' : 'Now tap the number (or press a key 1 to 9).') : '';
     return '';
   },
 };

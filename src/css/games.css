@@ -241,7 +241,7 @@
 .ch-p { font-size: clamp(26px, 8.2vw, 46px); line-height: 1; } .ch-p.w { color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000, 0 1px 3px #000; } .ch-p.b { color: #1a1220; text-shadow: 0 0 1px rgba(255,255,255,.4); }
 
 /* sudoku */
-.su { display: grid; grid-template-columns: repeat(9, 1fr); width: min(100%, 440px); aspect-ratio: 1; border: 3px solid var(--cream); background: var(--rail-hi); gap: 1px; }
+.su { display: grid; grid-template-columns: repeat(9, 1fr); width: min(100%, 440px, max(220px, calc(100vh - 430px))); aspect-ratio: 1; border: 3px solid var(--cream); background: var(--rail-hi); gap: 1px; }
 .su-c { border: 0; padding: 0; background: var(--room); color: var(--gold); font: 700 clamp(15px, 4.8vw, 24px) var(--body); display: grid; place-items: center; cursor: pointer; min-width: 0; }
 .su-c.given { color: var(--cream); background: var(--rail); } .su-c.rel { background: #2a2038; } .su-c.given.rel { background: #34283f; }
 .su-c.same { background: rgba(242,180,65,.25); } .su-c.sel { background: var(--gold); color: var(--gold-ink); } .su-c.bad { background: rgba(207,63,55,.45); }
