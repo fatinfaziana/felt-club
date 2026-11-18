@@ -30,6 +30,7 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Dice and party:** Yacht Dice, Farkle, Stop the Clock, Fast Fingers, Steady Hand, Quick Count
 - **More arcade:** Bubble Pop, Tap Tiles, Gold Miner, Balloon Cannon
 - **Also:** Solitaire (cards), Dominoes (board), Air Hockey (sports), Backgammon, Nine Men's Morris (board), Peg Solitaire, Sokoban (puzzle)
+- **Events:** the 🎉 Events button runs a game night or tournament in person: add players, record each game's finishing order, keep one leaderboard, show it on a big screen and share a QR code so everyone can open the site on their phone. Saved on that device only.
 - **Play with friends:** pick a game, choose *Create a table*, type how many players, and send the link to everyone. Rooms connect browser to browser, so keep the host's page open.
 - **Trivia:** Capital Cities, Name the Animal, Famous Places, Chemical Elements
 - Most games have **Easy, Medium and Hard** levels.

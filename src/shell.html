@@ -3,7 +3,7 @@
     <h1 class="brand"><a href="#" id="brandLink">Game Hub</a><small id="brandSub">Free games</small></h1>
     <div class="meta">
       <button type="button" class="nick" id="nickBtn" aria-label="Change your name">Playing as <b id="nickName"></b><span>Change</span></button>
-      <button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><span id="roundNo"></span>
+      <button type="button" class="ghost" id="evBtn">🎉 Events</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><span id="roundNo"></span>
       <span class="free">Play chips only. No real money.</span>
     </div>
   </header>
@@ -158,6 +158,14 @@
       </div>
     </div>
   </div>
+
+  <div class="guide-bg" id="evDlg" hidden>
+    <div class="guide evbox" role="dialog" aria-modal="true" aria-labelledby="evTitle">
+      <div class="evhead"><h2 id="evTitle">Events</h2><button type="button" class="ghost" id="evClose">Close</button></div>
+      <div id="evBody"></div>
+    </div>
+  </div>
+  <div class="evbig" id="evBigScr" hidden></div>
 
   <div class="guide-bg" id="nickDlg" hidden>
     <form class="guide nickbox" id="nickForm" autocomplete="off" role="dialog" aria-modal="true" aria-labelledby="nkTitle">
