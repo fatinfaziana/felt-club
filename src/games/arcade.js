@@ -41,7 +41,7 @@ function register(def) {
     io.render(); await io.sleep(400);
     for (let k = 0; k < n; k++) {
       const i = (A.turn + k) % n; A.turn = i; io.render();
-      const a = await io.turn(P[i], { lv }, { auto: { t: 'done', score: 0 }, timeout: 240000,
+      const a = await io.turn(P[i], { lv }, { auto: { t: 'done', score: 0 }, timeout: (def.limit || 240) * 1000,
         validate: x => (x && x.t === 'done' && Number.isFinite(x.score) ? { t: 'done', score: clamp(Math.round(x.score), 0, 99999) } : null),
         bot: () => ({ t: 'done', score: Math.round(def.par * LV(lv, 0.55, 0.9, 1.25) * R(0.7, 1.3)) }), think: 2200 + Math.random() * 1500 });
       A.sc[i] = a.score; io.ev(P[i], `scores ${a.score}`, `score ${a.score}`); io.render(); await io.sleep(500);

@@ -2,7 +2,7 @@
 
 **Play it now: https://fatinfaziana.github.io/game-hub/**
 
-A free collection of 110+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
+A free collection of 115+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
 
 Works on laptops, tablets and phones, in any modern browser.
 
@@ -29,7 +29,8 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Word, math and mind:** Crossword, Word Builder, Word Search, Math Dash, Colour Clash, Odd Tile Out
 - **Dice and party:** Yacht Dice, Farkle, Stop the Clock, Fast Fingers, Steady Hand, Quick Count
 - **More arcade:** Bubble Pop, Tap Tiles, Gold Miner, Balloon Cannon
-- **Also:** Solitaire (cards), Dominoes (board), Air Hockey (sports)
+- **Also:** Solitaire (cards), Dominoes (board), Air Hockey (sports), Backgammon, Nine Men's Morris (board), Peg Solitaire, Sokoban (puzzle)
+- **Play with friends:** pick a game, choose *Create a table*, type how many players, and send the link to everyone. Rooms connect browser to browser, so keep the host's page open.
 - **Trivia:** Capital Cities, Name the Animal, Famous Places, Chemical Elements
 - Most games have **Easy, Medium and Hard** levels.
 
