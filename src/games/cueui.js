@@ -304,7 +304,7 @@
 
   /* ===================== register ===================== */
   Club.register({
-    id: 'pool', cat: 'aim', name: 'Pool', tag: 'Eight-ball for two. Pot your group, then the 8 ball.', min: 2, max: 2, soloBots: 1, roundWord: 'Rack',
+    id: 'pool', cat: 'aim', name: 'Eight-Ball Pool', tag: 'Eight-ball for two. Pot your group, then the 8 ball.', min: 2, max: 2, soloBots: 1, roundWord: 'Rack',
     art: () => ['8', '●', '○'].map(c => `<div class="ltile">${c}</div>`).join(''),
     rules: `<p><b>Goal:</b> pot all the balls of your group, then sink the 8 ball.</p>
       <ol><li>Player 1 breaks. The table is <b>open</b> until someone pots a ball. The first ball potted decides your group: <b>solids</b> (1 to 7) or <b>stripes</b> (9 to 15).</li>

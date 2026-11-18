@@ -15,12 +15,14 @@ Works on laptops, tablets and phones, in any modern browser.
 
 ## Games
 
-- **Cards:** Texas Hold'em, Big Two, Colour Rush, Blackjack, Hi-Lo and more
-- **Board:** Chess, Checkers, Reversi, Gomoku, Four in a Row, Tic-Tac-Toe, Mancala, Dots & Boxes, Snakes & Ladders
-- **Dice:** Pig, Bankroll, Shut the Box, Bluff Dice, Craps, Sic Bo
-- **Casino-style (chips only):** Roulette, Baccarat, Video Poker, Slots, Keno, Let It Ride and others
-- **Aim:** Pool, Carrom, Mini Golf, Archery, Darts
-- **Mind & word:** Sudoku, Quiz, Code Breaker, Hangman, Memory, Number Hunt, puzzles
+- **Cards:** Texas Hold'em, Dai Di (Big Two), Uno, Crazy Eights, Go Fish, Old Maid, Cheat, Blackjack, Higher or Lower and more
+- **Board:** Chess, Checkers, Reversi, Gomoku, Connect Four, Tic-Tac-Toe, Mancala, Dots and Boxes, Snakes and Ladders
+- **Dice:** Pig, Bank, Shut the Box, Liar's Dice, Craps, Sic Bo
+- **Casino-style (chips only):** Roulette, Baccarat, Video Poker, Slot Machine, Keno, Let It Ride and others
+- **Aim:** Eight-Ball Pool, Carrom, Mini Golf, Archery, Darts
+- **Word:** Scrabble, Hangman, Word Scramble
+- **Maths:** 2048, Make 24, Quick Sums, Number Patterns
+- **Mind:** Sudoku, Mastermind, Memory, Simon, Nim, Trivia Quiz
 
 ## Run locally
 

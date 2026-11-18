@@ -1,21 +1,21 @@
-/* ---------- Sound: synthesized effects and arcade music (WebAudio, no files) ---------- */
+/* ---------- Sound: synthesized effects (WebAudio, no files) ---------- */
 const Snd = (() => {
   const KEY = 'feltclub.snd';
   const st = Object.assign({ sfx: true, sv: 0.7, mus: true, mv: 0.35 }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} };
-  let ctx = null, sfxG, musG, nbuf, timer = 0, playing = false, nextT = 0, step = 0, started = false;
+  let ctx = null, sfxG, nbuf;
   const AC = window.AudioContext || window.webkitAudioContext;
   function init() {
     if (ctx || !AC) return !!ctx;
     try {
       ctx = new AC(); const comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
-      sfxG = ctx.createGain(); musG = ctx.createGain(); sfxG.connect(comp); musG.connect(comp);
+      sfxG = ctx.createGain(); sfxG.connect(comp);
       nbuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       vols();
     } catch { ctx = null; }
     return !!ctx;
   }
-  function vols() { if (!ctx) return; sfxG.gain.value = st.sfx ? st.sv * 0.9 : 0; musG.gain.value = st.mus ? st.mv * 0.35 : 0; }
+  function vols() { if (!ctx) return; sfxG.gain.value = st.sfx ? st.sv * 0.9 : 0; }
   const midi = m => 440 * Math.pow(2, (m - 69) / 12);
   function tone(f, t, d, o) {
     o = o || {}; const os = ctx.createOscillator(), g = ctx.createGain(); os.type = o.type || 'square'; os.frequency.setValueAtTime(f, t); if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + d);
@@ -58,54 +58,26 @@ const Snd = (() => {
     try { FX[name](ctx.currentTime + 0.01 + (delay || 0)); } catch {}
   }
 
-  /* ----- arcade music: a bouncy minor-key loop with chiptune voices ----- */
-  const CH = [[45, [0, 3, 7]], [41, [0, 4, 7]], [48, [0, 4, 7]], [43, [0, 4, 7]]];
-  const PENT = [0, 3, 5, 7, 10, 12, 15];
-  let motifs = null;
-  const makeMotifs = () => [0, 1].map(() => Array.from({ length: 16 }, (_, i) => (i % 2 === 0 && Math.random() < 0.75) || Math.random() < 0.12 ? PENT[Math.floor(Math.random() * PENT.length)] : -1));
-  const SD = 60 / 150 / 4;   // sixteenth note
-  function sched(s, t) {
-    const bar = Math.floor(s / 16) % 4, i = s % 16, ch = CH[bar], phrase = Math.floor(s / 64);
-    if (!motifs || (s % 128 === 0)) motifs = makeMotifs();
-    if (i === 0 || i === 8 || (i === 10 && bar % 2)) { tone(150, t, 0.14, { type: 'sine', vol: 0.9, to: 45, dest: musG }); }
-    if (i === 4 || i === 12) noise(t, 0.1, { f: 2200, q: 0.6, vol: 0.3, dest: musG });
-    if (i % 2 === 0) noise(t, 0.03, { f: 7000, type: 'highpass', vol: i % 4 === 2 ? 0.16 : 0.08, dest: musG });
-    if ([0, 3, 6, 8, 11, 14].includes(i)) tone(midi(ch[0] + (i === 8 || i === 14 ? 12 : 0)), t, SD * 2.2, { type: 'triangle', vol: 0.55, dest: musG });
-    tone(midi(ch[0] + 24 + ch[1][i % 3]), t, SD * 0.9, { type: 'square', vol: 0.07, dest: musG });
-    const m = motifs[(bar + (phrase % 2)) % 2][i];
-    if (m >= 0) tone(midi(69 + m + (bar === 1 ? -4 : bar === 3 ? -2 : 0)), t, SD * 1.8, { type: 'square', vol: 0.15, dest: musG });
-  }
-  function pump() { if (!playing) return; while (nextT < ctx.currentTime + 0.25) { sched(step++, nextT); nextT += SD; } }
-  function musicOn() {
-    if (playing || !st.mus || !init()) return; if (ctx.state === 'suspended') ctx.resume();
-    playing = true; nextT = ctx.currentTime + 0.08; vols(); timer = setInterval(pump, 60); pump();
-  }
-  function musicOff() { playing = false; clearInterval(timer); }
-  function sync() { if (st.mus && started && !document.hidden) musicOn(); else musicOff(); vols(); }
-  document.addEventListener('visibilitychange', sync);
-  const gesture = () => { started = true; init(); sync(); };
-  ['pointerdown', 'keydown', 'touchstart'].forEach(e => document.addEventListener(e, gesture, { once: false, passive: true }));
+  const gesture = () => { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); };
+  ['pointerdown', 'keydown', 'touchstart'].forEach(e => document.addEventListener(e, gesture, { passive: true }));
+  const sync = () => vols();
 
   /* ----- settings panel ----- */
   function panel() {
     if (document.getElementById('sndPanel')) return;
     const d = document.createElement('div'); d.id = 'sndPanel'; d.className = 'sndpanel'; d.hidden = true; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Sound settings');
-    d.innerHTML = `<div class="snd-row"><b>Music</b><button type="button" class="ghost" id="musTog"></button></div><input type="range" id="musVol" min="0" max="100" aria-label="Music volume">
-      <div class="snd-row"><b>Sound effects</b><button type="button" class="ghost" id="sfxTog"></button></div><input type="range" id="sfxVol" min="0" max="100" aria-label="Sound effects volume">
+    d.innerHTML = `<div class="snd-row"><b>Sound effects</b><button type="button" class="ghost" id="sfxTog"></button></div><input type="range" id="sfxVol" min="0" max="100" aria-label="Sound effects volume">
       <button type="button" class="ghost snd-close" id="sndClose">Close</button>`;
     document.body.appendChild(d); paintPanel();
-    d.querySelector('#musTog').onclick = () => { st.mus = !st.mus; save(); sync(); paintPanel(); };
     d.querySelector('#sfxTog').onclick = () => { st.sfx = !st.sfx; save(); vols(); paintPanel(); p('ding'); };
-    d.querySelector('#musVol').oninput = e => { st.mv = e.target.value / 100; if (st.mv > 0 && !st.mus) st.mus = true; save(); sync(); paintPanel(true); };
     d.querySelector('#sfxVol').oninput = e => { st.sv = e.target.value / 100; save(); vols(); };
     d.querySelector('#sfxVol').onchange = () => p('chip');
     d.querySelector('#sndClose').onclick = () => { d.hidden = true; };
   }
-  function paintPanel(keep) {
-    const d = document.getElementById('sndPanel'); if (!d) return;
-    d.querySelector('#musTog').textContent = st.mus ? 'Pause music' : 'Play music'; d.querySelector('#sfxTog').textContent = st.sfx ? 'Turn off' : 'Turn on';
-    if (!keep) d.querySelector('#musVol').value = Math.round(st.mv * 100); d.querySelector('#sfxVol').value = Math.round(st.sv * 100);
-    document.querySelectorAll('.sndbtn').forEach(b => { b.textContent = st.mus || st.sfx ? '♪ Sound' : '♪ Muted'; b.setAttribute('aria-pressed', String(!!(st.mus || st.sfx))); });
+  function paintPanel() {
+    const d = document.getElementById('sndPanel');
+    if (d) { d.querySelector('#sfxTog').textContent = st.sfx ? 'Mute' : 'Unmute'; d.querySelector('#sfxVol').value = Math.round(st.sv * 100); }
+    document.querySelectorAll('.sndbtn').forEach(b => { b.textContent = st.sfx ? '♪ Sound' : '♪ Muted'; b.setAttribute('aria-pressed', String(!!st.sfx)); });
   }
   document.addEventListener('click', e => {
     const b = e.target.closest && e.target.closest('.sndbtn');

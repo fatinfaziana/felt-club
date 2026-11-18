@@ -50,7 +50,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'numberhunt', cat: 'math', name: 'Number Hunt', tag: 'A big-group game: find the secret number first.', min: 2, max: 10, soloBots: 3, roundWord: 'Game',
+  id: 'numberhunt', cat: 'math', name: 'Guess the Number', tag: 'A big-group game: find the secret number first.', min: 2, max: 10, soloBots: 3, roundWord: 'Game',
   art: () => ['?', '42', '?'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who guesses the secret number. Works for a big group, up to 10 players.</p>
     <ol><li>The computer picks a secret number from 1 to ${TOP}.</li>

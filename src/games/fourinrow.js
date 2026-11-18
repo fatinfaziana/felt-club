@@ -115,7 +115,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'fourinrow', cat: 'board', name: 'Four in a Row', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
+  id: 'fourinrow', cat: 'board', name: 'Connect Four', tag: 'Drop discs and line up four before your opponent.', min: 2, max: 2, soloBots: 1, roundWord: 'Game',
   art: () => ['p0', 'p1', 'p0'].map(c => `<div class="disc ${c}"></div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to get four of your discs in a row: across, up and down, or diagonally.</p>
     <ol><li>Two players take turns. You are gold or cream; the colour is shown beside your name.</li>

@@ -201,7 +201,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'bigtwo', cat: 'card', name: 'Tai Ti', tag: 'Big Two. Empty your hand first, 2s are the highest.', min: 2, max: 4, soloBots: 3, roundWord: 'Round',
+  id: 'bigtwo', cat: 'card', name: 'Dai Di (Big Two)', tag: 'Also called Big Two. Empty your hand first, 2s are the highest.', min: 2, max: 4, soloBots: 3, roundWord: 'Round',
   art: () => faceHTML('2', '♠', false) + faceHTML('A', '♥', true) + faceHTML('K', '♣', false),
   rules: `<p><b>Goal:</b> be the first to play all 13 of your cards. Everyone else pays you ${PER_CARD} chips for each card they still hold.</p>
     <ul><li>Card order, low to high: 3 4 5 6 7 8 9 10 J Q K A 2. Suits, low to high: ♦ ♣ ♥ ♠.</li>

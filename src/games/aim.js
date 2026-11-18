@@ -196,7 +196,7 @@ function darts3d(box, S) {
 }
 
 Club.register({
-  id: 'darts', cat: 'aim', name: 'Darts 101', tag: 'Aim, throw and count down from 101 to exactly zero.', min: 1, max: 6, soloBots: 1, roundWord: 'Game',
+  id: 'darts', cat: 'aim', name: 'Darts (101)', tag: 'Aim, throw and count down from 101 to exactly zero.', min: 1, max: 6, soloBots: 1, roundWord: 'Game',
   art: () => ['20', '◎', '3'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the first to bring your score from 101 down to exactly zero.</p>
     <ol><li>Everyone starts on 101. On your turn you throw <b>three darts</b>.</li>

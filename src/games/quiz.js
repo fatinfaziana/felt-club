@@ -96,7 +96,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'quiz', cat: 'group', name: 'Quick Quiz', tag: 'General knowledge for the whole group.', min: 2, max: 10, soloBots: 3, roundWord: 'Quiz',
+  id: 'quiz', cat: 'group', name: 'Trivia Quiz', tag: 'General knowledge for the whole group.', min: 2, max: 10, soloBots: 3, roundWord: 'Quiz',
   art: () => ['?', 'A', '✓'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> answer the most questions correctly. Fits 2 to 10 players.</p>
     <ol><li>Each quiz has ${PER} questions, each with four answers.</li>

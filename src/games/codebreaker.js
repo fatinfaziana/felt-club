@@ -61,7 +61,7 @@ const ui = {
 };
 function drawCur() { $('cbCur').innerHTML = Array.from({ length: LEN }, (_, k) => (k < cur.length ? peg(cur[k]) : '<i class="peg empty"></i>')).join(''); $('cbGo').disabled = cur.length !== LEN; }
 Club.register({
-  id: 'codebreaker', cat: 'mind', name: 'Code Breaker', tag: 'Crack the hidden colour code using the clues.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
+  id: 'codebreaker', cat: 'mind', name: 'Mastermind', tag: 'Crack the hidden colour code using the clues.', min: 2, max: 6, soloBots: 2, roundWord: 'Game',
   art: () => [0, 3, 2].map(c => `<div class="ltile">${peg(c)}</div>`).join(''),
   rules: `<p><b>Goal:</b> be the player who cracks the secret code of ${LEN} colours. Everyone works on the same code and learns from each other’s guesses.</p>
     <ol><li>The computer picks a hidden code of ${LEN} colours from ${COLS}. A colour can appear more than once.</li>

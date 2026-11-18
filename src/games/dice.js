@@ -203,7 +203,7 @@ const bankUI = {
   },
 };
 Club.register({
-  id: 'bankroll', cat: 'dice', name: 'Bankroll', tag: 'Build a shared pot and bank it before a 7 wipes it out.', min: 2, max: 8, soloBots: 3, roundWord: 'Game',
+  id: 'bankroll', cat: 'dice', name: 'Bank', tag: 'Build a shared pot and bank it before a 7 wipes it out.', min: 2, max: 8, soloBots: 3, roundWord: 'Game',
   art: () => [3, 4, 6].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
   rules: `<p><b>Goal:</b> have the biggest banked total after ${ROUNDS} rounds. Two to eight players.</p>
     <ol><li>In each round, two dice are rolled over and over and the total is added to a shared <b>pot</b>.</li>

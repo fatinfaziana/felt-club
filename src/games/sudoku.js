@@ -113,7 +113,7 @@ const ui = {
 };
 function put(d) { if (S0 && S0.turn && cell >= 0 && !S0.V.g.g[cell]) { const i = cell; cell = -1; S0.send({ t: 'place', i, d }); } }
 Club.register({
-  id: 'sudoku', cat: 'mind', name: 'Sudoku Duel', tag: 'Fill the grid together. Right numbers score, wrong ones cost.', min: 1, max: 4, soloBots: 1, roundWord: 'Puzzle',
+  id: 'sudoku', cat: 'mind', name: 'Sudoku', tag: 'Fill the grid together. Right numbers score, wrong ones cost.', min: 1, max: 4, soloBots: 1, roundWord: 'Puzzle',
   art: () => ['5', '3', '7'].map(c => `<div class="ltile num">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> help finish the Sudoku grid and score more points than the others. You can play alone or with up to 3 others.</p>
     <ol><li>A Sudoku grid is shown with some numbers filled in. Every row, every column and every 3 × 3 box must contain the numbers 1 to 9 once each.</li>

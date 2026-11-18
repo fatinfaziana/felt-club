@@ -217,7 +217,7 @@ const ui = {
 };
 
 Club.register({
-  id: 'rush', cat: 'card', name: 'Colour Rush', tag: 'Match colours and numbers. First empty hand wins.', min: 2, max: 6, soloBots: 3, roundWord: 'Round',
+  id: 'rush', cat: 'card', name: 'Uno', tag: 'Match colours and numbers. First empty hand wins.', min: 2, max: 6, soloBots: 3, roundWord: 'Round',
   art: () => `<div class="rcard rc0 art"><b>7</b></div><div class="rcard rc4 art"><b>★</b></div><div class="rcard rc3 art"><b>⇄</b></div>`,
   rules: `<p><b>Goal:</b> be the first to play every card. Everyone else pays you the points left in their hand.</p>
     <ul><li>Everyone starts with 7 cards. On your turn, play a card that matches the top card by <b>colour</b> or by <b>number or symbol</b>.</li>

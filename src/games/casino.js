@@ -71,7 +71,7 @@ const slotUI = {
   },
 };
 Club.register({
-  id: 'slots', cat: 'casino', name: 'Slots', tag: 'Pull the lever and line up the symbols.', min: 1, max: 8, soloBots: 2, roundWord: 'Spin',
+  id: 'slots', cat: 'casino', name: 'Slot Machine', tag: 'Pull the lever and line up the symbols.', min: 1, max: 8, soloBots: 2, roundWord: 'Spin',
   art: () => ['🍒', '<b class="sl7">7</b>', '💎'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> line up matching symbols to win free chips. It is pure luck. Chips have no cash value.</p>
     <ol><li>On your turn, tap a stake. The three reels spin and stop one after another.</li>

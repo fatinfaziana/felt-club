@@ -9,6 +9,6 @@ const COVERS = {
   dotsboxes: ['▦', '#4a7ad8', '#142a5e'], chess: ['♞', '#8d5a2f', '#2e1c0e'], sudoku: ['9', '#5a8a9a', '#1a3a46'], pig: ['🐷', '#e08aa0', '#5a2234'], shutbox: ['📦', '#a07a4a', '#3a2a14'], bankroll: ['💰', '#c8a02a', '#4a3a08'],
   threecard: ['3♥', '#1f6a52', '#0b3326'], caribbean: ['🏝️', '#2aa5c8', '#0d3f4f'], letitride: ['🏇', '#3a8a4a', '#123d1b'], reddog: ['🐕', '#c4503a', '#4a1a10'], baccarat: ['9♦', '#8a1f2a', '#380a10'], videopoker: ['📟', '#3a5ad8', '#101e5e'],
   roulette: ['🎡', '#1a6b3a', '#0a2c18'], sicbo: ['🎲', '#8a1f2a', '#380a10'], craps: ['🎲', '#1f6a52', '#0b3326'], slots: ['🎰', '#7a2fd8', '#2a1060'], keno: ['🎱', '#2b3a6a', '#0f1630'],
-  darts: ['🎯', '#c4372e', '#3a1210'], archery: ['🏹', '#3a8a3a', '#10381a'], minigolf: ['⛳', '#3aa04a', '#10401a'], pool: ['🎱', '#1f7a4a', '#0a3220'], carrom: ['🟤', '#d6b05a', '#5a3f10'],
+  crazy8: ['8♠', '#2a6fb8', '#102a50'], gofish: ['🐟', '#2aa5c8', '#0d3f4f'], oldmaid: ['👵', '#a8508a', '#3f1634'], cheat: ['🤥', '#b8452a', '#4a1a10'], scrabble: ['Aa', '#2a7a4a', '#0e3a22'], g2048: ['2048', '#edc22e', '#6b4a10'], darts: ['🎯', '#c4372e', '#3a1210'], archery: ['🏹', '#3a8a3a', '#10381a'], minigolf: ['⛳', '#3aa04a', '#10401a'], pool: ['🎱', '#1f7a4a', '#0a3220'], carrom: ['🟤', '#d6b05a', '#5a3f10'],
 };
 const coverHTML = id => { const c = COVERS[id] || ['🎮', '#4a3a6a', '#1a1230']; return `<div class="cover" style="--c1:${c[1]};--c2:${c[2]}"><span>${c[0]}</span></div>`; };

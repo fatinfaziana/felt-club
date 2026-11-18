@@ -63,7 +63,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'memory', cat: 'mind', name: 'Memory Match', tag: 'Flip cards and remember where the pairs are.', min: 2, max: 6, soloBots: 1, roundWord: 'Game',
+  id: 'memory', cat: 'mind', name: 'Memory', tag: 'Flip cards and remember where the pairs are.', min: 2, max: 6, soloBots: 1, roundWord: 'Game',
   art: () => ['🍎', '⭐', '🍎'].map(c => `<div class="ltile">${c}</div>`).join(''),
   rules: `<p><b>Goal:</b> collect the most pairs. Sixteen cards lie face down: eight pairs of pictures.</p>
     <ol><li>On your turn, flip one card, then flip a second card.</li>

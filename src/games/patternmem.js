@@ -72,7 +72,7 @@ const ui = {
   },
 };
 Club.register({
-  id: 'patternmem', cat: 'mind', name: 'Pattern Memory', tag: 'Repeat the colour pattern and add one. Last player in wins.', min: 2, max: 8, soloBots: 2, roundWord: 'Game',
+  id: 'patternmem', cat: 'mind', name: 'Simon', tag: 'Repeat the colour pattern and add one. Last player in wins.', min: 2, max: 8, soloBots: 2, roundWord: 'Game',
   art: () => [0, 2, 3].map(c => `<div class="ltile"><i class="peg c${c}"></i></div>`).join(''),
   rules: `<p><b>Goal:</b> be the last player who can still remember the pattern. Works for 2 to 8 players.</p>
     <ol><li>The first player taps any one colour. That starts the pattern.</li>

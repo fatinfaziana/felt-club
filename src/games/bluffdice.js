@@ -84,7 +84,7 @@ function draw() {
   $('bdHint').textContent = b ? 'Raise the number or the face, or call liar if you think the bid is too high.' : 'Say how many dice of one face you think are on the whole table.';
 }
 Club.register({
-  id: 'bluffdice', cat: 'dice', name: 'Bluff Dice', tag: 'Bid, bluff and catch the liar. Great for a crowd.', min: 2, max: 8, soloBots: 3, roundWord: 'Round',
+  id: 'bluffdice', cat: 'dice', name: 'Liar\'s Dice', tag: 'Bid, bluff and catch the liar. Great for a crowd.', min: 2, max: 8, soloBots: 3, roundWord: 'Round',
   art: () => [2, 5, 6].map(c => `<div class="ltile">${FACE[c]}</div>`).join(''),
   rules: `<p><b>Goal:</b> win the round by making a bid that is true, or by catching someone whose bid is not. Up to 8 players.</p>
     <ol><li>Everyone rolls ${DICE} dice in secret. Only you can see yours.</li>
