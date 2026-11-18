@@ -384,6 +384,26 @@ body { margin: 0; }
 .table:has(.s3dbox) .banner:empty { display: none; }
 .table:has(.s3dbox) .seat .tag, .table:has(.s3dbox) .plate { white-space: nowrap; }
 
+/* ===== card & casino rooms: 3D room behind, 2D table in front ===== */
+#stage.amb { overflow: hidden; }
+.ambwrap { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; border: 2px solid var(--rail); background: #0c0810; }
+.ambbg { position: absolute; inset: 0; }
+.ambbg .s3d { position: absolute; inset: 0; width: auto; height: auto; max-width: none; max-height: none; aspect-ratio: auto; border: 0; border-radius: 0; }
+.ambbg .s3d-views, .ambbg .s3d-hint { display: none; }
+.ambfg { position: relative; z-index: 1; margin: auto auto 0; width: 100%; max-width: 780px; max-height: 100%; overflow: auto; padding: 8px 8px 10px; scrollbar-width: thin; }
+.ambfg > .table, .ambfg > section.table { background: radial-gradient(120% 90% at 50% 30%, rgba(26, 98, 68, .62), rgba(10, 46, 33, .74)); border: 3px solid rgba(247, 240, 225, .22); border-radius: 26px; box-shadow: 0 14px 40px rgba(0, 0, 0, .6); padding: 10px clamp(8px, 2vw, 18px) 12px; gap: 10px; }
+
+/* hands: every card fully visible (no stacking), picked card pops up out of the row */
+.bt-hand { --cw: clamp(44px, 9.5vw, 76px); gap: 4px; padding: 22px 6px 6px; }
+.bt-card { margin: 0 2px 4px; position: relative; transition: transform .14s ease; }
+.bt-card:hover { transform: translateY(-8px); }
+.bt-card.sel, .bt-card.sel:hover { transform: translateY(-22px) scale(1.08); z-index: 3; }
+.bt-card.sel .card, .bt-card.sel .rcard { box-shadow: 0 0 0 3px var(--gold), 0 12px 20px rgba(0, 0, 0, .55); }
+.card { box-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
+.seat.hero .cards, #pkHcards { --cw: clamp(54px, 11vw, 84px); gap: 8px; }
+.board { --cw: clamp(48px, 9.5vw, 76px); gap: 6px; }
+.vp-card { transition: transform .14s ease; } .vp-card.held { transform: translateY(-16px); } .vp-card.held .card { box-shadow: 0 0 0 3px var(--gold), 0 10px 16px rgba(0, 0, 0, .5); }
+
 /* ----- Tai Ti and Colour Rush share a row of opponents and a hand of tappable cards ----- */
 .bt-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(8px, 2vw, 20px); }
 .bt-opps .seat { flex: 1 1 96px; max-width: 170px; }
@@ -1131,7 +1151,7 @@ const T3 = (() => {
       const b = e.target.closest('[data-v]'); if (b) s.setView(b.dataset.v);
     };
     // Look around freely: drag to orbit, wheel / pinch / buttons to zoom. Choosing a view button resets it.
-    s.zoomBy = f => { orb.zoom = Math.min(2.6, Math.max(0.3, orb.zoom * f)); s.manual = true; s.zoomed = false; };
+    s.zoomBy = f => { orb.zoom = Math.min(2.6, Math.max(s.minZoom || 0.3, orb.zoom * f)); s.manual = true; s.zoomed = false; };
     (() => {
       const ptrs = new Map(); let pinch = 0;
       cv.style.touchAction = 'none';
@@ -1171,7 +1191,7 @@ const T3 = (() => {
       cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) fn(e); d = null; });
     };
 
-    const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); };
+    const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); if (s.onResize) s.onResize(); };
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(rs) : null; if (ro) ro.observe(wrap); rs();
     let last = performance.now(), raf = 0;
     const dispose = () => { s.dead = true; cancelAnimationFrame(raf); if (ro) ro.disconnect(); try { renderer.dispose(); renderer.forceContextLoss(); } catch (e) {} };
@@ -4682,11 +4702,18 @@ function chess3d(box, S) {
   }
   for (let i = 0; i < 2; i++) { const pp = T3.person(i ? '#e0443c' : '#3f8be8', { seated: true, idx: i }); pp.scale.setScalar(3); sc.add(pp); s.addPerson(pp); people.push(pp); const lb = T3.label('', { scale: 4.2 }); lb.sprite.position.y = 2.25; pp.add(lb.sprite); lb.sprite.scale.multiplyScalar(1 / 3); tags.push(lb); }
   s.hint('');
-  const mkViews = side => ({
-    seat: { label: 'Seat', pos: [0, 13.2, side * 8.4], look: [0, 2.9, side * -0.2], fov: 40, sway: 0.012 },
-    top: { label: 'Top', pos: [0, 17, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 38 },
-    side: { label: 'Side', pos: [13.5, 6.4, 0], look: [0, 3.4, 0], fov: 42 },
-  });
+  // Camera distances are worked out from the screen shape so the whole board (and its edge) is always in view.
+  const mkViews = side => {
+    const a = s.camera.aspect || 1.5, fm = a >= 1.3 ? 1 : Math.min(1.9, 1.3 / a), vf = 40 * fm * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * a);
+    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.0;
+    return {
+      seat: { label: 'Seat', pos: [0, 3 + Math.sin(e) * d, side * Math.cos(e) * d], look: [0, 3, 0], fov: 40, zoom: 0, sway: 0.006 },
+      top: { label: 'Top', pos: [0, 3 + d, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 40, zoom: 0 },
+      side: { label: 'Side', pos: [Math.cos(e) * d, 3 + Math.sin(e) * d * 0.8, 0], look: [0, 3, 0], fov: 40, zoom: 0 },
+    };
+  };
+  s.minZoom = 0.9;
+  s.onResize = () => { if (mySide) s.setViews(mkViews(mySide), s.view || 'seat', true); };
   let mySide = 0, pcs = [], built = false, lastSeat = null, SS = S;
   const seatNode = i => people[i];
   function place(white) {
@@ -7270,1100 +7297,99 @@ const CUE = (() => {
   });
 })();
 
-/* ===================== 3D casino tables (shared scene) =====================
-   One table builder serves every casino game. Each game gives a small config:
-   cards(S,i) / bet(S,i) / status(S,i) per seat, zones(S) for dealer and middle cards,
-   and optional props (dice, wheel, slot machine, keno board). The 2D seat plates stay. */
+/* ===================== Card & casino rooms: a 3D room around the 2D table =====================
+   The room (lounge, lamps, a dealer and the other players sitting around the table) is drawn in 3D behind the game.
+   The cards, chips and buttons stay in 2D in front, large and easy to read. There is nothing to switch. */
 (() => {
   const AVC = ['#3f8be8', '#e0443c', '#5cc8b0', '#e8a23a', '#a063d8', '#e8708a', '#8ab4ff', '#9ac24a'];
-  const TY = 2.5, TA = 8.4, TB = 4.6;
+  const TY = 2.5;
+  const THEME = {
+    poker: { wall: '#1d2a38', felt: '#1f7a4a', bg: 0x0c1118 }, bigtwo: { wall: '#2d1b3d', felt: '#1f6a52', bg: 0x120b1a }, rush: { wall: '#1d2250', felt: '#2a3a6a', bg: 0x0b0e24 },
+    roulette: { wall: '#3a1220', felt: '#1a6b3a', bg: 0x14080e }, craps: { wall: '#2a1424', felt: '#1f6a52', bg: 0x0c0810 }, sicbo: { wall: '#3a1a14', felt: '#8a1f2a', bg: 0x140a08 },
+    slots: { wall: '#241044', felt: '#3a1a6a', bg: 0x0a0618 }, keno: { wall: '#10244a', felt: '#2b3a6a', bg: 0x080e1e },
+  };
+  const dflt = { wall: '#2a1424', felt: '#1f7a4a', bg: 0x0c0810 };
 
-  /* ---------- dice ---------- */
-  const PIPS = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
-  const dieTex = {};
-  const dieFace = v => dieTex[v] || (dieTex[v] = new THREE.MeshStandardMaterial({ roughness: 0.35, map: T3.canvasTex(128, 128, (g, w, h) => {
-    g.fillStyle = '#f7f1e3'; g.fillRect(0, 0, w, h); g.fillStyle = '#1a1a1a';
-    PIPS[v].forEach(([x, y]) => { g.beginPath(); g.arc(w / 2 + x * 32, h / 2 + y * 32, 12, 0, 7); g.fill(); });
-  }) }));
-  const DIE_ORDER = [3, 4, 1, 6, 2, 5];           // +x -x +y -y +z -z
-  const DIE_ROT = { 1: [0, 0, 0], 6: [Math.PI, 0, 0], 3: [0, 0, Math.PI / 2], 4: [0, 0, -Math.PI / 2], 2: [-Math.PI / 2, 0, 0], 5: [Math.PI / 2, 0, 0] };
-  const mkDie = () => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.62, 0.62), DIE_ORDER.map(dieFace)); m.castShadow = true; return m; };
-
-  T3.mkDie = mkDie; T3.DIE_ROT = DIE_ROT;
-  /* ---------- roulette wheel ---------- */
-  const WHEEL = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-  const RED = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
-  const wheelTex = () => T3.canvasTex(512, 512, (g, w, h) => {
-    g.translate(w / 2, h / 2); g.rotate(-Math.PI / 2);
-    const n = 37, st = Math.PI * 2 / n;
-    for (let k = 0; k < n; k++) {
-      const v = WHEEL[k]; g.fillStyle = v === 0 ? '#1f8a4a' : RED.has(v) ? '#c4372e' : '#1c1c22';
-      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 250, (k - 0.5) * st, (k + 0.5) * st); g.closePath(); g.fill();
-      g.save(); g.rotate(k * st); g.fillStyle = '#f7f0e1'; g.font = '700 22px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.translate(222, 0); g.rotate(Math.PI / 2); g.fillText(String(v), 0, 0); g.restore();
-    }
-    g.fillStyle = '#6b4a22'; g.beginPath(); g.arc(0, 0, 175, 0, 7); g.fill();
-    g.fillStyle = '#d6b05a'; g.beginPath(); g.arc(0, 0, 60, 0, 7); g.fill();
-  });
-
-  /* ---------- the scene ---------- */
-  function casino3(box, S0, cfg) {
-    const TH = THREE, s = T3.stage(box, { fov: 44 }), sc = s.scene;
-    T3.lounge(s, { w: 36, d: 30, lamps: [], ambient: 0.6, wall: '#2a1424', bg: 0x0c0810 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 46, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
-    T3.mk(sc, new TH.CircleGeometry(13, 56), T3.mat('#3a1220', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    const felt = T3.canvasTex(512, 512, T3.speckle(cfg.felt || '#1f7a4a', 40, 7000));
+  function scene(box, S0, id, dealer) {
+    const TH = THREE, th = THEME[id] || dflt, s = T3.stage(box, { fov: 46 }), sc = s.scene;
+    s.cv.style.pointerEvents = 'none';
+    T3.lounge(s, { w: 40, d: 32, h: 9, lamps: [[-9, -6], [9, -6], [0, 4]], lampPower: 0.8, ambient: 0.62, wall: th.wall, bg: th.bg });
+    const key = new TH.SpotLight(0xfff0d0, 1.5, 50, 0.95, 0.6, 1.1); key.position.set(0, 14, 2); key.target.position.set(0, TY, -0.5); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
+    T3.mk(sc, new TH.CircleGeometry(15, 56), T3.mat('#3a1220', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
+    const felt = T3.canvasTex(512, 512, T3.speckle(th.felt, 40, 7000)), TA = 8.6, TB = 4.8;
     const top = T3.mk(sc, new TH.CylinderGeometry(1, 1, 0.3, 72), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.15, 0); top.scale.set(TA, 1, TB);
     const pts = []; for (let k = 0; k < 96; k++) { const a = k / 96 * Math.PI * 2; pts.push(new TH.Vector3(Math.cos(a) * (TA + 0.1), TY, Math.sin(a) * (TB + 0.1))); }
-    T3.mk(sc, new TH.TubeGeometry(new TH.CatmullRomCurve3(pts, true), 120, 0.26, 12, true), T3.mat('#3b1d12', { roughness: 0.35 }), 0, 0, 0);
+    T3.mk(sc, new TH.TubeGeometry(new TH.CatmullRomCurve3(pts, true), 120, 0.28, 12, true), T3.mat('#3b1d12', { roughness: 0.35 }), 0, 0, 0);
     T3.mk(sc, T3.CYL(1.4, 2.2, TY - 0.3, 24), T3.mat('#2a1810'), 0, (TY - 0.3) / 2, 0);
-    const people = [], tags = [], chairs = [], seatG = [], betG = [], betL = [], diam = [], hold = [], zones = {};
-    let layoutKey = '', built = false, SS = S0, first = true, dealerP = null, dealerLab = null, props = null, n = 0;
-    const shoe = new TH.Vector3(3.2, TY + 1.4, -3.4);
-    const T = (x, z, f) => new TH.Vector3(x * f, TY + 0.02, z * f);
-
-    function setCards(h, faces, w, sp, instant, lift) {
-      const g = h.g; h.m = h.m || [];
-      while (h.m.length > faces.length) g.remove(h.m.pop());
-      faces.forEach((c, j) => {
-        const tx = (j - (faces.length - 1) / 2) * sp; let m = h.m[j];
-        if (m && m.userData.c === c && m.userData.w === w) { m.userData.tx = tx; m.userData.lift = lift && lift[j] ? 0.32 : 0; return; }
-        const old = m; if (old) g.remove(old);
-        m = cfg.mk ? cfg.mk(c, w) : T3.card3(c >= 0 && cfg.map ? cfg.map(c) : c, w); m.userData.c = c; m.userData.w = w; m.userData.tx = tx; m.userData.lift = lift && lift[j] ? 0.32 : 0; g.add(m); h.m[j] = m;
-        if (old || instant) { m.position.set(tx, 0, 0); return; }
-        g.updateMatrixWorld(true); const from = g.worldToLocal(shoe.clone()); m.userData.fly = true; m.position.copy(from); m.scale.setScalar(0.5);
-        s.tween(480 + j * 120, (k, e) => { m.position.set(from.x + (tx - from.x) * e, from.y * (1 - e) + Math.sin(Math.PI * e) * 0.5, from.z * (1 - e)); m.scale.setScalar(0.5 + 0.5 * e); m.rotation.y = (1 - e) * 1.4; }, () => { m.userData.fly = false; m.rotation.y = 0; });
-      });
+    // a row of glowing machines and signs along the back wall for atmosphere
+    const glow = [];
+    for (let i = -4; i <= 4; i++) {
+      const m = T3.mk(sc, T3.BOX(2.2, 4.2, 1.4), T3.mat('#1a1022'), i * 4.2, 2.1, -14.5, { noCast: true });
+      const c = new TH.Color().setHSL((i * 0.11 + 0.9) % 1, 0.8, 0.55), scr = T3.mk(sc, T3.BOX(1.7, 1.2, 0.05), new TH.MeshBasicMaterial({ color: c }), i * 4.2, 3.2, -13.78, { noCast: true }); glow.push(scr);
     }
-    s.on(dt => {
-      const k = Math.min(1, dt * 9);
-      const all = [...seatG, ...Object.values(zones)];
-      all.forEach(h => (h.m || []).forEach(m => { if (m.userData.fly) return; m.position.x += (m.userData.tx - m.position.x) * k; m.position.y += (m.userData.lift - m.position.y) * k; }));
-    });
+    s.on((dt, t) => glow.forEach((g, i) => { g.material.color.offsetHSL(dt * 0.05, 0, 0); g.scale.y = 1 + 0.06 * Math.sin(t * 2 + i); }));
+    if (dealer) {
+      const dp = T3.person('#7a1f3a', { idx: 4 }); dp.scale.setScalar(2.2); dp.position.set(0, 0, -6.8); sc.add(dp); s.addPerson(dp);
+      const dl = T3.label('Dealer', { scale: 3 }); dl.sprite.position.y = 2.3; dl.sprite.scale.multiplyScalar(1 / 2.2); dp.add(dl.sprite);
+    }
+    s.setViews({ seat: { label: 'Seat', pos: [0, 6.2, 10.5], look: [0, 1.6, -7], fov: 50, zoom: 0, sway: 0.03 } }, 'seat', true);
 
+    const people = [], tags = [], diam = [], chairs = []; let key2 = '', SS = S0;
     function layout(S) {
-      const V = S.V, me = S.me; n = V.seats.length;
-      [...people, ...chairs, ...diam].forEach(o => sc.remove(o)); [...tags, ...betL].forEach(l => sc.remove(l.sprite)); betG.forEach(b => b.g && sc.remove(b.g)); seatG.forEach(h => sc.remove(h.g));
-      people.length = chairs.length = diam.length = tags.length = betL.length = betG.length = seatG.length = hold.length = 0;
-      const span = n <= 1 ? 0 : Math.min(124, 34 * (n - 1) + 20), mid = Math.floor((n - 1) / 2);
-      for (let i = 0; i < n; i++) {
-        const k = me >= 0 ? (i - me + mid + n) % n : i, th = cfg.ring ? -2 * Math.PI * ((i - Math.max(me, 0) + n) % n) / n : n <= 1 ? 0 : (-span / 2 + span * k / (n - 1)) * Math.PI / 180;
-        const ox = 10.3 * Math.sin(th), oz = 6.6 * Math.cos(th), ry = Math.atan2(-ox, -oz);
-        const seat = T3.mk(sc, T3.BOX(2.0, 0.3, 2.0), T3.mat('#2a1a3a', { roughness: 0.8 }), ox, 1.28, oz); seat.rotation.y = ry; seat.userData.seatOf = i; chairs.push(seat);
-        const L = Math.hypot(ox, oz), back = T3.mk(sc, T3.BOX(2.0, 2.4, 0.26), T3.mat('#2a1a3a', { roughness: 0.8 }), ox + ox / L, 2.5, oz + oz / L); back.rotation.y = ry; back.userData.seatOf = i; chairs.push(back);
-        const pp = T3.person(AVC[i % 8], { seated: true, idx: i }); pp.scale.setScalar(2.2); pp.position.set(ox, 0, oz); pp.rotation.y = ry; sc.add(pp); s.addPerson(pp); people.push(pp);
+      [...people, ...chairs].forEach(o => sc.remove(o)); tags.forEach(l => l.sprite.parent && l.sprite.parent.remove(l.sprite));
+      people.length = tags.length = diam.length = chairs.length = 0;
+      const n = S.V.seats.length, others = []; for (let i = 0; i < n; i++) if (i !== S.me) others.push(i);
+      others.forEach((i, k) => {
+        const m = others.length, f = m <= 1 ? 0.5 : k / (m - 1), a = (-68 + 136 * f) * Math.PI / 180, ox = 10.8 * Math.sin(a), oz = -(7.4 * Math.cos(a)) + (dealer ? 0.9 : 0), ry = Math.atan2(-ox, -oz);
+        const ch = T3.mk(sc, T3.BOX(2.0, 0.3, 2.0), T3.mat('#2a1a3a', { roughness: 0.8 }), ox, 1.28, oz); ch.rotation.y = ry; chairs.push(ch);
+        const L = Math.hypot(ox, oz), bk = T3.mk(sc, T3.BOX(2.0, 2.4, 0.26), T3.mat('#2a1a3a', { roughness: 0.8 }), ox + ox / L, 2.5, oz + oz / L); bk.rotation.y = ry; chairs.push(bk);
+        const pp = T3.person(AVC[i % 8], { seated: true, idx: i }); pp.scale.setScalar(2.2); pp.position.set(ox, 0, oz); pp.rotation.y = ry; sc.add(pp); s.addPerson(pp); people.push(pp); pp.userData.seat = i;
         const lb = T3.label('', { scale: 3.6 }); lb.sprite.position.y = 2.1; lb.sprite.scale.multiplyScalar(1 / 2.2); pp.add(lb.sprite); tags.push(lb);
         const dm = T3.mk(pp, new TH.OctahedronGeometry(0.1), new TH.MeshBasicMaterial({ color: 0xf2b441 }), 0, 2.42, 0, { noCast: true }); dm.visible = false; diam.push(dm);
-        const g = new TH.Group(), cp = T(TA * Math.sin(th), TB * Math.cos(th), 0.6); g.position.copy(cp); g.rotation.y = Math.atan2(ox, oz); sc.add(g); seatG.push({ g, m: [] });
-        const bp = T(TA * Math.sin(th), TB * Math.cos(th), 0.34); betG.push({ g: null, amt: -1, x: bp.x, z: bp.z });
-        const bl = T3.label('', { scale: 1.7 }); bl.sprite.position.set(bp.x, TY + 0.75, bp.z); sc.add(bl.sprite); betL.push(bl);
-      }
-      built = true; layoutKey = me + '|' + V.seats.map(q => q.u || q.n).join(',');
-    }
-    if (!cfg.noDealer) {
-      dealerP = T3.person('#7a1f3a', { idx: 4 }); dealerP.scale.setScalar(2.2); dealerP.position.set(0, 0, -6.6); sc.add(dealerP); s.addPerson(dealerP);
-      dealerLab = T3.label('Dealer', { scale: 3 }); dealerLab.sprite.position.y = 2.3; dealerLab.sprite.scale.multiplyScalar(1 / 2.2); dealerP.add(dealerLab.sprite);
-      T3.mk(sc, T3.BOX(2.2, 0.06, 0.8), T3.mat('#2a1810'), 0, TY + 0.03, -3.9, { noCast: true });
-    }
-    if (cfg.props) props = cfg.props(s, sc, TY, S0, { seatG });
-
-    s.setViews({
-      seat: { label: 'Seat', pos: [0, 8.4, 10.2], look: [0, 1.8, -0.2], fov: 44, sway: 0.012 },
-      table: { label: 'Table', pos: [0, 11.8, 12.4], look: [0, 2.2, -0.6], fov: 42 },
-      top: { label: 'Top', pos: [0, 17.5, 0.01], look: [0, 2.5, -0.4], up: [0, 0, -1], fov: 42 },
-    }, 'seat', true);
-    s.on((dt, t) => {
-      const g = SS.V.g, done = SS.V.done;
-      people.forEach((pp, i) => {
-        const act = g.turn === i && !done, win = done && dlt(g, i) > 0, ar = pp.userData.arms;
-        ar[0].rotation.x += ((win ? -2.7 : -1.0) - ar[0].rotation.x) * Math.min(1, dt * 4); ar[1].rotation.x += ((win ? -2.7 : act ? -1.3 : -1.0) - ar[1].rotation.x) * Math.min(1, dt * 4);
-        if (diam[i]) { diam[i].visible = act; diam[i].position.y = 2.42 + Math.sin(t * 3) * 0.05; diam[i].rotation.y = t * 2; }
       });
-      if (dealerP) { const ar = dealerP.userData.arms; ar[1].rotation.x += ((g.turn >= 0 ? -0.5 : -1.1) - ar[1].rotation.x) * Math.min(1, dt * 3); }
-      if (props && props.frame) props.frame(dt, t, SS);
-    });
-    s.onView = nm => { people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); chairs.forEach(c => { c.visible = !(nm === 'seat' && c.userData.seatOf === SS.me && SS.me >= 0); }); };
-
-    s.onTap(e => { if (props && props.tap) { props.tap(e, SS); setTimeout(() => { if (!s.dead) { try { s.sync(SS); } catch (x) {} } }, 40); } else if (cfg.tapCards) { cfg.tapCards(s, e, SS, seatG, zones); setTimeout(() => { if (!s.dead) { try { s.sync(SS); } catch (x) {} } }, 40); } });
-
+      key2 = S.me + '|' + S.V.seats.map(q => q.u || q.n).join(',');
+    }
+    s.on((dt, t) => { const g = SS.V.g || {}, who = g.turn !== undefined ? g.turn : g.active; people.forEach((pp, k) => { const act = who === pp.userData.seat && !SS.V.done; if (diam[k]) { diam[k].visible = act; diam[k].position.y = 2.42 + Math.sin(t * 3) * 0.05; diam[k].rotation.y = t * 2; } const ar = pp.userData.arms; ar[1].rotation.x += ((act ? -1.3 : -1.0) - ar[1].rotation.x) * Math.min(1, dt * 4); }); });
     s.sync = S => {
-      SS = S; const V = S.V, g = V.g, me = S.me, inst = first;
-      if (!built || layoutKey !== me + '|' + V.seats.map(q => q.u || q.n).join(',')) { layout(S); Object.values(zones).forEach(z => z.m.forEach(m => z.g.remove(m))); }
-      const nn = V.seats.length, big = nn > 3;
-      V.seats.forEach((st, i) => {
-        const p = (g.ps && g.ps[i]) || {};
-        const faces = cfg.cards && !(cfg._hud && i === me) ? cfg.cards(S, i) : [];
-        const sz = cfg.size ? cfg.size(S, i, faces) : null, cw = sz ? sz[0] : faces.length > 3 && big ? 0.5 : big ? 0.62 : 0.78;
-        setCards(seatG[i], faces, cw, sz ? sz[1] : cw * 0.82, inst, cfg.held ? cfg.held(S, i) : null);
-        const amt = cfg.bet ? cfg.bet(S, i) : 0, bl = cfg.betText ? cfg.betText(S, i) : (amt ? fmt(amt) : '');
-        if (betG[i].amt !== amt) { betG[i].amt = amt; if (betG[i].g) sc.remove(betG[i].g); betG[i].g = null; if (amt > 0) { const c = T3.chips(amt, 0.22); c.position.set(betG[i].x, TY, betG[i].z); sc.add(c); betG[i].g = c; } }
-        betL[i].set(bl, '#f7f0e1');
-        const d = dlt(g, i), stt = cfg.status ? cfg.status(S, i, p) : (p.res || '');
-        const txt = `${S.nameOf(i)} · ${fmt(st.stack)}${V.done && d ? (d > 0 ? ' +' : ' ') + fmt(d) : stt ? ' · ' + stt : ''}`;
-        tags[i].set(txt, V.done && d > 0 ? '#6ee09a' : V.done && d < 0 ? '#ff9a8a' : (g.turn === i ? '#f2b441' : '#f7f0e1'));
-      });
-      (cfg.zones ? cfg.zones(S) : []).forEach(zd => {
-        let z = zones[zd.id]; if (!z) { const gg = new TH.Group(); gg.position.set(zd.x, TY + 0.02, zd.z); sc.add(gg); const lb = T3.label('', { scale: 2.4 }); lb.sprite.position.set(zd.x, TY + 0.8, zd.z + (zd.ly || 0.9)); sc.add(lb.sprite); z = zones[zd.id] = { g: gg, m: [], lab: lb }; }
-        setCards(z, zd.faces || [], zd.w || 0.82, (zd.w || 0.82) * 0.86, inst, null); z.lab.set(zd.text || '', '#f7f0e1');
-      });
-      if (props && props.sync) props.sync(S, inst);
-      s.onView(s.view); first = false;
-      s.hint(cfg.hint ? cfg.hint(S) : (S.turn ? 'Your turn: use the buttons below.' : ''));
+      SS = S; if (key2 !== S.me + '|' + S.V.seats.map(q => q.u || q.n).join(',')) layout(S);
+      people.forEach((pp, k) => { const i = pp.userData.seat, st = S.V.seats[i]; if (st) tags[k].set(`${S.nameOf(i)} · ${fmt(st.stack)}`, '#f7f0e1'); });
     };
-    return s;
+    s.sync(S0); return s;
   }
 
-  /* ---------- game configs ---------- */
-  const arr = x => (Array.isArray(x) ? x : []);
-  const dlt = (g, i) => ((g.ps && g.ps[i] ? g.ps[i].delta : (g.delta || [])[i]) || 0);
-  const diceProps = (opts) => (s, sc, TY0) => {
-    const TH = THREE, g = new TH.Group(); g.position.set(opts.x || 0, TY0 + 0.31, opts.z || -0.6); sc.add(g);
-    const lab = T3.label('', { scale: 2.6 }); lab.sprite.position.set(opts.x || 0, TY0 + 1.0, (opts.z || -0.6) + 1.2); sc.add(lab.sprite);
-    let dice = [], key = '', puck = null, puckLab = null;
-    if (opts.puck) { puck = new TH.Group(); T3.mk(puck, T3.CYL(0.36, 0.36, 0.08, 24), T3.mat('#f7f0e1', { roughness: 0.4 }), 0, 0, 0); puckLab = T3.label('OFF', { scale: 0.9, bg: 'rgba(0,0,0,0)', color: '#222' }); puckLab.sprite.position.y = 0.2; puck.add(puckLab.sprite); puck.position.set(-3.4, TY0 + 0.06, -2); sc.add(puck); }
+  function ambient(ui2d, id, dealer) {
+    let sc = null, lastS = null;
     return {
-      sync(S, inst) {
-        const vals = arr(opts.dice(S)), k = vals.join('.');
-        while (dice.length > vals.length) g.remove(dice.pop());
-        while (dice.length < vals.length) { const d = mkDie(); g.add(d); dice.push(d); }
-        if (k !== key) {
-          key = k;
-          vals.forEach((v, j) => {
-            const d = dice[j], r = DIE_ROT[v], x = (j - (vals.length - 1) / 2) * 1.15, from = new TH.Vector3(x + 2.5, 2.4, 2.4), spin = [6 + j, 5, 7 - j];
-            if (inst) { d.position.set(x, 0, 0); d.rotation.set(r[0], r[1], r[2]); return; }
-            s.tween(900 + j * 140, (kk, e) => { d.position.set(from.x + (x - from.x) * e, from.y * (1 - e) + Math.abs(Math.sin(e * 9)) * 0.5 * (1 - e), from.z * (1 - e)); d.rotation.set(r[0] + (1 - e) * spin[0], r[1] + (1 - e) * spin[1], r[2] + (1 - e) * spin[2]); });
-          });
+      mount(stageEl, ctl, S) {
+        ui2d.mount(stageEl, ctl, S); sc = null; lastS = S;
+        let wrap = null, fg = null;
+        try {
+          wrap = document.createElement('div'); wrap.className = 'ambwrap'; const bg = document.createElement('div'); bg.className = 'ambbg'; fg = document.createElement('div'); fg.className = 'ambfg';
+          while (stageEl.firstChild) fg.appendChild(stageEl.firstChild);
+          wrap.append(bg, fg); stageEl.appendChild(wrap); stageEl.classList.add('amb');
+          sc = scene(bg, S, id, dealer);
+        } catch (e) {
+          console.error(e); try { window.__errs && window.__errs.push('3D: ' + (e && e.stack || e)); } catch (x) {}
+          if (wrap && fg) { while (fg.firstChild) stageEl.appendChild(fg.firstChild); wrap.remove(); } stageEl.classList.remove('amb'); sc = null;
         }
-        lab.set(opts.text ? opts.text(S) : '', '#f7f0e1');
-        if (puck) { const pt = S.V.g.point; puckLab.set(pt ? 'ON' : 'OFF', '#222'); puck.children[0].material.color.set(pt ? '#1a1a1a' : '#f7f0e1'); puckLab.set(pt ? 'ON' : 'OFF', pt ? '#fff' : '#222'); puck.position.x = pt ? ([4, 5, 6, 8, 9, 10].indexOf(pt) - 2.5) * 1.3 : -4.6; }
       },
+      update(S) { lastS = S; const r = ui2d.update(S); if (sc && sc.sync) { try { sc.sync(S); } catch (e) { console.error(e); } } return r; },
     };
-  };
-
-  T3.diceProps = diceProps;
-  const CF = {};
-
-  CF.blackjack = {
-    cards: (S, i) => arr(S.V.g.ps[i] && S.V.g.ps[i].cards), bet: (S, i) => (S.V.g.ps[i] || {}).bet || 0,
-    status: (S, i, p) => (p.cards && p.cards.length ? (p.soft && p.t < 21 ? 'Soft ' : '') + p.t + (p.state === 'bust' ? ' Bust' : p.state === 'bj' ? ' Blackjack' : '') : ''),
-    zones: S => [{ id: 'd', x: 0, z: -2.9, faces: arr(S.V.g.dealer), text: S.V.g.dealer && S.V.g.dealer.length ? 'Dealer ' + S.V.g.dt + (S.V.g.dealer.includes(-1) ? ' + ?' : '') : '', ly: -0.9 }],
-    hint: S => (S.turn ? (S.turn.data.kind === 'bet' ? 'Place your bet with the chips below.' : 'Your move: hit, stand or double.') : ''),
-  };
-  CF.threecard = {
-    cards: (S, i) => arr(S.V.g.ps[i] && S.V.g.ps[i].cards), bet: (S, i) => (S.V.g.ps[i] || {}).ante || 0,
-    status: (S, i, p) => p.cat || (p.state === 'fold' ? 'Folded' : ''),
-    zones: S => [{ id: 'd', x: 0, z: -2.9, faces: arr(S.V.g.dealer), text: S.V.g.dcat ? 'Dealer: ' + S.V.g.dcat : '', ly: -0.9 }],
-  };
-  CF.caribbean = {
-    cards: (S, i) => arr(S.V.g.ps[i] && S.V.g.ps[i].cards), bet: (S, i) => { const p = S.V.g.ps[i] || {}; return (p.ante || 0) * (p.state === 'raise' ? 3 : 1); },
-    status: (S, i, p) => (p.state === 'fold' ? 'Folded' : p.cat || ''),
-    zones: S => [{ id: 'd', x: 0, z: -2.9, faces: arr(S.V.g.dealer), text: S.V.g.dcat ? 'Dealer: ' + S.V.g.dcat : '', ly: -0.9, w: 0.78 }],
-  };
-  CF.letitride = {
-    cards: (S, i) => arr(S.V.g.ps[i] && S.V.g.ps[i].cards), bet: (S, i) => { const p = S.V.g.ps[i] || {}; return (p.bet || 0) * (p.units || 1); },
-    zones: S => [{ id: 'c', x: 0, z: -1.5, faces: arr(S.V.g.comm), text: S.V.g.kind || '', w: 0.95 }],
-  };
-  CF.reddog = {
-    cards: () => [], bet: (S, i) => (S.V.g.ps[i] || {}).bet || 0,
-    zones: S => [{ id: 'c', x: 0, z: -1.5, faces: arr(S.V.g.cards), text: S.V.g.spread ? 'Spread ' + S.V.g.spread : (S.V.g.kind || ''), w: 0.95 }],
-  };
-  CF.baccarat = {
-    cards: () => [], bet: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.amt : 0; }, betText: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.kind + ' ' + fmt(b.amt) : ''; },
-    zones: S => { const g = S.V.g; return [
-      { id: 'b', x: 0, z: -2.9, faces: arr(g.banker), text: g.banker && g.banker.length ? 'Banker ' + g.bk : '', ly: -0.9, w: 0.9 },
-      { id: 'p', x: 0, z: -0.6, faces: arr(g.player), text: g.player && g.player.length ? 'Player ' + g.pt + (g.win ? ' · ' + (g.win === 'tie' ? 'Tie' : g.win[0].toUpperCase() + g.win.slice(1) + ' wins') : '') : '', w: 0.9 }]; },
-  };
-  CF.videopoker = {
-    cards: (S, i) => arr(S.V.g.ps[i] && S.V.g.ps[i].cards), bet: (S, i) => (S.V.g.ps[i] || {}).bet || 0,
-    held: (S, i) => { const rows = document.querySelectorAll('#vpSeats .seat'); const r = rows[i]; return r ? [...r.querySelectorAll('.vp-card')].map(b => b.classList.contains('held')) : []; },
-    hint: S => (S.turn ? (S.turn.data.kind === 'hold' ? 'Tap cards to hold them, then press Draw.' : 'Tap a stake to be dealt five cards.') : ''),
-    tapCards(s, e, S, seatG) {
-      if (!(S.turn && S.turn.data.kind === 'hold') || S.me < 0) return;
-      const h = seatG[S.me]; if (!h) return; const hit = s.pick(e, h.m)[0]; if (!hit) return;
-      let o = hit.object; while (o && h.m.indexOf(o) < 0) o = o.parent; const k = h.m.indexOf(o); if (k < 0) return;
-      const b = document.querySelectorAll('#vpSeats .seat')[S.me]; const btn = b && b.querySelector('[data-h="' + k + '"]'); if (btn) btn.click();
-    },
-  };
-  CF.roulette = {
-    cards: () => [], bet: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.amt : 0; },
-    betText: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? (b.kind === 'num' ? '#' + b.n : b.kind) + ' ' + fmt(b.amt) : ''; },
-    noDealer: false, felt: '#1f6a4a',
-    props: (s, sc, TY0) => {
-      const TH = THREE, wg = new TH.Group(); wg.position.set(0, TY0 + 0.12, -0.9); sc.add(wg);
-      T3.mk(wg, T3.CYL(2.05, 2.15, 0.22, 48), T3.mat('#4a2a14', { roughness: 0.4 }), 0, 0, 0);
-      const disc = T3.mk(wg, T3.CYL(1.8, 1.8, 0.1, 64), T3.mat('#fff', { map: wheelTex(), roughness: 0.5 }), 0, 0.14, 0); T3.mk(wg, T3.CYL(0.2, 0.28, 0.5, 14), T3.mat('#d6b05a', { metalness: 0.6, roughness: 0.3 }), 0, 0.3, 0);
-      const ball = T3.mk(wg, T3.SPH(0.1, 12), T3.mat('#fafafa', { roughness: 0.2 }), 1.5, 0.28, 0); const lab = T3.label('', { scale: 2.6 }); lab.sprite.position.set(0, TY0 + 1.4, -0.9); sc.add(lab.sprite);
-      let phase = '', ang = 0, rad = 1.55, landed = false, spinT = 0;
-      return {
-        frame(dt) {
-          disc.rotation.y += dt * (phase === 'spin' ? 0.9 : 0.25);
-          if (phase === 'spin') { spinT += dt; ang -= dt * (9 - Math.min(5, spinT * 3)); rad = 1.55; landed = false; ball.visible = true; ball.position.set(Math.cos(ang) * rad, 0.28, Math.sin(ang) * rad); }
-          else if (landed) { ball.position.set(Math.cos(landAng()) * 1.35, 0.26, Math.sin(landAng()) * 1.35); }
-        },
-        sync(S, inst) {
-          const g = S.V.g; if (g.phase !== phase) { phase = g.phase; spinT = 0; }
-          if (phase === 'done' && g.result !== null && g.result !== undefined) { landed = true; lastRes = g.result; lab.set(g.result + (g.result === 0 ? ' green' : RED.has(g.result) ? ' red' : ' black'), '#f7f0e1'); }
-          else { if (phase !== 'spin') landed = false; lab.set(phase === 'spin' ? 'No more bets…' : '', '#f7f0e1'); if (phase !== 'spin' && g.result == null) { ball.position.set(1.5, 0.28, 0); } }
-        },
-      };
-      function landAng() { const k = WHEEL.indexOf(lastRes); return -disc.rotation.y + (k * Math.PI * 2 / 37) - Math.PI / 2 + Math.PI / 2 * 0; }
-    },
-  };
-  let lastRes = 0;
-  CF.sicbo = {
-    cards: () => [], bet: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.amt : 0; },
-    betText: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? (b.kind === 'num' ? 'number ' + b.n : b.kind === 'sum' ? 'total ' + b.n : b.kind) + ' ' + fmt(b.amt) : ''; },
-    props: diceProps({ z: -0.6, dice: S => S.V.g.dice, text: S => { const d = arr(S.V.g.dice); return d.length ? 'Total ' + d.reduce((a, b) => a + b, 0) : ''; } }),
-  };
-  CF.craps = {
-    cards: () => [], bet: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.amt : 0; },
-    betText: (S, i) => { const b = (S.V.g.ps[i] || {}).bet; return b ? b.kind + ' ' + fmt(b.amt) : ''; },
-    props: diceProps({ z: -0.8, puck: true, dice: S => S.V.g.dice, text: S => { const g = S.V.g, d = arr(g.dice); return (d.length ? 'Rolled ' + (d[0] + d[1]) + ' · ' : '') + (g.point ? 'Point ' + g.point : 'Come-out roll'); } }),
-  };
-  CF.slots = {
-    cards: () => [], bet: (S, i) => (S.V.g.ps[i] || {}).bet || 0,
-    noDealer: true,
-    props: (s, sc, TY0) => {
-      const TH = THREE, cab = new TH.Group(); cab.position.set(0, TY0, -1.4); sc.add(cab);
-      T3.mk(cab, T3.BOX(4.6, 3.6, 1.7), T3.mat('#a3262a', { roughness: 0.45 }), 0, 1.8, 0); T3.mk(cab, T3.BOX(4.9, 0.4, 1.9), T3.mat('#d6b05a', { metalness: 0.6, roughness: 0.3 }), 0, 3.7, 0);
-      T3.mk(cab, T3.BOX(4.0, 1.5, 0.12), T3.mat('#111'), 0, 2.15, 0.88);
-      const SYM = ['🍒', '🍋', '🔔', '⭐', '💎', '7'], reels = [], ctxs = [];
-      for (let k = 0; k < 3; k++) {
-        const c = document.createElement('canvas'); c.width = c.height = 128; const tex = new TH.CanvasTexture(c), gx = c.getContext('2d'); ctxs.push({ c, tex, gx, cur: -2 });
-        const m = new TH.Mesh(new TH.PlaneGeometry(1.2, 1.2), new TH.MeshBasicMaterial({ map: tex })); m.position.set((k - 1) * 1.3, 2.15, 0.96); cab.add(m); reels.push(m);
-      }
-      const lever = new TH.Group(); lever.position.set(2.5, 2.2, 0); cab.add(lever); T3.mk(lever, T3.CYL(0.06, 0.06, 1.3, 8), T3.mat('#bbb', { metalness: 0.7 }), 0, 0.65, 0); T3.mk(lever, T3.SPH(0.2, 12), T3.mat('#c4372e'), 0, 1.35, 0);
-      const lab = T3.label('', { scale: 3 }); lab.sprite.position.set(0, TY0 + 4.6, -1.4); sc.add(lab.sprite);
-      let focus = -1, t0 = 0, SS = null;
-      const draw = (k, v) => { const o = ctxs[k]; if (o.cur === v) return; o.cur = v; o.gx.fillStyle = '#f7f0e1'; o.gx.fillRect(0, 0, 128, 128); o.gx.font = (v === 5 ? '700 90px Georgia, serif' : '86px serif'); o.gx.textAlign = 'center'; o.gx.textBaseline = 'middle'; o.gx.fillStyle = v === 5 ? '#c4372e' : '#222'; o.gx.fillText(v < 0 ? '' : SYM[v], 64, 70); o.tex.needsUpdate = true; };
-      return {
-        frame(dt, t) {
-          if (!SS) return; const g = SS.V.g, p = g.ps[focus]; if (!p) return; const spinning = g.turn === focus && p.bet > 0;
-          for (let k = 0; k < 3; k++) { if (p.reels[k] === null || p.reels[k] === undefined) { if (spinning) draw(k, Math.floor(t * 14 + k * 3) % 6); else draw(k, -1); } else draw(k, p.reels[k]); }
-          lever.rotation.x += ((spinning ? 0.9 : 0) - lever.rotation.x) * Math.min(1, dt * 6);
-        },
-        sync(S) { SS = S; const g = S.V.g; if (g.turn >= 0) focus = g.turn; else if (focus < 0 || !g.ps[focus] || !g.ps[focus].bet) { const f = g.ps.findIndex(p => p.bet > 0); focus = f >= 0 ? f : (S.me >= 0 ? S.me : 0); }
-          lab.set(S.V.g.ps[focus] ? 'Reels: ' + S.nameOf(focus) : '', '#f7f0e1'); },
-      };
-    },
-  };
-  CF.keno = {
-    cards: () => [], bet: (S, i) => (S.V.g.ps[i] || {}).bet || 0, betText: (S, i) => { const p = S.V.g.ps[i] || {}; return p.bet ? p.picks.length + ' spots · ' + fmt(p.bet) : ''; },
-    noDealer: true, felt: '#2b3a6a',
-    hint: S => (S.turn ? 'Tap numbers on the board (up to 8), then pick a stake below.' : ''),
-    props: (s, sc, TY0) => {
-      const TH = THREE, c = document.createElement('canvas'); c.width = 1024; c.height = 640; const gx = c.getContext('2d'), tex = new TH.CanvasTexture(c);
-      const board = new TH.Mesh(new TH.PlaneGeometry(7.6, 4.75), new TH.MeshBasicMaterial({ map: tex })); board.position.set(0, TY0 + 2.5, -2.3); board.rotation.x = -0.32; sc.add(board);
-      T3.mk(sc, T3.BOX(7.9, 5.05, 0.2), T3.mat('#2a1810'), 0, TY0 + 2.5, -2.42, { noCast: true }).rotation.x = -0.32;
-      const lab = T3.label('', { scale: 3 }); lab.sprite.position.set(0, TY0 + 5.6, -2.3); sc.add(lab.sprite); let key = '', SS = null;
-      const draw = () => {
-        gx.fillStyle = '#0f1a38'; gx.fillRect(0, 0, 1024, 640);
-        const btns = document.querySelectorAll('#knGrid .kn-n');
-        for (let n = 1; n <= 80; n++) {
-          const col = (n - 1) % 10, row = Math.floor((n - 1) / 10), x = 12 + col * 100, y = 12 + row * 78, b = btns[n - 1], cl = b ? b.className : '';
-          gx.fillStyle = cl.includes('hit') ? '#3fbf6a' : cl.includes('drawn') ? '#f2b441' : cl.includes('pick') ? '#3f8be8' : '#26335c'; gx.beginPath(); gx.roundRect ? gx.roundRect(x, y, 90, 68, 10) : gx.rect(x, y, 90, 68); gx.fill();
-          gx.fillStyle = cl.includes('drawn') || cl.includes('hit') ? '#1b1206' : '#f7f0e1'; gx.font = '700 34px Figtree, sans-serif'; gx.textAlign = 'center'; gx.textBaseline = 'middle'; gx.fillText(String(n), x + 45, y + 36);
-        }
-        tex.needsUpdate = true;
-      };
-      return {
-        sync(S) {
-          SS = S; const g = S.V.g, btns = document.querySelectorAll('#knGrid .kn-n'), k = [...btns].map(b => b.className).join('|') + g.drawn.length; if (k !== key) { key = k; draw(); }
-          lab.set(g.drawn.length ? g.drawn.length + ' of 20 drawn' : '', '#f7f0e1');
-        },
-        tap(e, S) {
-          if (!S.turn || S.me < 0) return; const hit = s.pick(e, [board])[0]; if (!hit || !hit.uv) return;
-          const col = Math.floor(hit.uv.x * 1024 / 100 - 0.12), row = Math.floor((640 - hit.uv.y * 640) / 78 - 0.15); if (col < 0 || col > 9 || row < 0 || row > 7) return;
-          const b = document.querySelector('#knGrid .kn-n[data-n="' + (row * 10 + col + 1) + '"]'); if (b) b.click();
-        },
-      };
-    },
-  };
-
-  /* ---------- hook onto the games ---------- */
-  const SET = [
-    ['blackjack', CF.blackjack, ['.bj-dealer']], ['threecard', CF.threecard, ['.bac-h']], ['caribbean', CF.caribbean, ['.bac-h']],
-    ['letitride', CF.letitride, ['.bac-h']], ['reddog', CF.reddog, ['#rdCards']], ['baccarat', CF.baccarat, ['#bacHands']],
-    ['videopoker', CF.videopoker, []], ['roulette', CF.roulette, ['#rlBall']], ['sicbo', CF.sicbo, ['#sicDice', '#sicTot']],
-    ['craps', CF.craps, ['#crPuck', '#crDice', '#crTot']], ['slots', CF.slots, []], ['keno', CF.keno, ['#knGrid']],
-  ];
-  // default hand overlay: the shared / dealer cards, then my own cards
-  const defHands = (st, S) => {
-    const me = S ? S.me : -1, L = [], sh = st.querySelector('#csDealer, #lrComm, #bjDcards, #rdCards');
-    if (sh) L.push({ label: sh.id === 'lrComm' ? 'Community' : sh.id === 'rdCards' ? 'Spread' : 'Dealer', el: sh });
-    const mine = st.querySelector('#bjSeats .seat.me .cards') || (me >= 0 && st.querySelector(`.tc-seats > .seat:nth-child(${me + 1}) .cards`));
-    if (mine) L.push({ label: 'You', el: mine });
-    return L;
-  };
-  const attach = (id, cfg, hide) => {
-    cfg._hud = id !== 'baccarat';
-    const D = Club.games[id]; if (!D) return;
-    const m2 = D.ui.mount; D.ui.mount = function (st, ctl, S) { st.classList.remove('c3d'); return m2.call(this, st, ctl, S); };
-    const w = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), hands: cfg.hands || defHands, make: (box, S) => casino3(box, S, cfg) });
-    D.ui3d = { mount(st, ctl, S) { w.mount(st, ctl, S); if (st.querySelector('.s3dbox')) st.classList.add('c3d'); }, update: w.update };
-  };
-  T3.casino3 = casino3; T3.attach3 = attach;
-  for (const [id, cfg, hide] of SET) attach(id, cfg, hide);
+  }
+  T3.ambient = ambient;
 })();
 
-/* ===================== 3D tables for the grid board games =====================
-   Checkers, Reversi, Gomoku, Four in a Row, Tic-tac-toe.
-   The 2D screen keeps running underneath (hidden board); the 3D scene reads the same board state
-   from its buttons and taps the matching button, so the rules and bots stay in one place. */
+/* ===================== which games get what =====================
+   3D scenes (you play inside them): chess, mini golf, archery, darts, pool, carrom.
+   Card and casino tables: a 3D room around the normal 2D table (card rooms keep their cards in 2D, large and readable).
+   Everything else is plain 2D. */
 (() => {
-  const COL = ['#f2b441', '#f7f0e1'], AV = ['#3f8be8', '#e0443c'];
-  const TY = 2.5;
-
-  function board3(box, S0, cfg) {
-    const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene;
-    T3.lounge(s, { w: 30, d: 26, lamps: [], ambient: 0.65, wall: '#1d2a38', bg: 0x0c1118 });
-    const key = new TH.SpotLight(0xfff0d0, 1.45, 40, 0.95, 0.6, 1.1); key.position.set(0, 14, 3); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; sc.add(key, key.target);
-    T3.mk(sc, new TH.CircleGeometry(11, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    const wood = T3.canvasTex(512, 512, T3.speckle('#6b4423', 30, 5000));
-    T3.mk(sc, T3.BOX(13, 0.5, 11), T3.mat('#fff', { map: wood, roughness: 0.55 }), 0, TY - 0.25, 0);
-    T3.mk(sc, T3.BOX(1.6, TY - 0.5, 1.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0);
-    const root = new TH.Group(); root.position.set(0, TY, 0); sc.add(root);
-    const api = cfg.build(s, root, TH);
-    let SS = S0, people = [], diam = [], tags = [], laidOut = false, first = true;
-
-    function seat(S) {
-      people.forEach(p => sc.remove(p)); people = []; diam = []; tags = [];
-      const n = S.V.seats.length, me = S.me;
-      for (let i = 0; i < n; i++) {
-        const rel = me >= 0 ? (i === me ? 0 : 1) : i;      // 0 = near side
-        const ew = cfg.sides === 'ew';
-        const others = n - (me >= 0 ? 1 : 0), oi = me >= 0 ? (i < me ? i : i - 1) : i, spread = (oi - (others - 1) / 2) * 4.4;
-        const ox = ew ? (rel === 0 ? -8 : 8) : (rel === 1 && others > 1 ? spread : 0), oz = ew ? 1.5 : (rel === 0 ? 7.4 : -7.4), ry = ew ? (rel === 0 ? Math.PI / 2 : -Math.PI / 2) : (rel === 0 ? Math.PI : 0);
-        // person faces +z by default: near side must face -z (rotate pi), far side faces +z
-        const pp = T3.person(AV[i % 2], { seated: true, idx: i + 2 }); pp.scale.setScalar(2.2); pp.position.set(ox, 0, oz); pp.rotation.y = ry; sc.add(pp); s.addPerson(pp); pp.userData.rel = rel; pp.userData.who = i;
-        const ch = T3.mk(pp, T3.BOX(0.9, 0.12, 0.9), T3.mat('#2a1a3a'), 0, 0.55, 0.1, {}); ch.scale.setScalar(1);
-        const lb = T3.label('', { scale: 3.6 }); lb.sprite.position.y = 2.1; lb.sprite.scale.multiplyScalar(1 / 2.2); pp.add(lb.sprite); tags.push(lb);
-        const dm = T3.mk(pp, new TH.OctahedronGeometry(0.1), new TH.MeshBasicMaterial({ color: 0xf2b441 }), 0, 2.42, 0, { noCast: true }); dm.visible = false; diam.push(dm);
-        people.push(pp);
-      }
-      laidOut = true;
-    }
-    s.setViews(cfg.views, 'seat', true);
-    s.on((dt, t) => {
-      const g = SS.V.g;
-      people.forEach((pp, i) => {
-        const act = g.turn === i && !g.over, win = g.over && g.winner === i, ar = pp.userData.arms;
-        ar[0].rotation.x += ((win ? -2.7 : -1.0) - ar[0].rotation.x) * Math.min(1, dt * 4); ar[1].rotation.x += ((win ? -2.7 : act ? -1.3 : -1.0) - ar[1].rotation.x) * Math.min(1, dt * 4);
-        diam[i].visible = act; diam[i].position.y = 2.42 + Math.sin(t * 3) * 0.05; diam[i].rotation.y = t * 2;
-      });
-      if (api.frame) api.frame(dt, t, SS);
-    });
-    s.onView = nm => { people.forEach(pp => { pp.visible = !(nm === 'seat' && pp.userData.who === SS.me && SS.me >= 0); }); };
-    const resync = () => setTimeout(() => { if (!s.dead) { try { s.sync(SS); } catch (e) {} } }, 30);
-    s.onTap(e => { if (api.tap && api.tap(e, SS)) resync(); });
-    s.sync = S => {
-      SS = S; const V = S.V, g = V.g;
-      if (!laidOut || people.length !== V.seats.length) seat(S);
-      V.seats.forEach((st, i) => {
-        const won = g.over && g.winner === i, d = (g.delta || [])[i] || 0;
-        tags[i].set(`${S.nameOf(i)} · ${fmt(st.stack)}${g.over && d ? (d > 0 ? ' +' : ' ') + fmt(d) : ''}`, won ? '#6ee09a' : g.turn === i ? '#f2b441' : '#f7f0e1');
-      });
-      api.sync(S, first); s.onView(s.view); first = false;
-      s.hint(S.turn ? cfg.hint : '');
-    };
-    return s;
-  }
-
-  T3.board3 = board3;
-  /* ---------- helpers ---------- */
-  const cells = sel => [...document.querySelectorAll(sel)];
-  const owner = el => { const m = /\bp([01])\b/.exec((el.querySelector('.ck-pc,.rv-d') || el).className || ''); return m ? +m[1] : -1; };
-  const disc = (parent, p, r, h) => { const m = T3.mk(parent, T3.CYL(r, r, h, 28), T3.mat(COL[p], { roughness: 0.4 }), 0, h / 2, 0); return m; };
-  const squares = (root, n, cell, a, b, pickKey) => {
-    const list = [];
-    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
-      const m = T3.mk(root, T3.BOX(cell, 0.12, cell), T3.mat((r + c) % 2 ? a : b, { roughness: 0.6 }), (c - (n - 1) / 2) * cell, 0.06, (r - (n - 1) / 2) * cell, { noCast: true });
-      m.userData[pickKey] = r * n + c; list.push(m);
-    }
-    return list;
-  };
-  const ring = (root, x, z, col, r) => { const m = T3.mk(root, new THREE.TorusGeometry(r || 0.36, 0.045, 8, 28), new THREE.MeshBasicMaterial({ color: col }), x, 0.16, z, { noCast: true }); m.rotation.x = Math.PI / 2; return m; };
-  const tapSq = (s, e, list, fn) => { const h = s.pick(e, list)[0]; if (!h) return false; let o = h.object; while (o && o.userData.pk === undefined && !list.includes(o)) o = o.parent; return fn(h.object.userData, h.object); };
-
-  /* ---------- checkers / reversi (8 by 8) ---------- */
-  function grid8(kind) {
-    return (s, root, TH) => {
-      const CELL = 1.02, N = 8, sq = squares(root, N, CELL, kind === 'ck' ? '#2e1a0e' : '#1f7a4a', kind === 'ck' ? '#c9a06a' : '#1b6a40', 'i');
-      T3.mk(root, T3.BOX(N * CELL + 0.7, 0.2, N * CELL + 0.7), T3.mat('#3b1d12', { roughness: 0.5 }), 0, 0.0, 0, { noCast: true });
-      const pcs = {}, marks = [];
-      const pos = i => { const r = i >> 3, c = i & 7; return [(c - 3.5) * CELL, (r - 3.5) * CELL]; };
-      let flipped = false;
-      const place = (i, el, first, st) => {
-        const [x, z] = pos(i), p = owner(el), king = !!el.querySelector('.king');
-        const key = p + (king ? 'k' : '');
-        let g = pcs[i];
-        if (g && g.userData.key === key) return;
-        if (g) { root.remove(g); }
-        if (p < 0) { delete pcs[i]; return; }
-        g = new TH.Group(); g.userData.key = key; g.position.set(x, 0.12, z);
-        if (kind === 'ck') { disc(g, p, 0.4, 0.2); if (king) { const k2 = disc(g, p, 0.4, 0.2); k2.position.y = 0.2 + 0.1; T3.mk(g, new TH.TorusGeometry(0.22, 0.04, 8, 20), T3.mat('#d6b05a', { metalness: 0.6, roughness: 0.3 }), 0, 0.42, 0, { noCast: true }).rotation.x = Math.PI / 2; } }
-        else disc(g, p, 0.4, 0.14);
-        root.add(g); pcs[i] = g;
-        if (!first) { const y0 = 1.6; g.position.y = y0; s.tween(kind === 'ck' ? 320 : 380, (k, e) => { g.position.y = 0.12 + (y0 - 0.12) * (1 - e) + (kind === 'rv' ? Math.sin(Math.PI * e) * 0.35 : 0); if (kind === 'rv') g.rotation.z = Math.PI * e * (st.flip ? 1 : 0); }); }
-      };
-      return {
-        sync(S, first) {
-          flipped = kind === 'ck' && S.me === 1; root.rotation.y = flipped ? Math.PI : 0;
-          const els = cells(kind === 'ck' ? '#ck .ck-sq' : '#rv .rv-c'), seen = new Set();
-          marks.forEach(m => root.remove(m)); marks.length = 0;
-          els.forEach(el => {
-            const i = +(el.dataset.sq !== undefined ? el.dataset.sq : el.dataset.i); seen.add(i);
-            place(i, el, first, { flip: kind === 'rv' });
-            const [x, z] = pos(i);
-            if (el.classList.contains('hint') || el.classList.contains('ok')) marks.push(ring(root, x, z, 0x6ee09a));
-            if (el.classList.contains('sel')) marks.push(ring(root, x, z, 0xffffff, 0.46));
-            if (el.classList.contains('last')) marks.push(ring(root, x, z, 0xf2b441, 0.3));
-          });
-          Object.keys(pcs).forEach(k => { if (!seen.has(+k)) { root.remove(pcs[k]); delete pcs[k]; } });
-        },
-        tap(e) {
-          const h = s.pick(e, sq)[0]; if (!h) return false; const i = h.object.userData.i;
-          const el = document.querySelector(kind === 'ck' ? `#ck [data-sq="${i}"]` : `#rv [data-i="${i}"]`); if (!el || el.disabled) return false; el.click(); return true;
-        },
-      };
-    };
-  }
-
-  /* ---------- gomoku ---------- */
-  function gomoku(s, root, TH) {
-    const N = 11, SP = 0.62, W = (N - 1) * SP + 1.1;
-    const tex = T3.canvasTex(1024, 1024, (g, w, h) => {
-      g.fillStyle = '#d9b36b'; g.fillRect(0, 0, w, h); g.strokeStyle = '#4a3216'; g.lineWidth = 3;
-      const m = 1024 * 0.55 / W, a = (1024 - (N - 1) * SP * 1024 / W) / 2, st = SP * 1024 / W;
-      for (let i = 0; i < N; i++) { g.beginPath(); g.moveTo(a + i * st, a); g.lineTo(a + i * st, 1024 - a); g.stroke(); g.beginPath(); g.moveTo(a, a + i * st); g.lineTo(1024 - a, a + i * st); g.stroke(); }
-      g.fillStyle = '#4a3216'; [[2, 2], [8, 2], [5, 5], [2, 8], [8, 8]].forEach(([x, y]) => { g.beginPath(); g.arc(a + x * st, a + y * st, 8, 0, 7); g.fill(); });
-    });
-    T3.mk(root, T3.BOX(W, 0.22, W), T3.mat('#fff', { map: tex, roughness: 0.5 }), 0, 0.05, 0, { noCast: true });
-    const picks = [], st = {}, marks = [];
-    const pos = i => [((i % N) - (N - 1) / 2) * SP, (Math.floor(i / N) - (N - 1) / 2) * SP];
-    for (let i = 0; i < N * N; i++) { const [x, z] = pos(i); const m = T3.mk(root, T3.BOX(SP, 0.02, SP), new TH.MeshBasicMaterial({ visible: false }), x, 0.2, z, { noCast: true }); m.userData.i = i; picks.push(m); }
-    return {
-      sync(S, first) {
-        marks.forEach(m => root.remove(m)); marks.length = 0;
-        cells('#gm .gm-c').forEach(el => {
-          const i = +el.dataset.i, p = owner(el), [x, z] = pos(i);
-          if (p >= 0 && !st[i]) {
-            const m = T3.mk(root, T3.SPH(0.27, 18), T3.mat(COL[p], { roughness: 0.3 }), x, 0.34, z); m.scale.y = 0.5; st[i] = m;
-            if (!first) { m.position.y = 1.8; s.tween(340, (k, e) => { m.position.y = 0.34 + 1.46 * (1 - e); }); }
-          }
-          if (el.classList.contains('win')) marks.push(ring(root, x, z, 0x6ee09a, 0.32));
-          else if (el.classList.contains('last')) marks.push(ring(root, x, z, 0xff6a4a, 0.22));
-        });
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const el = document.querySelector(`#gm [data-i="${h.object.userData.i}"]`); if (!el || el.disabled) return false; el.click(); return true; },
-    };
-  }
-
-  /* ---------- tic-tac-toe ---------- */
-  function ttt(s, root, TH) {
-    const CELL = 2.1;
-    T3.mk(root, T3.BOX(3 * CELL + 0.6, 0.25, 3 * CELL + 0.6), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0.05, 0, { noCast: true });
-    for (const k of [-0.5, 0.5]) { T3.mk(root, T3.BOX(0.12, 0.08, 3 * CELL), T3.mat('#4a3216'), k * CELL, 0.2, 0, { noCast: true }); T3.mk(root, T3.BOX(3 * CELL, 0.08, 0.12), T3.mat('#4a3216'), 0, 0.2, k * CELL, { noCast: true }); }
-    const pos = i => [((i % 3) - 1) * CELL, (Math.floor(i / 3) - 1) * CELL], picks = [], marks = [], st = {};
-    for (let i = 0; i < 9; i++) { const [x, z] = pos(i); const m = T3.mk(root, T3.BOX(CELL, 0.05, CELL), new TH.MeshBasicMaterial({ visible: false }), x, 0.24, z, { noCast: true }); m.userData.i = i; picks.push(m); }
-    const mark = (p, x, z) => {
-      const g = new TH.Group(); g.position.set(x, 0.18, z);
-      if (p === 0) for (const a of [Math.PI / 4, -Math.PI / 4]) { const b = T3.mk(g, T3.BOX(1.3, 0.28, 0.26), T3.mat(COL[0], { roughness: 0.4 }), 0, 0.14, 0); b.rotation.y = a; }
-      else { const t = T3.mk(g, new TH.TorusGeometry(0.5, 0.14, 12, 28), T3.mat(COL[1], { roughness: 0.4 }), 0, 0.15, 0); t.rotation.x = Math.PI / 2; }
-      root.add(g); return g;
-    };
-    return {
-      sync(S, first) {
-        marks.forEach(m => root.remove(m)); marks.length = 0;
-        cells('#ttt .ttt-c').forEach(el => {
-          const i = +el.dataset.i, p = el.classList.contains('p0') ? 0 : el.classList.contains('p1') ? 1 : -1, [x, z] = pos(i);
-          if (p >= 0 && !st[i]) { const g = mark(p, x, z); st[i] = g; if (!first) { g.scale.setScalar(0.1); s.tween(300, (k, e) => g.scale.setScalar(0.1 + 0.9 * e)); } }
-          if (el.classList.contains('win')) marks.push(ring(root, x, z, 0x6ee09a, 0.8));
-        });
-        Object.keys(st).forEach(k => { const el = document.querySelector(`#ttt [data-i="${k}"]`); if (el && !el.classList.contains('p0') && !el.classList.contains('p1')) { root.remove(st[k]); delete st[k]; } });
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const el = document.querySelector(`#ttt [data-i="${h.object.userData.i}"]`); if (!el || el.disabled) return false; el.click(); return true; },
-    };
-  }
-
-  /* ---------- four in a row ---------- */
-  function four(s, root, TH) {
-    const COLS = 7, ROWS = 6, SP = 1.06, W = COLS * SP + 0.5, H = ROWS * SP + 0.5;
-    const shape = new TH.Shape(); shape.moveTo(-W / 2, 0); shape.lineTo(W / 2, 0); shape.lineTo(W / 2, H); shape.lineTo(-W / 2, H); shape.closePath();
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { const h = new TH.Path(); h.absarc((c - (COLS - 1) / 2) * SP, 0.25 + SP / 2 + r * SP + 0.0, 0.44, 0, Math.PI * 2, true); shape.holes.push(h); }
-    const fr = new TH.Mesh(new TH.ExtrudeGeometry(shape, { depth: 0.3, bevelEnabled: false }), T3.mat('#2b57c9', { roughness: 0.35 })); fr.castShadow = true; fr.position.set(0, 0.2, 0.12); root.add(fr);
-    for (const sx of [-1, 1]) T3.mk(root, T3.BOX(0.3, 0.3, 1.1), T3.mat('#1d3f96'), sx * (W / 2 - 0.05), 0.35, 0.2);
-    const backing = T3.mk(root, T3.BOX(W - 0.2, H - 0.2, 0.06), T3.mat('#101a3a', { roughness: 0.8 }), 0, 0.2 + H / 2, 0.1, { noCast: true });
-    const posC = c => (c - (COLS - 1) / 2) * SP, posR = r => 0.2 + 0.25 + SP / 2 + (ROWS - 1 - r) * SP;   // r=0 is the top row
-    const picks = [], st = {}, marks = [];
-    for (let c = 0; c < COLS; c++) { const m = T3.mk(root, T3.BOX(SP, H + 1.2, 0.8), new TH.MeshBasicMaterial({ visible: false }), posC(c), 0.2 + H / 2 + 0.3, 0.3, { noCast: true }); m.userData.c = c; picks.push(m); }
-    return {
-      sync(S, first) {
-        marks.forEach(m => root.remove(m)); marks.length = 0;
-        cells('#c4 .c4-cell').forEach(el => {
-          const i = +el.dataset.i, r = Math.floor(i / COLS), c = i % COLS, p = el.classList.contains('p0') ? 0 : el.classList.contains('p1') ? 1 : -1;
-          if (p >= 0 && !st[i]) {
-            const m = T3.mk(root, T3.CYL(0.42, 0.42, 0.2, 28), T3.mat(COL[p], { roughness: 0.35 }), posC(c), posR(r), 0.22); m.rotation.x = Math.PI / 2; st[i] = m;
-            if (!first) { const y0 = H + 1.6, y1 = posR(r); m.position.y = y0; s.tween(300 + (ROWS - r) * 70, (k, e) => { const b = e * e; m.position.y = y1 + (y0 - y1) * (1 - b); }); }
-          }
-          if (el.classList.contains('win')) { const m = T3.mk(root, new TH.TorusGeometry(0.46, 0.05, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), posC(c), posR(r), 0.4, { noCast: true }); marks.push(m); }
-        });
-        Object.keys(st).forEach(k => { const el = document.querySelector(`#c4 [data-i="${k}"]`); if (el && !el.classList.contains('p0') && !el.classList.contains('p1')) { root.remove(st[k]); delete st[k]; } });
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const el = document.querySelector(`#c4 [data-c="${h.object.userData.c}"]`); if (!el || el.disabled) return false; el.click(); return true; },
-    };
-  }
-
-  const V8 = { seat: { label: 'Seat', pos: [0, 12.6, 10.4], look: [0, 2.3, 0.6], fov: 42, sway: 0.01 }, top: { label: 'Top', pos: [0, 16.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, side: { label: 'Side', pos: [11.5, 7.5, 5], look: [0, 2.4, 0], fov: 42 } };
-  const SETUP = [
-    ['checkers', { build: grid8('ck'), views: V8, hint: 'Tap a piece, then tap where it goes.' }, ['#ck']],
-    ['reversi', { build: grid8('rv'), views: V8, hint: 'Tap a glowing square to place a disc.' }, ['#rv']],
-    ['gomoku', { build: gomoku, views: V8, hint: 'Tap an empty point to place a stone.' }, ['#gm']],
-    ['tictactoe', { build: ttt, views: V8, hint: 'Tap an empty square.' }, ['#ttt']],
-    ['fourinrow', { build: four, sides: 'ew', hint: 'Tap a column to drop your disc.', views: {
-      seat: { label: 'Front', pos: [0, 8.2, 13.2], look: [0, 4.2, 0], fov: 42, sway: 0.01 }, side: { label: 'Side', pos: [11, 6.4, 7], look: [0, 4.0, 0], fov: 42 }, top: { label: 'Top', pos: [0, 15, 4], look: [0, 3, 0], fov: 42 } } }, ['#c4']],
-  ];
-  for (const [id, cfg, hide] of SETUP) {
-    const D = Club.games[id]; if (!D) continue;
-    D.ui3d = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table > :nth-child(2)'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => board3(box, S, cfg) });
-  }
-})();
-
-/* ===================== 3D tables: Mancala, Dots and Boxes, Snakes-style Ladders ===================== */
-(() => {
-  const COL = ['#f2b441', '#f7f0e1'], SEED = ['#e04a3a', '#3f8be8', '#5cc8b0', '#f2b441', '#a063d8'];
-  const ring = (root, x, z, col, r, y) => { const m = T3.mk(root, new THREE.TorusGeometry(r || 0.5, 0.05, 8, 28), new THREE.MeshBasicMaterial({ color: col }), x, y || 0.3, z, { noCast: true }); m.rotation.x = Math.PI / 2; return m; };
-  const V = (pos, look) => ({ seat: { label: 'Seat', pos, look, fov: 42, sway: 0.01 }, top: { label: 'Top', pos: [0, 19, 0.01], look: [0, 2.5, 0.4], up: [0, 0, -1], fov: 42 }, side: { label: 'Side', pos: [11.5, 7.5, 5], look: [0, 2.4, 0], fov: 42 } });
-
-  /* ---------- Mancala ---------- */
-  function mancala(s, root, TH) {
-    const SPC = 1.5;
-    T3.mk(root, T3.BOX(12.4, 0.5, 4.4), T3.mat('#7a4a22', { roughness: 0.5 }), 0, 0.1, 0, { noCast: true });
-    const pitX = k => (k - 2.5) * SPC, pits = [], pickers = [], seeds = {}, marks = [], key = {};
-    const mkPit = (x, z, r, sx) => { const m = T3.mk(root, T3.CYL(r, r, 0.08, 28), T3.mat('#2b170a', { roughness: 0.9 }), x, 0.37, z, { noCast: true }); m.scale.x = sx || 1; return m; };
-    for (let k = 0; k < 6; k++) { mkPit(pitX(k), 1.05, 0.62); mkPit(pitX(k), -1.05, 0.62); }
-    const stores = [mkPit(-5.35, 0, 0.8, 0.62), mkPit(5.35, 0, 0.8, 0.62)];
-    stores.forEach(st => { st.scale.set(0.8, 1, 1.9); st.geometry = new TH.CylinderGeometry(0.8, 0.8, 0.08, 28); });
-    const bottom = [];
-    for (let k = 0; k < 6; k++) { const m = T3.mk(root, T3.CYL(0.7, 0.7, 0.04, 20), new TH.MeshBasicMaterial({ visible: false }), pitX(k), 0.45, 1.05, { noCast: true }); m.userData.p = k; pickers.push(m); }
-    const labels = [T3.label('', { scale: 1.6 }), T3.label('', { scale: 1.6 })]; labels[0].sprite.position.set(-5.35, 1.7, 0); labels[1].sprite.position.set(5.35, 1.7, 0); labels.forEach(l => root.add(l.sprite));
-    const fill = (id, n, cx, cz, rad, w) => {
-      const k = n + '|' + w; if (key[id] === k) return; key[id] = k; (seeds[id] || []).forEach(m => root.remove(m)); seeds[id] = [];
-      for (let i = 0; i < Math.min(n, 36); i++) {
-        const a = i * 2.4 + id.length, rr = rad * Math.sqrt((i + 0.5) / Math.min(n, 36)) * 0.8, ly = 0.46 + Math.floor(i / 14) * 0.16;
-        const m = T3.mk(root, T3.SPH(0.16, 10), T3.mat(SEED[(i + id.charCodeAt(0)) % 5], { roughness: 0.3 }), cx + Math.cos(a) * rr * (w || 1), ly, cz + Math.sin(a) * rr); seeds[id].push(m);
-      }
-    };
-    return {
-      sync(S) {
-        const g = S.V.g, me = S.me === 1 ? 1 : 0, opp = 1 - me;
-        marks.forEach(m => root.remove(m)); marks.length = 0;
-        for (let k = 0; k < 6; k++) { fill('b' + k, g.b[me * 7 + k], pitX(k), 1.05, 0.5); fill('t' + k, g.b[opp * 7 + k], pitX(5 - k), -1.05, 0.5); }
-        fill('sL', g.b[opp * 7 + 6], -5.35, 0, 0.9, 0.5); fill('sR', g.b[me * 7 + 6], 5.35, 0, 0.9, 0.5);
-        labels[0].set(String(g.b[opp * 7 + 6]), '#f7f0e1'); labels[1].set(String(g.b[me * 7 + 6]), '#f7f0e1');
-        document.querySelectorAll('#mc .mc-p[data-p]').forEach(b => { const k = +b.dataset.p; if (b.classList.contains('ok')) marks.push(ring(root, pitX(k), 1.05, 0x6ee09a, 0.66, 0.42)); if (b.classList.contains('last')) marks.push(ring(root, pitX(k), 1.05, 0xf2b441, 0.56, 0.42)); });
-      },
-      tap(e) { const h = s.pick(e, pickers)[0]; if (!h) return false; const b = document.querySelector(`#mc [data-p="${h.object.userData.p}"]`); if (!b || b.disabled) return false; b.click(); return true; },
-    };
-  }
-
-  /* ---------- Dots and Boxes ---------- */
-  function dots(s, root, TH) {
-    const L = 1.9;
-    const kids = [...document.getElementById('db').children], B = Math.round(Math.sqrt(kids.length) - 1) / 2, W = 2 * B + 1;
-    T3.mk(root, T3.BOX(B * L + 1.6, 0.2, B * L + 1.6), T3.mat('#d9b36b', { roughness: 0.55 }), 0, 0.05, 0, { noCast: true });
-    const X = C => (C - B) * L / 2, Z = R => (R - B) * L / 2, edges = {}, boxes = {}, picks = [];
-    kids.forEach((el, idx) => {
-      const R = Math.floor(idx / W), C = idx % W;
-      if (R % 2 === 0 && C % 2 === 0) T3.mk(root, T3.CYL(0.16, 0.16, 0.14, 14), T3.mat('#2b170a'), X(C), 0.2, Z(R));
-      else if (el.dataset.e !== undefined) {
-        const e = +el.dataset.e, hz = R % 2 === 0;
-        const m = T3.mk(root, T3.BOX(hz ? L - 0.45 : 0.14, 0.06, hz ? 0.14 : L - 0.45), T3.mat('#a98a58', { roughness: 0.8 }), X(C), 0.17, Z(R), { noCast: true }); edges[e] = m;
-        const p = T3.mk(root, T3.BOX(hz ? L - 0.3 : 0.55, 0.05, hz ? 0.55 : L - 0.3), new TH.MeshBasicMaterial({ visible: false }), X(C), 0.2, Z(R), { noCast: true }); p.userData.e = e; picks.push(p);
-      } else if (el.dataset.b !== undefined) boxes[+el.dataset.b] = { x: X(C), z: Z(R), m: null };
-    });
-    return {
-      sync(S, first) {
-        document.querySelectorAll('#db .db-e').forEach(el => {
-          const m = edges[+el.dataset.e]; if (!m) return; const on = el.classList.contains('on'), last = el.classList.contains('last');
-          m.material.color.set(last ? '#f2b441' : on ? '#f7f0e1' : '#a98a58'); m.scale.y = on ? 2.6 : 1; m.position.y = on ? 0.21 : 0.17;
-          if (on && !m.userData.on) { m.userData.on = true; if (!first) { const y1 = 0.21; m.position.y = 1.4; s.tween(260, (k, e) => { m.position.y = y1 + (1.4 - y1) * (1 - e); }); } }
-        });
-        document.querySelectorAll('#db .db-b').forEach(el => {
-          const b = boxes[+el.dataset.b], p = el.classList.contains('p0') ? 0 : el.classList.contains('p1') ? 1 : -1;
-          if (b && p >= 0 && !b.m) { b.m = T3.mk(root, T3.BOX(L - 0.55, 0.12, L - 0.55), T3.mat(COL[p], { roughness: 0.4 }), b.x, 0.2, b.z, { noCast: true }); if (!first) { b.m.scale.setScalar(0.1); s.tween(300, (k, e) => b.m.scale.setScalar(0.1 + 0.9 * e)); } }
-        });
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const b = document.querySelector(`#db [data-e="${h.object.userData.e}"]`); if (!b || b.disabled) return false; b.click(); return true; },
-    };
-  }
-
-  /* ---------- Ladders ---------- */
-  function ladders(s, root, TH) {
-    const W = 9.6, CELL = W / 10;
-    const tex = T3.canvasTex(1024, 1024, (g, w, h) => {
-      const c = w / 10;
-      for (let r = 0; r < 10; r++) for (let q = 0; q < 10; q++) {
-        const n = (9 - r) % 2 === 0 ? (9 - r) * 10 + q + 1 : (9 - r) * 10 + 10 - q;
-        g.fillStyle = (r + q) % 2 ? '#e7cf9f' : '#c9a06a'; g.fillRect(q * c, r * c, c, c);
-        g.fillStyle = 'rgba(60,35,15,.75)'; g.font = '700 30px Figtree, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top'; g.fillText(String(n), q * c + 8, r * c + 6);
-      }
-    });
-    T3.mk(root, T3.BOX(W + 0.5, 0.18, W + 0.5), T3.mat('#fff', { map: tex, roughness: 0.6 }), 0, 0.05, 0, { noCast: true });
-    const P = (x, y) => new TH.Vector3((x / 100 - 0.5) * W, 0.2, (y / 100 - 0.5) * W);
-    document.querySelectorAll('.ld-svg line').forEach(l => {
-      const a = P(+l.getAttribute('x1'), +l.getAttribute('y1')), b = P(+l.getAttribute('x2'), +l.getAttribute('y2')), lad = l.classList.contains('lad');
-      const dir = b.clone().sub(a), len = dir.length(), nrm = new TH.Vector3(-dir.z, 0, dir.x).normalize().multiplyScalar(0.14);
-      if (lad) {
-        for (const sg of [-1, 1]) { const rail = T3.mk(root, T3.BOX(0.07, 0.07, len), T3.mat('#2f9e5a', { roughness: 0.5 }), (a.x + b.x) / 2 + nrm.x * sg, 0.28, (a.z + b.z) / 2 + nrm.z * sg, { noCast: true }); rail.rotation.y = Math.atan2(dir.x, dir.z); }
-        for (let t = 0.5; t < len; t += 0.45) { const p = a.clone().add(dir.clone().multiplyScalar(t / len)); const rg = T3.mk(root, T3.BOX(0.3, 0.05, 0.05), T3.mat('#2f9e5a'), p.x, 0.28, p.z, { noCast: true }); rg.rotation.y = Math.atan2(dir.x, dir.z) + Math.PI / 2; rg.rotation.y = Math.atan2(dir.x, dir.z); }
-      } else {
-        const pts = []; for (let k = 0; k <= 12; k++) { const t = k / 12, p = a.clone().lerp(b, t); const wob = Math.sin(t * Math.PI * 3) * 0.35; p.x += nrm.x * 2.4 * wob; p.z += nrm.z * 2.4 * wob; p.y = 0.3; pts.push(p); }
-        const tube = new TH.Mesh(new TH.TubeGeometry(new TH.CatmullRomCurve3(pts), 40, 0.12, 8, false), T3.mat('#d6453d', { roughness: 0.4 })); root.add(tube);
-        T3.mk(root, T3.SPH(0.2, 12), T3.mat('#d6453d'), a.x, 0.32, a.z).scale.set(1, 0.7, 1.2); // head at the top
-      }
-    });
-    const cellPos = n => { if (n <= 0) return new TH.Vector3(-W / 2 - 0.6, 0.2, W / 2 + 0.2); const k = n - 1, r = Math.floor(k / 10), c = r % 2 === 0 ? k % 10 : 9 - (k % 10); return new TH.Vector3((c - 4.5) * CELL, 0.2, (4.5 - r) * CELL); };
-    const pawns = [], at = [];
-    const pawn = i => { const g = new TH.Group(); T3.mk(g, T3.CYL(0.22, 0.3, 0.3, 16), T3.mat(i < 2 ? COL[i] : SEED[i], { roughness: 0.4 }), 0, 0.15, 0); T3.mk(g, T3.SPH(0.22, 16), T3.mat(i < 2 ? COL[i] : SEED[i], { roughness: 0.4 }), 0, 0.45, 0); root.add(g); return g; };
-    const die = T3.mkDie(); die.scale.setScalar(1.2); die.position.set(W / 2 + 1.4, 0.4, -1.5); root.add(die); let dieKey = -1;
-    const note = T3.label('', { scale: 2.6 }); note.sprite.position.set(W / 2 + 1.4, 1.5, -1.5); root.add(note.sprite);
-    return {
-      sync(S, first) {
-        const g = S.V.g;
-        g.pos.forEach((p, i) => {
-          if (!pawns[i]) { pawns[i] = pawn(i); at[i] = -999; }
-          if (at[i] === p) return;
-          const from = at[i] === -999 ? cellPos(p) : cellPos(at[i]), to = cellPos(p), off = new TH.Vector3((i % 2 - 0.5) * 0.3, 0, (Math.floor(i / 2) - 0.5) * 0.3); at[i] = p; const pw = pawns[i];
-          if (first || from.equals(to)) { pw.position.copy(to).add(off); return; }
-          s.tween(750, (k, e) => { pw.position.lerpVectors(from, to, e).add(off); pw.position.y += Math.abs(Math.sin(e * Math.PI * Math.min(8, from.distanceTo(to) / 1.1 + 1))) * 0.35; });
-        });
-        if (g.die && g.die !== dieKey) { dieKey = g.die; const r = T3.DIE_ROT[g.die]; if (first) die.rotation.set(r[0], r[1], r[2]); else s.tween(800, (k, e) => { die.position.y = 0.4 + Math.abs(Math.sin(e * 9)) * 1.1 * (1 - e); die.rotation.set(r[0] + (1 - e) * 7, r[1] + (1 - e) * 5, r[2] + (1 - e) * 6); }); }
-        note.set(g.note || '', '#f7f0e1');
-      },
-    };
-  }
-
-  const SET = [
-    ['mancala', { build: mancala, views: V([0, 11, 9], [0, 2.4, 0.4]), hint: 'Tap one of your pits (the bottom row).' }, ['#mc']],
-    ['dotsboxes', { build: dots, views: V([0, 12.5, 9.6], [0, 2.4, 0.4]), hint: 'Tap a gap between two dots. Close a box and go again.' }, ['#db']],
-    ['ladders', { build: ladders, views: V([0, 13.6, 10.6], [0, 2.4, 0.4]), hint: 'Roll the die with the button below.' }, ['.ld']],
-  ];
-  for (const [id, cfg, hide] of SET) {
-    const D = Club.games[id]; if (!D) continue;
-    D.ui3d = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table > :nth-child(2)'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => T3.board3(box, S, cfg) });
-  }
-})();
-
-/* ===================== 3D tables for hand-holding card games: Big Two and Colour Rush ===================== */
-(() => {
-  const arr = x => (Array.isArray(x) ? x : []);
-  const handTap = (rootSel, S, s, e, seatG) => {
-    if (S.me < 0 || !seatG[S.me]) return false; const h = seatG[S.me], hit = s.pick(e, h.m)[0]; if (!hit) return false;
-    let o = hit.object; while (o && h.m.indexOf(o) < 0) o = o.parent; if (!o) return false;
-    const b = document.querySelector(`${rootSel} [data-c="${o.userData.c}"]`); if (b) { b.click(); return true; } return false;
-  };
-
-  /* ---------- Big Two ---------- */
-  const bigtwo = {
-    felt: '#1f5a3a', noDealer: true, ring: true,
-    map: c => ((((c >> 2) + 1) % 13) * 4) + [2, 3, 1, 0][c & 3],
-    cards: (S, i) => { const g = S.V.g; return i === S.me ? arr(S.my && S.my.h) : g.hands ? arr(g.hands[i]) : Array(Math.min(13, (g.counts || [])[i] || 0)).fill(-1); },
-    size: (S, i) => (i === S.me ? [0.8, 0.52] : [0.42, 0.22]),
-    held: (S, i) => (i === S.me ? [...document.querySelectorAll('#btHand .bt-card')].map(b => b.classList.contains('sel')) : []),
-    status: (S, i) => { const g = S.V.g; return g.passed && g.passed[i] ? 'Passed' : (g.counts || [])[i] === 1 ? 'One card!' : ''; },
-    zones: S => { const l = S.V.g.lead; return [{ id: 'lead', x: 0, z: -0.4, faces: l ? l.cs : [], text: l ? S.nameOf(l.by) + ' played' : (S.V.g.turn >= 0 ? 'Open lead' : ''), w: 0.8 }]; },
-    hint: S => (S.turn ? 'Tap cards to pick them, then press Play (or Pass) below.' : ''),
-    tapCards: (s, e, S, seatG) => handTap('#btHand', S, s, e, seatG),
-  };
-
-  /* ---------- Colour Rush ---------- */
-  const RC = ['#e8685a', '#f2b441', '#5cc8b0', '#5aa8f0', '#2b2433'], CN = ['Coral', 'Amber', 'Mint', 'Sky'];
-  const lab = v => (v <= 9 ? String(v) : v === 10 ? '⊘' : v === 11 ? '⇄' : v === 12 ? '+2' : v === 13 ? '★' : '+4');
-  const faceCache = {};
-  const rushMat = id => faceCache[id] || (faceCache[id] = new THREE.MeshStandardMaterial({ roughness: 0.5, map: T3.canvasTex(256, 360, (g, w, h) => {
-    const c = id >> 4, v = id & 15, L = lab(v);
-    g.fillStyle = '#fbf6ea'; g.fillRect(0, 0, w, h); g.fillStyle = RC[c]; g.fillRect(12, 12, w - 24, h - 24);
-    if (c === 4) { ['#e8685a', '#f2b441', '#5cc8b0', '#5aa8f0'].forEach((q, k) => { g.fillStyle = q; g.fillRect(12 + (k % 2) * (w - 24) / 2, 12 + (k >> 1) * (h - 24) / 2, (w - 24) / 2, (h - 24) / 2); }); }
-    g.save(); g.translate(w / 2, h / 2); g.rotate(-0.5); g.fillStyle = '#fbf6ea'; g.beginPath(); g.ellipse(0, 0, 86, 120, 0, 0, 7); g.fill(); g.restore();
-    g.fillStyle = c === 4 ? '#2b2433' : RC[c]; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '800 ' + (L.length > 1 ? 92 : 128) + 'px Figtree, system-ui, sans-serif'; g.fillText(L, w / 2, h / 2 + 6);
-    g.fillStyle = '#fff'; g.font = '800 40px Figtree, sans-serif'; g.fillText(L, 46, 52); g.fillText(L, w - 46, h - 52);
-  }) }));
-  const rush = {
-    felt: '#2a3a6a', noDealer: true, ring: true,
-    mk: (c, w) => { const m = T3.card3(-1, w); if (c >= 0) m.material[2] = rushMat(c); return m; },
-    cards: (S, i) => { const g = S.V.g; return i === S.me ? arr(S.my && S.my.h) : g.hands ? arr(g.hands[i]) : Array(Math.min(14, (g.counts || [])[i] || 0)).fill(-1); },
-    size: (S, i) => (i === S.me ? [0.8, 0.52] : [0.42, 0.22]),
-    held: (S, i) => (i === S.me ? [...document.querySelectorAll('#rsHand .bt-card')].map(b => b.classList.contains('ok') || b.classList.contains('sel')) : []),
-    status: (S, i) => ((S.V.g.counts || [])[i] === 1 ? 'One card!' : ''),
-    zones: S => { const g = S.V.g; return [
-      { id: 'top', x: 1.1, z: -0.5, faces: g.top >= 0 ? [g.top] : [], text: g.top >= 0 ? (CN[g.color] || '') + ' · ' + (g.dir === 1 ? 'clockwise' : 'anticlockwise') : '', w: 1.0 },
-      { id: 'draw', x: -1.1, z: -0.5, faces: g.left ? [-1] : [], text: g.left ? g.left + ' left' : '', w: 1.0 }]; },
-    hint: S => (S.turn ? 'Tap a lit card to play it, or tap the pile to draw.' : ''),
-    tapCards: (s, e, S, seatG, zones) => {
-      if (handTap('#rsHand', S, s, e, seatG)) return;
-      const z = zones.draw; if (z && z.m.length && s.pick(e, z.m)[0]) { const b = document.getElementById('rsDraw'); if (b) b.click(); }
-    },
-  };
-
-  bigtwo.hands = st => [{ label: 'Your hand', el: st.querySelector('#btHand') }];
-  rush.hands = st => [{ label: 'Your hand', el: st.querySelector('#rsHand') }];
-  T3.attach3('bigtwo', bigtwo, ['#btHand', '#btLead']);
-  T3.attach3('rush', rush, ['#rsHand', '.rs-mid']);
-})();
-
-/* ===================== 3D tables for the dice games: Pig, Shut the Box, Bankroll, Bluff Dice ===================== */
-(() => {
-  const arr = x => (Array.isArray(x) ? x : []);
-
-  const pig = {
-    cards: () => [], felt: '#6a2a2a', noDealer: true, ring: true,
-    status: (S, i) => `${S.V.g.score[i]} pts`,
-    props: T3.diceProps({ z: -0.4, dice: S => (S.V.g.die ? [S.V.g.die] : []), text: S => { const g = S.V.g; return g.over ? '' : g.busted ? 'Rolled a 1! Turn total lost.' : g.turn >= 0 ? 'Turn total: ' + g.tt : ''; } }),
-    hint: S => (S.turn ? 'Your turn: press Roll, or Hold to bank your turn total.' : ''),
-  };
-  const bank = {
-    cards: () => [], felt: '#1f5a3a', noDealer: true, ring: true,
-    status: (S, i) => `${S.V.g.score[i]} banked` + (S.V.g.banked[i] && !S.V.g.over ? ' ✓' : ''),
-    props: T3.diceProps({ z: -0.4, dice: S => S.V.g.dice, text: S => { const g = S.V.g; return g.over ? '' : (g.roundN ? `Round ${g.roundN} · pot ${g.pot}` : '') + (g.note ? ' · ' + g.note : ''); } }),
-    hint: S => (S.turn ? 'Bank the pot to keep it, or stay in for more.' : ''),
-  };
-
-  /* ---------- Shut the Box ---------- */
-  const tileTex = n => T3.canvasTex(128, 128, (g, w, h) => { g.fillStyle = '#e7cf9f'; g.fillRect(0, 0, w, h); g.strokeStyle = '#6b4423'; g.lineWidth = 8; g.strokeRect(4, 4, w - 8, h - 8); g.fillStyle = '#3b1d12'; g.font = '700 84px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(n), w / 2, h / 2 + 6); });
-  const shut = {
-    cards: () => [], felt: '#2a5a3a', noDealer: true, ring: true,
-    status: (S, i) => { const g = S.V.g, open = (g.tiles[i] || []).reduce((a, o, x) => a + (o ? x + 1 : 0), 0); return g.finished[i] || g.over ? 'Open ' + open : ''; },
-    hint: S => (S.turn ? 'Tap tiles that add up to your roll, then press Shut these tiles.' : ''),
-    props: (s, sc, TY0, S0, api) => {
-      const TH = THREE, dp = T3.diceProps({ z: 0.1, dice: S => S.V.g.dice, text: S => S.V.g.note || '' })(s, sc, TY0);
-      const tiles = [], picks = [];
-      T3.mk(sc, T3.BOX(9.6, 0.2, 1.7), T3.mat('#4a2a14', { roughness: 0.6 }), 0, TY0 + 0.1, -2.6, { noCast: true });
-      for (let k = 1; k <= 9; k++) {
-        const t = T3.mk(sc, T3.BOX(0.86, 0.14, 1.2), T3.mat('#fff', { map: tileTex(k), roughness: 0.5 }), (k - 5) * 1.0, TY0 + 0.27, -2.6); t.userData.v = k; tiles[k] = t; picks.push(t);
-      }
-      const who = T3.label('', { scale: 2.6 }); who.sprite.position.set(0, TY0 + 1.5, -2.6); sc.add(who.sprite);
-      return {
-        sync(S, inst) {
-          dp.sync(S, inst); const g = S.V.g;
-          document.querySelectorAll('#sbTiles .sb-t').forEach(b => {
-            const k = +b.dataset.v, t = tiles[k]; if (!t) return; const sh = b.classList.contains('shut'), pk = b.classList.contains('pick');
-            t.userData.ty = sh ? TY0 + 0.1 : pk ? TY0 + 0.75 : TY0 + 0.27; t.userData.shut = sh; t.material.color.set(sh ? '#4a3a2a' : pk ? '#ffe49a' : '#ffffff');
-            if (inst) t.position.y = t.userData.ty;
-          });
-          who.set(g.over ? '' : g.turn >= 0 ? S.nameOf(g.turn) + (g.turn === S.me ? ' (your tiles)' : '') : '', '#f7f0e1');
-        },
-        frame(dt) { tiles.forEach(t => { if (t && t.userData.ty !== undefined) t.position.y += (t.userData.ty - t.position.y) * Math.min(1, dt * 10); }); },
-        tap(e, S) { const h = s.pick(e, picks)[0]; if (!h) return false; const b = document.querySelector(`#sbTiles [data-v="${h.object.userData.v}"]`); if (b && !b.disabled) { b.click(); return true; } return false; },
-      };
-    },
-  };
-
-  /* ---------- Bluff Dice ---------- */
-  const bluff = {
-    cards: () => [], felt: '#3a1f3a', noDealer: true, ring: true,
-    status: (S, i) => { const g = S.V.g; return g.bid && g.by === i ? `Bid ${g.bid.q} × ${g.bid.f}s` : ''; },
-    hint: S => (S.turn ? 'Choose a bid (or call liar) with the buttons below.' : ''),
-    props: (s, sc, TY0, S0, api) => {
-      const TH = THREE, rows = [], bid = T3.label('', { scale: 3.4 }); bid.sprite.position.set(0, TY0 + 1.2, -0.6); sc.add(bid.sprite);
-      const cup = () => { const g = new TH.Group(); T3.mk(g, new TH.CylinderGeometry(0.5, 0.7, 0.9, 20, 1, true), T3.mat('#7a1f3a', { roughness: 0.5, side: TH.DoubleSide }), 0, 0.45, 0); T3.mk(g, T3.CYL(0.5, 0.5, 0.06, 20), T3.mat('#7a1f3a'), 0, 0.9, 0); return g; };
-      return {
-        sync(S, inst) {
-          const g = S.V.g, n = S.V.seats.length, per = Math.max(1, Math.round((g.total || 0) / Math.max(1, n)));
-          bid.set(g.bid ? `Bid: ${g.bid.q} × ${g.bid.f}s (${S.nameOf(g.by)})` : 'No bid yet', '#f7f0e1');
-          S.V.seats.forEach((st, i) => {
-            const holder = api.seatG[i]; if (!holder) return; const grp = holder.g;
-            const vals = g.dice ? arr(g.dice[i]) : (i === S.me ? arr(S.my && S.my.d) : null), key = (vals ? vals.join('.') : 'cup' + per) + '|' + grp.id;
-            if (rows[i] && rows[i].key === key) return; if (rows[i]) grp.remove(rows[i].g); const r = new TH.Group(); r.position.y = 0.3;
-            if (vals) vals.forEach((v, j) => { const d = T3.mkDie(); d.scale.setScalar(0.85); const rr = T3.DIE_ROT[v]; d.rotation.set(rr[0], rr[1] + j * 0.5, rr[2]); d.position.set((j - (vals.length - 1) / 2) * 0.8, 0.0, (j % 2) * 0.15); r.add(d); if (g.bid && v === g.bid.f && g.dice) { T3.mk(r, new TH.TorusGeometry(0.34, 0.04, 6, 20), new TH.MeshBasicMaterial({ color: 0x6ee09a }), d.position.x, -0.2, d.position.z, { noCast: true }).rotation.x = Math.PI / 2; } });
-            else { const c = cup(); c.position.y = -0.3; r.add(c); }
-            grp.add(r); rows[i] = { g: r, key };
-          });
-          rows.length = n;
-        },
-      };
-    },
-  };
-
-  T3.attach3('pig', pig, ['#pgDie']);
-  T3.attach3('bankroll', bank, ['#bkDice', '#bkPot']);
-  T3.attach3('shutbox', shut, ['#sbDice', '#sbTiles']);
-  T3.attach3('bluffdice', bluff, ['#bdDice', '#bdAll']);
-})();
-
-/* ===================== 3D tables: Memory, Nim, Rock Paper Scissors, Pattern Memory, Hi-Lo, Code Breaker, Hangman ===================== */
-(() => {
-  const PEG = ['#e0443c', '#f2b441', '#46b96a', '#3f8be8', '#a063d8', '#f7f0e1'];
-  const symTex = {};
-  const sym = (txt, bg) => { const k = txt + '|' + bg; return symTex[k] || (symTex[k] = T3.canvasTex(128, 160, (g, w, h) => { g.fillStyle = bg || '#fbf6ea'; g.fillRect(0, 0, w, h); g.strokeStyle = '#d8ccb0'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6); g.fillStyle = '#222'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = (txt.length > 2 ? 44 : 78) + 'px Figtree, "Apple Color Emoji", system-ui, sans-serif'; g.fillText(txt, w / 2, h / 2 + 4); })); };
-  const emoji = (txt, size) => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); g.font = '190px "Apple Color Emoji","Segoe UI Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 128, 140); const t = new THREE.CanvasTexture(c); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true })); sp.scale.set(size, size, 1); return sp; };
-  const V = (pos, look) => ({ seat: { label: 'Seat', pos, look, fov: 42, sway: 0.01 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 7, 4.5], look: [0, 2.4, 0], fov: 42 } });
-  const dom = (sel) => [...document.querySelectorAll(sel)];
-
-  /* ---------- Memory ---------- */
-  function memory(s, root, TH) {
-    const cards = [], picks = [], dx = 1.6, dz = 2.0;
-    for (let i = 0; i < 16; i++) {
-      const g = new TH.Group(), x = ((i % 4) - 1.5) * dx, z = (Math.floor(i / 4) - 1.5) * dz; g.position.set(x, 0.07, z); root.add(g);
-      const back = T3.mk(g, T3.BOX(1.3, 0.09, 1.75), T3.mat('#a3262a', { roughness: 0.5 }), 0, 0, 0); back.userData.i = i; picks.push(back);
-      T3.mk(g, new TH.PlaneGeometry(1.1, 1.55), new TH.MeshBasicMaterial({ color: 0xf4d9a0 }), 0, 0.048, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-      const face = T3.mk(g, new TH.PlaneGeometry(1.26, 1.7), new TH.MeshBasicMaterial({ map: sym('?') }), 0, 0.05, 0, { noCast: true }); face.rotation.x = -Math.PI / 2; face.visible = false;
-      cards.push({ g, face, up: false, gone: false, txt: '' });
-    }
-    return {
-      sync(S, inst) {
-        dom('#mm .mm-c').forEach(el => {
-          const i = +el.dataset.i, c = cards[i], up = el.classList.contains('up'), gone = el.classList.contains('gone'), txt = el.textContent.trim();
-          if (txt && c.txt !== txt) { c.txt = txt; c.face.material.map = sym(txt); c.face.material.needsUpdate = true; }
-          if (up !== c.up || gone !== c.gone) {
-            const was = c.up; c.up = up; const wasGone = c.gone; c.gone = gone;
-            if (inst) { c.face.visible = up || gone; c.g.visible = !gone; return; }
-            if (gone && !wasGone) { c.face.visible = true; s.tween(500, (k, e) => { c.g.position.y = 0.07 + e * 0.5; c.g.scale.setScalar(1 - e * 0.9); }, () => { c.g.visible = false; }); return; }
-            s.tween(300, (k) => { c.g.scale.x = Math.abs(Math.cos(Math.PI * k)) * 0.98 + 0.02; if (k > 0.5) c.face.visible = up; });
-          }
-        });
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const b = document.querySelector(`#mm [data-i="${h.object.userData.i}"]`); if (b && !b.disabled) { b.click(); return true; } return false; },
-    };
-  }
-
-  /* ---------- Nim ---------- */
-  function nim(s, root, TH) {
-    T3.mk(root, T3.BOX(9, 0.14, 7), T3.mat('#6b4a2a', { roughness: 0.6 }), 0, 0.07, 0, { noCast: true });
-    const sticks = [], picks = []; let key = '';
-    return {
-      sync(S) {
-        const els = dom('#nmRows .nm-s'), k = els.map(b => b.dataset.r + b.dataset.k + (b.classList.contains('sel') ? 's' : '')).join('|');
-        if (k === key) return; key = k; sticks.forEach(m => root.remove(m)); sticks.length = 0; picks.length = 0;
-        const rows = {}; els.forEach(b => { (rows[b.dataset.r] = rows[b.dataset.r] || []).push(b); });
-        Object.keys(rows).forEach(r => rows[r].forEach((b, j) => {
-          const sel = b.classList.contains('sel'), x = (j - (rows[r].length - 1) / 2) * 0.62, z = (+r - (Object.keys(rows).length - 1) / 2) * 1.8;
-          const m = T3.mk(root, T3.CYL(0.17, 0.17, 1.7, 12), T3.mat(sel ? '#f2b441' : '#e7cf9f', { roughness: 0.5 }), x, 0.14 + 0.85 + (sel ? 0.4 : 0), z); m.userData.r = +r; m.userData.k = +b.dataset.k; sticks.push(m); picks.push(m);
-          T3.mk(root, T3.SPH(0.17, 10), T3.mat(sel ? '#f2b441' : '#c9a06a'), x, m.position.y + 0.85, z, { noCast: true });
-        }));
-      },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const b = document.querySelector(`#nmRows [data-r="${h.object.userData.r}"][data-k="${h.object.userData.k}"]`); if (b && !b.disabled) { b.click(); return true; } return false; },
-    };
-  }
-
-  /* ---------- Rock Paper Scissors ---------- */
-  function rps(s, root, TH) {
-    const score = T3.label('', { scale: 4 }); score.sprite.position.set(0, 3.2, 0); root.add(score.sprite);
-    const spots = [-2.6, 2.6], hands = [null, null], qm = [null, null]; let revKey = '';
-    const sh = i => { const g = new TH.Group(); g.position.set(spots[i], 1.1, 0); root.add(g); return g; };
-    const holders = [sh(0), sh(1)];
-    holders.forEach((h, i) => { qm[i] = T3.mk(h, T3.SPH(0.8, 20), T3.mat('#e7cf9f', { roughness: 0.6 }), 0, 0.2, 0); qm[i].scale.set(1, 0.8, 1); });
-    T3.mk(root, T3.CYL(1.1, 1.1, 0.12, 24), T3.mat('#2a1810'), -2.6, 0.06, 0, { noCast: true }); T3.mk(root, T3.CYL(1.1, 1.1, 0.12, 24), T3.mat('#2a1810'), 2.6, 0.06, 0, { noCast: true });
-    return {
-      sync(S, inst) {
-        const g = S.V.g; score.set(`First to 3: ${g.score[0]} – ${g.score[1]}`, '#f7f0e1');
-        const rev = dom('#rpRev .rp-i').map(e => e.textContent.trim()); const k = rev.join('');
-        holders.forEach((h, i) => { qm[i].visible = !rev.length; if (hands[i] && k !== revKey) { h.remove(hands[i]); hands[i] = null; } });
-        if (rev.length && k !== revKey) {
-          holders.forEach((h, i) => { const e = emoji(rev[i], 2.6); e.position.y = 0.9; h.add(e); hands[i] = e; if (!inst) s.tween(700, (kk, ee) => { h.position.y = 1.1 + Math.abs(Math.sin(ee * Math.PI * 3)) * 0.7 * (1 - ee) + 0.0; }); });
-        }
-        revKey = k;
-        if (!rev.length) holders.forEach((h, i) => { qm[i].material.color.set(g.chosen && g.chosen[i] ? '#6ee09a' : '#e7cf9f'); });
-      },
-    };
-  }
-
-  /* ---------- Pattern Memory ---------- */
-  function pattern(s, root, TH) {
-    const pads = [], picks = [], pos = [[-1.5, -1.5], [1.5, -1.5], [-1.5, 1.5], [1.5, 1.5]];
-    T3.mk(root, T3.BOX(6.4, 0.2, 6.4), T3.mat('#2a2230', { roughness: 0.6 }), 0, 0.1, 0, { noCast: true });
-    for (let c = 0; c < 4; c++) { const m = T3.mk(root, T3.CYL(1.2, 1.3, 0.4, 28), new TH.MeshStandardMaterial({ color: PEG[c], emissive: PEG[c], emissiveIntensity: 0.12, roughness: 0.3 }), pos[c][0], 0.4, pos[c][1]); m.userData.c = c; pads.push(m); picks.push(m); }
-    return {
-      sync() { },
-      frame(dt) { pads.forEach((m, c) => { const b = document.querySelector(`#pm .pm-b.c${c}`), lit = b && b.classList.contains('lit'); m.material.emissiveIntensity += ((lit ? 1.6 : 0.12) - m.material.emissiveIntensity) * Math.min(1, dt * 18); m.position.y += ((lit ? 0.3 : 0.4) - m.position.y) * Math.min(1, dt * 18); }); },
-      tap(e) { const h = s.pick(e, picks)[0]; if (!h) return false; const b = document.querySelector(`#pm .pm-b.c${h.object.userData.c}`); if (b && !b.disabled) { b.click(); const m = h.object; m.material.emissiveIntensity = 1.4; return true; } return false; },
-    };
-  }
-
-  /* ---------- Hi-Lo ---------- */
-  function hilo(s, root, TH) {
-    let cur = null, card = null; const msg = T3.label('', { scale: 4 }); msg.sprite.position.set(0, 2.4, 0.5); root.add(msg.sprite);
-    T3.mk(root, T3.CYL(2.6, 2.6, 0.06, 40), T3.mat('#1f5a3a', { roughness: 1 }), 0, 0.03, 0, { noCast: true });
-    return {
-      sync(S, inst) {
-        const g = S.V.g, c = g.cur; msg.set((document.getElementById('hlMsg') || {}).textContent || '', '#f7f0e1');
-        if (c === cur) return; cur = c; if (card) root.remove(card); card = null; if (c === null) return;
-        const id = (((c >> 2) + 12) % 13) * 4 + (c & 3); card = T3.card3(id, 1.9); card.position.set(0, 0.1, 0); root.add(card);
-        if (!inst) { s.tween(520, (k, e) => { card.position.y = 0.1 + Math.sin(Math.PI * e) * 1.4; card.rotation.y = (1 - e) * 3.1; card.rotation.z = (1 - e) * 0.4; card.scale.setScalar(0.6 + 0.4 * e); }); }
-      },
-    };
-  }
-
-  /* ---------- Code Breaker ---------- */
-  function codebreaker(s, root, TH) {
-    T3.mk(root, T3.BOX(8.6, 0.22, 8.4), T3.mat('#4a2a14', { roughness: 0.5 }), 0, 0.11, 0, { noCast: true });
-    let key = '', objs = [];
-    return {
-      sync(S) {
-        const rows = dom('#cbRows .cb-row'), k = rows.map(r => r.textContent + r.innerHTML.length).join('~'); if (k === key) return; key = k; objs.forEach(o => root.remove(o)); objs = [];
-        rows.forEach((r, ri) => {
-          const z = -3.3 + ri * 0.78, secret = r.classList.contains('secret'), pegs = [...r.querySelectorAll('.cb-g .peg')];
-          pegs.forEach((p, j) => { const m = /c(\d)/.exec(p.className), c = m ? +m[1] : 5; objs.push(T3.mk(root, T3.SPH(0.27, 14), T3.mat(PEG[c], { roughness: 0.3 }), -2.7 + j * 0.78, 0.5, z)); });
-          const nums = [...r.querySelectorAll('.cb-f b')].map(b => +b.textContent); if (nums.length === 2 && !secret) {
-            let idx = 0; for (let q = 0; q < nums[0] + nums[1]; q++, idx++) objs.push(T3.mk(root, T3.SPH(0.11, 8), T3.mat(q < nums[0] ? '#111' : '#f7f0e1'), 1.0 + (idx % 4) * 0.3, 0.4, z - 0.12 + Math.floor(idx / 4) * 0.28, { noCast: true }));
-          }
-          if (secret) objs.push(T3.mk(root, T3.BOX(4.0, 0.05, 0.06), T3.mat('#f2b441'), -1.2, 0.3, z + 0.4, { noCast: true }));
-        });
-      },
-    };
-  }
-
-  /* ---------- Hangman ---------- */
-  function hangman(s, root, TH) {
-    const wood = T3.mat('#7a4a22', { roughness: 0.6 });
-    T3.mk(root, T3.BOX(2.4, 0.2, 1.8), wood, -3.2, 0.1, 0); T3.mk(root, T3.CYL(0.1, 0.1, 4, 10), wood, -3.9, 2.1, 0); T3.mk(root, T3.BOX(2.3, 0.14, 0.14), wood, -2.8, 4.05, 0); T3.mk(root, T3.CYL(0.04, 0.04, 0.6, 6), T3.mat('#c9a06a'), -1.9, 3.7, 0);
-    const parts = [], body = new TH.Group(); body.position.set(-1.9, 0, 0); root.add(body);
-    const skin = T3.mat('#e8b890'), cl = T3.mat('#3f8be8');
-    parts.push(T3.mk(body, T3.SPH(0.3, 14), skin, 0, 3.15, 0));
-    parts.push(T3.mk(body, T3.CYL(0.22, 0.26, 1.1, 12), cl, 0, 2.4, 0));
-    const al = T3.mk(body, T3.CYL(0.07, 0.07, 0.95, 8), skin, -0.42, 2.45, 0); al.rotation.z = 0.5; parts.push(al);
-    const ar = T3.mk(body, T3.CYL(0.07, 0.07, 0.95, 8), skin, 0.42, 2.45, 0); ar.rotation.z = -0.5; parts.push(ar);
-    const ll = T3.mk(body, T3.CYL(0.09, 0.09, 1.1, 8), cl, -0.18, 1.35, 0); ll.rotation.z = 0.15; parts.push(ll);
-    const lr = T3.mk(body, T3.CYL(0.09, 0.09, 1.1, 8), cl, 0.18, 1.35, 0); lr.rotation.z = -0.15; parts.push(lr);
-    parts.forEach(p => { p.visible = false; });
-    const tiles = []; let wk = '';
-    return {
-      sync(S) {
-        const g = S.V.g; parts.forEach((p, i) => { p.visible = i < g.wrong; });
-        const ls = dom('#hmWord .hm-l').map(e => e.textContent.trim() + (e.classList.contains('miss') ? '!' : '')), k = ls.join('');
-        if (k !== wk) { wk = k; tiles.forEach(t => root.remove(t)); tiles.length = 0; ls.forEach((t, i) => { const ch = t.replace('!', ''), miss = t.endsWith('!'); const m = T3.mk(root, T3.BOX(0.64, 0.16, 0.82), T3.mat('#fff', { map: sym(ch || ' ', miss ? '#f3c0b8' : '#fbf6ea'), roughness: 0.5 }), (i - (ls.length - 1) / 2) * 0.74 + 0.9, 0.22, 2.4, { noCast: true }); tiles.push(m); }); }
-      },
-    };
-  }
-
-  const SET = [
-    ['memory', { build: memory, views: V([0, 10, 7.6], [0, 2.4, 0.2]), hint: 'Tap a card to flip it.' }, ['#mm']],
-    ['nim', { build: nim, views: V([0, 9, 7.2], [0, 2.4, 0.2]), hint: 'Tap a stick, then press Take them.' }, ['#nmRows']],
-    ['rps', { build: rps, views: V([0, 7.4, 7.6], [0, 2.8, 0]), hint: 'Choose rock, paper or scissors below.' }, ['.rp-reveal', '.rp-score']],
-    ['patternmem', { build: pattern, views: V([0, 9.5, 6.4], [0, 2.4, 0.2]), hint: 'Watch the pattern, then tap the colours in order.' }, ['#pm']],
-    ['hilo', { build: hilo, views: V([0, 7.8, 7], [0, 2.4, 0.4]), hint: 'Will the next card be higher or lower?' }, ['#hlCard']],
-    ['codebreaker', { build: codebreaker, views: V([0, 11.5, 8], [0, 2.4, 0.2]), hint: 'Pick colours below to break the code.' }, ['#cbRows']],
-    ['hangman', { build: hangman, views: V([0, 8.4, 8.4], [0, 3.2, 0.2]), hint: 'Pick a letter below.' }, ['.hm-top']],
-  ];
-  for (const [id, cfg, hide] of SET) {
-    const D = Club.games[id]; if (!D) continue;
-    D.ui3d = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table > :nth-child(2)') || st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => T3.board3(box, S, cfg) });
-  }
-})();
-
-/* ===================== 3D tables with a big screen or board: Quiz, Sudoku, Number Hunt, Sealed picks, Puzzles ===================== */
-(() => {
-  const dom = sel => [...document.querySelectorAll(sel)];
-  const txt = sel => { const e = document.querySelector(sel); return e ? e.textContent.trim() : ''; };
-  const V = (pos, look) => ({ seat: { label: 'Seat', pos, look, fov: 42, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 7, 4.5], look: [0, 2.6, 0], fov: 42 } });
-  const wrap = (g, text, x, y, maxW, lh) => { const words = String(text).split(/\s+/); let line = '', yy = y; for (const w of words) { const t = line ? line + ' ' + w : w; if (g.measureText(t).width > maxW && line) { g.fillText(line, x, yy); line = w; yy += lh; } else line = t; } if (line) g.fillText(line, x, yy); return yy + lh; };
-
-  /* a canvas "screen": standing at the back of the table, or lying flat on it */
-  function screen(s, root, TH, o) {
-    const W = o.px[0], H = o.px[1], c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), tex = new TH.CanvasTexture(c); tex.encoding = TH.sRGBEncoding;
-    const [sw, sh] = o.size, plane = new TH.Mesh(new TH.PlaneGeometry(sw, sh), new TH.MeshBasicMaterial({ map: tex }));
-    if (o.flat) { plane.rotation.x = -Math.PI / 2; plane.position.set(0, 0.17, 0); T3.mk(root, T3.BOX(sw + 0.5, 0.2, sh + 0.5), T3.mat('#3b1d12', { roughness: 0.5 }), 0, 0.06, 0, { noCast: true }); }
-    else { plane.position.set(0, 3.0, -3.1); plane.rotation.x = -0.12; T3.mk(root, T3.BOX(sw + 0.4, sh + 0.4, 0.2), T3.mat('#14101c', { roughness: 0.4 }), 0, 3.0, -3.25).rotation.x = -0.12; T3.mk(root, T3.BOX(1.6, 0.6, 0.8), T3.mat('#2a1810'), 0, 0.3, -3.2, { noCast: true }); }
-    root.add(plane);
-    let regions = [], key = '';
-    const api = {
-      sync(S, inst) {
-        const k = o.key(S); if (k === key) return; key = k; regions = [];
-        g.clearRect(0, 0, W, H); o.paint(g, W, H, (x, y, w, h, el) => regions.push({ x, y, w, h, el, pid: el && el.parentElement && el.parentElement.id, idx: el && el.parentElement ? [...el.parentElement.children].indexOf(el) : -1 }), S); tex.needsUpdate = true;
-      },
-      tap(e) {
-        const h = s.pick(e, [plane])[0]; if (!h || !h.uv) return false; const px = h.uv.x * W, py = (1 - h.uv.y) * H;
-        for (const r of regions) if (r.el && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) { let el = r.el; if (!el.isConnected && r.pid) el = (document.getElementById(r.pid) || {children: []}).children[r.idx] || el; if (!el.disabled) { el.click(); return true; } }
-        return false;
-      },
-    };
-    return api;
-  }
-  const panel = (g, W, H) => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#1d1633'); gr.addColorStop(1, '#2a1f4a'); g.fillStyle = gr; g.fillRect(0, 0, W, H); };
-
-  /* ---------- Quiz ---------- */
-  const quiz = (s, root, TH) => screen(s, root, TH, {
-    px: [1024, 576], size: [9, 5.06],
-    key: S => txt('#qzQ') + '|' + dom('#qzOpts .qz-o').map(b => b.textContent + b.className + b.disabled).join('|'),
-    paint(g, W, H, add) {
-      panel(g, W, H); g.fillStyle = '#f2b441'; g.font = '700 30px Figtree, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
-      const q = txt('#qzQ'); g.fillStyle = '#f7f0e1'; g.font = '700 40px Figtree, system-ui, sans-serif'; wrap(g, q, 40, 36, W - 80, 52);
-      const opts = dom('#qzOpts .qz-o'); opts.forEach((b, i) => {
-        const x = 40 + (i % 2) * ((W - 100) / 2 + 20), y = 270 + Math.floor(i / 2) * 150, w = (W - 100) / 2, h = 120, right = b.classList.contains('right');
-        g.fillStyle = right ? '#2f9e5a' : b.disabled ? '#3a2f55' : '#4d3a86'; g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, 18) : g.rect(x, y, w, h); g.fill();
-        g.fillStyle = '#fff'; g.font = '700 34px Figtree, system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(String.fromCharCode(65 + i) + '  ', x + 20, y + h / 2); g.font = '600 32px Figtree, system-ui, sans-serif'; wrap(g, b.textContent.trim(), x + 70, y + h / 2 - 16, w - 90, 38); g.textBaseline = 'top';
-        add(x, y, w, h, b);
-      });
-    },
-  });
-
-  /* ---------- Sudoku (lies flat on the table) ---------- */
-  const sudoku = (s, root, TH) => screen(s, root, TH, {
-    flat: true, px: [1024, 1024], size: [8.4, 8.4],
-    key: S => dom('#su .su-c').map(b => b.className + b.textContent).join('|'),
-    paint(g, W, H, add) {
-      g.fillStyle = '#f4ecd8'; g.fillRect(0, 0, W, H); const cs = W / 9;
-      dom('#su .su-c').forEach((b, i) => {
-        const r = Math.floor(i / 9), c = i % 9, x = c * cs, y = r * cs, cl = b.className;
-        if (cl.includes('sel')) g.fillStyle = '#ffd877'; else if (cl.includes('same')) g.fillStyle = '#cfe6ff'; else if (cl.includes('rel')) g.fillStyle = '#ece0c2'; else g.fillStyle = 'rgba(0,0,0,0)';
-        if (g.fillStyle !== 'rgba(0, 0, 0, 0)') g.fillRect(x, y, cs, cs);
-        if (cl.includes('bad')) { g.fillStyle = '#f3b0a8'; g.fillRect(x, y, cs, cs); }
-        const t = b.textContent.trim(); if (t) { g.fillStyle = cl.includes('given') ? '#1d1a24' : '#2b57c9'; g.font = (cl.includes('given') ? '800 ' : '600 ') + '68px Figtree, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, x + cs / 2, y + cs / 2 + 4); }
-        add(x, y, cs, cs, b);
-      });
-      g.strokeStyle = '#6b4a2a'; for (let i = 0; i <= 9; i++) { g.lineWidth = i % 3 === 0 ? 7 : 2; g.beginPath(); g.moveTo(i * cs, 0); g.lineTo(i * cs, H); g.stroke(); g.beginPath(); g.moveTo(0, i * cs); g.lineTo(W, i * cs); g.stroke(); }
-    },
-  });
-
-  /* ---------- Number Hunt ---------- */
-  const numberhunt = (s, root, TH) => screen(s, root, TH, {
-    px: [1024, 576], size: [9, 5.06],
-    key: S => txt('.pz-label') + txt('#nhRange') + dom('#nhHist > *').map(e => e.textContent).join('|'),
-    paint(g, W, H) {
-      panel(g, W, H); g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = '#f7f0e1'; g.font = '700 38px Figtree, sans-serif'; g.fillText(txt('.pz-label') || 'Guess the number', W / 2, 34);
-      g.fillStyle = '#f2b441'; g.font = '800 120px Figtree, sans-serif'; g.fillText(txt('#nhRange') || '', W / 2, 110);
-      g.fillStyle = '#cfc6e8'; g.font = '600 30px Figtree, sans-serif'; dom('#nhHist > *').slice(-6).forEach((e, i) => g.fillText(e.textContent.trim(), W / 2, 280 + i * 42));
-    },
-  });
-
-  /* ---------- Sealed picks ---------- */
-  const sealed = (s, root, TH) => screen(s, root, TH, {
-    px: [1024, 576], size: [9, 5.06],
-    key: S => txt('.pz-label') + '|' + dom('#slSeats .tag').map(e => e.textContent).join('|') + '|' + txt('#slBanner'),
-    paint(g, W, H, add, S) {
-      panel(g, W, H); g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = '#f7f0e1'; g.font = '700 36px Figtree, sans-serif'; wrap(g, txt('.pz-label'), W / 2, 30, W - 100, 46);
-      const seats = dom('#slSeats .seat'); seats.forEach((el, i) => {
-        const nm = (el.querySelector('.name') || {}).textContent || '', tg = (el.querySelector('.tag') || {}).textContent || '', y = 150 + i * 62;
-        g.textAlign = 'left'; g.fillStyle = '#cfc6e8'; g.font = '600 34px Figtree, sans-serif'; g.fillText(nm.trim(), 120, y); g.textAlign = 'right'; g.fillStyle = tg.includes('Picked') ? '#f2b441' : '#9a90a8'; g.fillText(tg.trim(), W - 120, y);
-      });
-    },
-  });
-
-  /* ---------- Puzzles ---------- */
-  const puzzle = (s, root, TH) => screen(s, root, TH, {
-    px: [1024, 576], size: [9, 5.06],
-    key: S => txt('#pzLabel') + '|' + dom('#pzTiles > *').map(e => e.textContent).join(','),
-    paint(g, W, H) {
-      panel(g, W, H); g.textAlign = 'center'; g.textBaseline = 'top'; g.fillStyle = '#f7f0e1'; g.font = '700 38px Figtree, sans-serif'; wrap(g, txt('#pzLabel'), W / 2, 30, W - 100, 48);
-      const tiles = dom('#pzTiles > *').map(e => e.textContent.trim()), n = Math.max(1, tiles.length), tw = Math.min(150, (W - 120) / n - 12);
-      tiles.forEach((t, i) => { const x = W / 2 + (i - (n - 1) / 2) * (tw + 12) - tw / 2, y = 250; g.fillStyle = '#f4ecd8'; g.beginPath(); g.roundRect ? g.roundRect(x, y, tw, tw * 1.1, 14) : g.rect(x, y, tw, tw * 1.1); g.fill(); g.fillStyle = '#2b1d12'; g.font = '800 ' + Math.floor(tw * 0.6) + 'px Figtree, sans-serif'; g.textBaseline = 'middle'; g.fillText(t, x + tw / 2, y + tw * 0.57); g.textBaseline = 'top'; });
-    },
-  });
-
-  const SET = [
-    ['quiz', { build: quiz, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Tap an answer on the screen (or use the buttons).' }, ['#qzOpts', '#qzQ']],
-    ['sudoku', { build: sudoku, views: V([0, 15.5, 6.5], [0, 0.4, 0.3]), hint: 'Tap a square, then choose a number below.' }, ['#su']],
-    ['numberhunt', { build: numberhunt, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Type a guess below.' }, ['#nhRange', '#nhHist', '.pz-label']],
-    ['lowunique', { build: sealed, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Lock in your number below.' }, ['.pz-label']],
-    ['twothirds', { build: sealed, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Lock in your number below.' }, ['.pz-label']],
-    ['scramble', { build: puzzle, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Type your answer below.' }, ['#pzLabel', '#pzTiles']],
-    ['make24', { build: puzzle, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Type your answer below.' }, ['#pzLabel', '#pzTiles']],
-    ['pattern', { build: puzzle, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Type your answer below.' }, ['#pzLabel', '#pzTiles']],
-    ['sums', { build: puzzle, views: V([0, 8.6, 8.6], [0, 3.0, -1.2]), hint: 'Type your answer below.' }, ['#pzLabel', '#pzTiles']],
-  ];
-  for (const [id, cfg, hide] of SET) {
-    const D = Club.games[id]; if (!D) { console.warn('no game', id); continue; }
-    D.ui3d = T3.wrapUi(D.ui, { slot: st => ({ before: st.querySelector('.table > :nth-child(2)') || st.querySelector('.table'), hide: hide.map(q => st.querySelector(q)) }), make: (box, S) => T3.board3(box, S, cfg) });
+  const SCENES = ['chess', 'minigolf', 'archery', 'darts', 'pool', 'carrom'];
+  const ROOMS = { poker: 1, bigtwo: 0, rush: 0, blackjack: 1, threecard: 1, caribbean: 1, letitride: 1, reddog: 1, baccarat: 1, videopoker: 0, roulette: 1, sicbo: 1, craps: 1, slots: 0, keno: 0 };
+  for (const id of Object.keys(Club.games)) {
+    const D = Club.games[id];
+    if (SCENES.includes(id)) continue;
+    if (id in ROOMS && T3.ambient) D.ui3d = T3.ambient(D.ui, id, !!ROOMS[id]); else delete D.ui3d;
   }
 })();
 
@@ -8789,7 +7815,7 @@ function renderRoom() {
     const U = T3.on() && D.ui3d ? D.ui3d : D.ui;
     if (!c.mounted || c.mountedUi !== U) { U.mount($('stage'), $('gameCtl'), S); c.mounted = true; c.mountedUi = U; }
     c.extra = U.update(S) || '';
-    $('viewBtn').hidden = !(D.ui3d && T3.has());
+    $('viewBtn').hidden = true;
     $('viewBtn').textContent = T3.on() ? 'Switch to 2D' : 'Switch to 3D';
   }
   $('log').innerHTML = V.log.map(e => `<li${e.st ? ' class="street"' : ''}>${entryText(e, V, me)}</li>`).join('');

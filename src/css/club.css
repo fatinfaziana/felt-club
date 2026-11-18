@@ -371,3 +371,23 @@ body { margin: 0; }
 .table:has(.s3dbox) .plate .stack { font-size: 14px; }
 .table:has(.s3dbox) .banner:empty { display: none; }
 .table:has(.s3dbox) .seat .tag, .table:has(.s3dbox) .plate { white-space: nowrap; }
+
+/* ===== card & casino rooms: 3D room behind, 2D table in front ===== */
+#stage.amb { overflow: hidden; }
+.ambwrap { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; border-radius: 18px; overflow: hidden; border: 2px solid var(--rail); background: #0c0810; }
+.ambbg { position: absolute; inset: 0; }
+.ambbg .s3d { position: absolute; inset: 0; width: auto; height: auto; max-width: none; max-height: none; aspect-ratio: auto; border: 0; border-radius: 0; }
+.ambbg .s3d-views, .ambbg .s3d-hint { display: none; }
+.ambfg { position: relative; z-index: 1; margin: auto auto 0; width: 100%; max-width: 780px; max-height: 100%; overflow: auto; padding: 8px 8px 10px; scrollbar-width: thin; }
+.ambfg > .table, .ambfg > section.table { background: radial-gradient(120% 90% at 50% 30%, rgba(26, 98, 68, .62), rgba(10, 46, 33, .74)); border: 3px solid rgba(247, 240, 225, .22); border-radius: 26px; box-shadow: 0 14px 40px rgba(0, 0, 0, .6); padding: 10px clamp(8px, 2vw, 18px) 12px; gap: 10px; }
+
+/* hands: every card fully visible (no stacking), picked card pops up out of the row */
+.bt-hand { --cw: clamp(44px, 9.5vw, 76px); gap: 4px; padding: 22px 6px 6px; }
+.bt-card { margin: 0 2px 4px; position: relative; transition: transform .14s ease; }
+.bt-card:hover { transform: translateY(-8px); }
+.bt-card.sel, .bt-card.sel:hover { transform: translateY(-22px) scale(1.08); z-index: 3; }
+.bt-card.sel .card, .bt-card.sel .rcard { box-shadow: 0 0 0 3px var(--gold), 0 12px 20px rgba(0, 0, 0, .55); }
+.card { box-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
+.seat.hero .cards, #pkHcards { --cw: clamp(54px, 11vw, 84px); gap: 8px; }
+.board { --cw: clamp(48px, 9.5vw, 76px); gap: 6px; }
+.vp-card { transition: transform .14s ease; } .vp-card.held { transform: translateY(-16px); } .vp-card.held .card { box-shadow: 0 0 0 3px var(--gold), 0 10px 16px rgba(0, 0, 0, .5); }

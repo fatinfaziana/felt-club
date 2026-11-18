@@ -279,11 +279,18 @@ function chess3d(box, S) {
   }
   for (let i = 0; i < 2; i++) { const pp = T3.person(i ? '#e0443c' : '#3f8be8', { seated: true, idx: i }); pp.scale.setScalar(3); sc.add(pp); s.addPerson(pp); people.push(pp); const lb = T3.label('', { scale: 4.2 }); lb.sprite.position.y = 2.25; pp.add(lb.sprite); lb.sprite.scale.multiplyScalar(1 / 3); tags.push(lb); }
   s.hint('');
-  const mkViews = side => ({
-    seat: { label: 'Seat', pos: [0, 13.2, side * 8.4], look: [0, 2.9, side * -0.2], fov: 40, sway: 0.012 },
-    top: { label: 'Top', pos: [0, 17, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 38 },
-    side: { label: 'Side', pos: [13.5, 6.4, 0], look: [0, 3.4, 0], fov: 42 },
-  });
+  // Camera distances are worked out from the screen shape so the whole board (and its edge) is always in view.
+  const mkViews = side => {
+    const a = s.camera.aspect || 1.5, fm = a >= 1.3 ? 1 : Math.min(1.9, 1.3 / a), vf = 40 * fm * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * a);
+    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.0;
+    return {
+      seat: { label: 'Seat', pos: [0, 3 + Math.sin(e) * d, side * Math.cos(e) * d], look: [0, 3, 0], fov: 40, zoom: 0, sway: 0.006 },
+      top: { label: 'Top', pos: [0, 3 + d, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 40, zoom: 0 },
+      side: { label: 'Side', pos: [Math.cos(e) * d, 3 + Math.sin(e) * d * 0.8, 0], look: [0, 3, 0], fov: 40, zoom: 0 },
+    };
+  };
+  s.minZoom = 0.9;
+  s.onResize = () => { if (mySide) s.setViews(mkViews(mySide), s.view || 'seat', true); };
   let mySide = 0, pcs = [], built = false, lastSeat = null, SS = S;
   const seatNode = i => people[i];
   function place(white) {

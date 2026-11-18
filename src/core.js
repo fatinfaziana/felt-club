@@ -420,7 +420,7 @@ function renderRoom() {
     const U = T3.on() && D.ui3d ? D.ui3d : D.ui;
     if (!c.mounted || c.mountedUi !== U) { U.mount($('stage'), $('gameCtl'), S); c.mounted = true; c.mountedUi = U; }
     c.extra = U.update(S) || '';
-    $('viewBtn').hidden = !(D.ui3d && T3.has());
+    $('viewBtn').hidden = true;
     $('viewBtn').textContent = T3.on() ? 'Switch to 2D' : 'Switch to 3D';
   }
   $('log').innerHTML = V.log.map(e => `<li${e.st ? ' class="street"' : ''}>${entryText(e, V, me)}</li>`).join('');

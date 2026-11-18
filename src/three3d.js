@@ -162,7 +162,7 @@ const T3 = (() => {
       const b = e.target.closest('[data-v]'); if (b) s.setView(b.dataset.v);
     };
     // Look around freely: drag to orbit, wheel / pinch / buttons to zoom. Choosing a view button resets it.
-    s.zoomBy = f => { orb.zoom = Math.min(2.6, Math.max(0.3, orb.zoom * f)); s.manual = true; s.zoomed = false; };
+    s.zoomBy = f => { orb.zoom = Math.min(2.6, Math.max(s.minZoom || 0.3, orb.zoom * f)); s.manual = true; s.zoomed = false; };
     (() => {
       const ptrs = new Map(); let pinch = 0;
       cv.style.touchAction = 'none';
@@ -202,7 +202,7 @@ const T3 = (() => {
       cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) fn(e); d = null; });
     };
 
-    const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); };
+    const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); if (s.onResize) s.onResize(); };
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(rs) : null; if (ro) ro.observe(wrap); rs();
     let last = performance.now(), raf = 0;
     const dispose = () => { s.dead = true; cancelAnimationFrame(raf); if (ro) ro.disconnect(); try { renderer.dispose(); renderer.forceContextLoss(); } catch (e) {} };
