@@ -41,11 +41,11 @@ async function round(G, io) {
     const mv = legal(M.b, s);
     const a = await io.turn(P[s], {}, { auto: { t: 'sow', p: mv[0] },
       validate: x => (x && x.t === 'sow' && Number.isInteger(x.p) && mv.includes(x.p) ? { t: 'sow', p: x.p } : null),
-      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s, G.level) }), think: 1000 + Math.random() * 500 });
+      bot: () => ({ t: 'sow', p: botMove(M.b.slice(), s, G.level) }), think: 1300 + Math.random() * 600 });
     M.sown = M.b[s * 7 + a.p]; const r = sow(M.b, s, a.p); M.last = s * 7 + a.p;
     io.ev(P[s], r.again ? 'lands in their store and goes again' : r.cap ? `captures ${r.cap}` : 'sows seeds', r.again ? 'land in your store and go again' : r.cap ? `capture ${r.cap}` : 'sow seeds');
     if (finish(M.b)) M.over = true; else M.turn = r.again ? s : 1 - s;
-    io.render(); await io.sleep(Math.min(2600, 300 + 270 * (M.sown || 0)));
+    io.render(); await io.sleep(Math.min(6500, 700 + 540 * (M.sown || 0)));
   }
   const a = M.b[6], c = M.b[13]; M.winner = a === c ? -1 : a > c ? 0 : 1;
   settlePot(G, ANTE, M.winner >= 0 ? [M.winner] : []); potSummary(G);
@@ -89,14 +89,14 @@ function flyStone(from, to, ms) {
 async function animateSow(pb, last, tok) {
   const s = (last / 7) | 0, skip = store(1 - s), b = pb.slice();
   let seeds = b[last]; b[last] = 0; let i = last;
-  animating = true; draw(b); Snd.p('pebble');
-  await delay(260);
+  animating = true; draw(b); Snd.p('pop');
+  await delay(500);
   while (seeds > 0 && tok === animTok) {
     const from = i; i = (i + 1) % 14; if (i === skip) continue;
-    flyStone(from, i, 190); await delay(200);
+    flyStone(from, i, 380); await delay(390);
     if (tok !== animTok) return;
     b[i]++; seeds--; draw(b); Snd.p('pebble');
-    await delay(70);
+    await delay(130);
   }
   animating = false;
 }

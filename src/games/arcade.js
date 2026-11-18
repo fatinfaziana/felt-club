@@ -138,30 +138,6 @@ register({ id: 'zombies', name: 'Zombie Hunt', icon: '🧟', tag: 'Shoot the zom
     return g;
   } });
 
-// ============ Street Racer ============
-register({ id: 'racing', name: 'Street Racer', icon: '🏎️', tag: 'Race down the road and dodge the traffic.', goal: 'drive as far as you can without crashing.', how: 'Steer with the left and right arrow keys, or drag across the screen. Grab coins for bonus points. One crash ends the race.', par: 260,
-  make(lv) {
-    const g = { score: 0, over: false, x: W / 2, tx: W / 2, spd: LV(lv, 190, 240, 300), dist: 0, cars: [], coins: [], off: 0, sp: 0.8, k: { l: 0, r: 0 }, msg: 'Crash!' };
-    g.update = dt => {
-      g.spd = Math.min(560, g.spd + dt * LV(lv, 6, 9, 13)); g.dist += g.spd * dt; g.off = (g.off + g.spd * dt) % 60;
-      const kx = (g.k.r - g.k.l) * 300 * dt; if (kx) g.tx = clamp(g.tx + kx, 70, W - 70); g.x += (g.tx - g.x) * Math.min(1, dt * 12);
-      g.sp -= dt; if (g.sp <= 0) { g.sp = R(0.45, 0.9) * 230 / g.spd * 1.6; const lane = Math.floor(R(0, 4)); g.cars.push({ x: 75 + lane * 70, y: -50, e: ['🚗', '🚙', '🚕', '🚚', '🚓'][Math.floor(R(0, 5))], v: g.spd * R(0.3, 0.55) }); if (Math.random() < 0.5) g.coins.push({ x: 75 + Math.floor(R(0, 4)) * 70, y: -120 }); }
-      g.cars.forEach(o => { o.y += (g.spd - o.v) * dt; }); g.coins.forEach(o => { o.y += g.spd * dt; });
-      g.cars.forEach(o => { if (Math.abs(o.x - g.x) < 30 && Math.abs(o.y - (H - 90)) < 42) g.over = true; });
-      g.coins = g.coins.filter(o => { if (Math.abs(o.x - g.x) < 30 && Math.abs(o.y - (H - 90)) < 36) { g.score += 10; sfx('coin'); return false; } return o.y < H + 40; });
-      g.cars = g.cars.filter(o => o.y < H + 60); g.score += g.spd * dt / 40;
-    };
-    g.ptr = (t, x) => { if (t !== 'up') g.tx = clamp(x, 70, W - 70); };
-    g.key = (k, d) => { if (k === 'ArrowLeft' || k === 'a') g.k.l = d ? 1 : 0; if (k === 'ArrowRight' || k === 'd') g.k.r = d ? 1 : 0; };
-    g.draw = c => {
-      c.fillStyle = '#3f8f3a'; c.fillRect(0, 0, W, H); c.fillStyle = '#3a3a42'; c.fillRect(40, 0, W - 80, H); c.fillStyle = '#fff'; c.fillRect(38, 0, 4, H); c.fillRect(W - 42, 0, 4, H);
-      c.fillStyle = '#f2c94c'; for (let l = 1; l < 4; l++) for (let y = -60; y < H; y += 60) c.fillRect(40 + l * 70 - 2 + 0, y + g.off, 4, 28);
-      g.coins.forEach(o => emo(c, '🪙', o.x, o.y, 30)); g.cars.forEach(o => emo(c, o.e, o.x, o.y, 46, Math.PI)); emo(c, '🏎️', g.x, H - 90, 50, 0);
-      hud(c, 'Score ' + Math.round(g.score), Math.round(g.spd / 3) + ' km/h');
-    };
-    return g;
-  } });
-
 // ============ Dance Floor ============
 register({ id: 'dance', name: 'Dance Floor', icon: '💃', tag: 'Hit the arrows in time with the beat.', goal: 'step on every arrow as it reaches the line.', how: 'When an arrow reaches the glowing line, press the same arrow key (or tap its column). Perfect timing scores most.', par: 520,
   make(lv) {

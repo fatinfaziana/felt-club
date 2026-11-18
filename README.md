@@ -23,7 +23,7 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Word:** Scrabble, Hangman, Word Scramble
 - **Maths:** 2048, Make 24, Quick Sums, Number Patterns
 - **Mind:** Sudoku, Mastermind, Memory, Simon, Nim, Trivia Quiz
-- **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch (keyboard, mouse and touch)
+- **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Moto Rider, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch (keyboard, mouse and touch)
 - Most games have **Easy, Medium and Hard** levels.
 
 ## Run locally

@@ -440,3 +440,11 @@
 .arover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer}.arover[hidden]{display:none}
 .arcard{background:rgba(15,20,25,.9);border:2px solid var(--gold);border-radius:14px;padding:14px 18px;text-align:center;max-width:300px;color:var(--cream);display:flex;flex-direction:column;gap:6px;align-items:center}.arcard p{margin:0;font-size:14px}.arcard small{opacity:.7}.arbig{font-size:44px;line-height:1}
 .arwrap .banner{flex:0 0 auto}
+
+/* ---- Pool and Carrom canvas tables ---- */
+.cuewrap{display:flex;flex-direction:column;align-items:center;min-height:0;height:100%;gap:6px}.cuewrap .bt-opps{flex:0 0 auto;flex-wrap:nowrap;justify-content:center;gap:6px}.cuewrap .bt-opps .seat{min-width:0;flex:0 1 130px}.cuewrap .bt-opps .plate{padding:4px 8px}.cuewrap .pz-label{flex:0 0 auto;min-height:0;margin:0;font-size:14px}.cuewrap .banner{flex:0 0 auto}
+.cuebox{flex:1 1 0;min-height:0;width:100%;display:flex;justify-content:center;align-items:center;container-type:size}
+.cuebox canvas{display:block;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;border-radius:10px;box-shadow:0 8px 18px rgba(0,0,0,.5);width:min(100cqw,calc(100cqh*1.862));height:min(100cqh,calc(100cqw/1.862))}
+.cuebox.carrom canvas{width:min(100cqw,100cqh);height:min(100cqw,100cqh)}
+.cuebox canvas:active{cursor:grabbing}
+.pwrow{display:flex;align-items:center;gap:10px;margin:2px 0}.pwrow input[type=range]{flex:1}.pwbar{flex:1;height:14px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(255,255,255,.2)}.pwbar i{display:block;height:100%;width:0;background:#4c4;border-radius:8px}

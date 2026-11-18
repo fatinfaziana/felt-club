@@ -1,306 +1,298 @@
-/* ---------- Pool and Carrom: screens (flat view plus 3D table) and registration ---------- */
+/* ---------- Pool and Carrom screens: one smooth canvas each (60 fps playback, drag-to-shoot, real impact sounds) ---------- */
 (() => {
-  const BCOL = ['#fff', '#f2c230', '#2b5fd6', '#d63b2b', '#7a3fb8', '#ec7a1f', '#2e9b4a', '#8a2a2a', '#16161c'];
-  const ballCol = id => BCOL[id === 0 ? 0 : id === 8 ? 8 : ((id - 1) % 8) + 1 > 7 ? 7 : ((id - 1) % 8) + 1];
-  const colOf = id => (id === 0 ? '#fff' : id === 8 ? '#16161c' : BCOL[id > 8 ? id - 8 : id]);
-  const PCOL = ['#f2b441', '#f7f0e1'];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const DPR = () => Math.min(window.devicePixelRatio || 1, 2);
+  const BCOL = ['#f4f1e8', '#f2c230', '#2b5fd6', '#d63b2b', '#7a3fb8', '#ec7a1f', '#2e9b4a', '#8a2a2a', '#16161c'];
+  const colOf = id => (id === 0 ? BCOL[0] : id === 8 ? BCOL[8] : BCOL[id > 8 ? id - 8 : id]);
+  const FPS = 15;                                   // recorded frames per second of play; we interpolate between them at the screen rate
 
-  /* aiming effects: breathing wobble, cue/finger pull-back with power, thrust before the shot, ghost ball */
-  const AIMFX = { raf: 0, loop(fn) { if (this.raf) return; const f = () => { this.raf = 0; if (fn()) this.raf = requestAnimationFrame(f); }; this.raf = requestAnimationFrame(f); } };
-  const wob = () => Math.sin(performance.now() / 380) * 0.5 + 0.5;
-  const pullOf = (st, base, per) => { const th = st.th || 0; return (base + st.pw * per + wob() * 0.25 * per / 10) * (1 - th * th) + 0.15 * th * th; };
-  function fire(st, send) { if (st.firing) return; st.firing = true; const t0 = performance.now(); const step = () => { const k = Math.min(1, (performance.now() - t0) / 220); st.th = k; if (k < 1) requestAnimationFrame(step); else { st.th = 0; st.firing = false; send(); } }; step(); }
-  function ghostHit(P, c, ang, R) { const dx = Math.cos(ang), dy = Math.sin(ang); let best = null;
-    for (let i = 1; i < P.length; i++) { const b = P[i]; if (!b.alive) continue; const rx = b.x - c.x, ry = b.y - c.y, t = rx * dx + ry * dy; if (t <= 0) continue; const d2 = rx * rx + ry * ry - t * t; if (d2 > R * R) continue; const tc = t - Math.sqrt(R * R - d2); if (tc > 0 && (!best || tc < best.t)) best = { t: tc, b }; }
-    return best && { x: c.x + dx * best.t, y: c.y + dy * best.t, b: best.b, t: best.t }; }
-  const stick2d = (c, ang, off) => { const dx = Math.cos(ang), dy = Math.sin(ang), x0 = c.x - dx * off, y0 = c.y - dy * off, x1 = x0 - dx * 34, y1 = y0 - dy * 34;
-    return `<line x1="${x0 + 0.2}" y1="${y0 + 0.3}" x2="${x1 + 0.2}" y2="${y1 + 0.3}" stroke="#000" stroke-opacity=".3" stroke-width="1.1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#d9b36b" stroke-width=".9" stroke-linecap="round"/><line x1="${x1}" y1="${y1}" x2="${x0 - dx * 20}" y2="${y0 - dy * 20}" stroke="#5a3418" stroke-width="1" stroke-linecap="round"/><line x1="${x0}" y1="${y0}" x2="${x0 - dx * 1.2}" y2="${y0 - dy * 1.2}" stroke="#3f8be8" stroke-width=".95" stroke-linecap="round"/>`; };
-
-  /* shared: play the recorded frames on a flat screen */
-  function player(st, redraw) {
-    return shot => {
-      if (!shot || shot.seq === st.seq) return; st.seq = shot.seq; clearInterval(st.timer); let k = 0;
-      st.timer = setInterval(() => {
-        if (k >= shot.frames.length) { clearInterval(st.timer); st.anim = null; redraw(); return; }
-        const f = shot.frames[k], q = k > 1 ? shot.frames[k - 1] : null, r = k > 2 ? shot.frames[k - 2] : null; k++;
-        if (q && r && !st.mute) { let hit = 0, pk = 0; for (let i = 0; i < f.length; i += 2) { if (f[i] < 0 && q[i] >= 0) pk++; else if (f[i] >= 0 && q[i] >= 0 && r[i] >= 0) { const dv = Math.hypot((f[i] - q[i]) - (q[i] - r[i]), (f[i + 1] - q[i + 1]) - (q[i + 1] - r[i + 1])); if (dv > 7) hit++; } }
-          if (pk) Snd.p('pocket'); else if (hit) Snd.p('clack'); }
-        st.anim = f; redraw();
-      }, 66);
-    };
+  /* ---- find the sounds hidden in a recorded shot: ball hits, cushion/wall knocks, pockets ---- */
+  function analyze(frames, n, rad, W, H) {
+    const ev = [];
+    for (let f = 1; f < frames.length; f++) {
+      let hit = 0, wall = 0, pocket = 0;
+      for (let i = 0; i < n; i++) {
+        const a = frames[f][2 * i], p = frames[f - 1][2 * i];
+        if (p >= 0 && a < 0) { pocket++; continue; }
+        if (a < 0 || f < 2 || frames[f - 2][2 * i] < 0) continue;
+        const x2 = frames[f][2 * i] / 10, y2 = frames[f][2 * i + 1] / 10, x1 = frames[f - 1][2 * i] / 10, y1 = frames[f - 1][2 * i + 1] / 10, x0 = frames[f - 2][2 * i] / 10, y0 = frames[f - 2][2 * i + 1] / 10;
+        const vx1 = x1 - x0, vy1 = y1 - y0, vx2 = x2 - x1, vy2 = y2 - y1, dv = Math.hypot(vx2 - vx1, vy2 - vy1);
+        if (dv < 0.7) continue;
+        const r = rad(i), nearWall = x1 < r + 1.6 || x1 > W - r - 1.6 || y1 < r + 1.6 || y1 > H - r - 1.6;
+        const flip = (vx1 * vx2 < 0 && (x1 < r + 1.6 || x1 > W - r - 1.6)) || (vy1 * vy2 < 0 && (y1 < r + 1.6 || y1 > H - r - 1.6));
+        if (nearWall && flip) wall = Math.max(wall, dv); else hit = Math.max(hit, dv);
+      }
+      const t = f / FPS;
+      if (hit) ev.push({ t, k: 'hit', v: clamp(hit / 7, 0.18, 1) }); if (wall) ev.push({ t: t + 0.004, k: 'wall', v: clamp(wall / 7, 0.15, 1) }); if (pocket) ev.push({ t: t + 0.03, k: 'pocket', v: 0.8 });
+    }
+    return ev;
   }
-  const pt = (svg, e, vb) => { const r = svg.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * vb.w + vb.x, y: (e.clientY - r.top) / r.height * vb.h + vb.y }; };
+
+  /* ---- shared plumbing for a canvas table ---- */
+  function table(o) {
+    const st = { S: null, canvas: null, ctx: null, bg: null, sc: 1, raf: 0, play: null, seq: 0, seen: false, drag: null, aim: null, pw: 0, thrust: null, place: null, kb: { ang: null, ch: 0 }, dead: false };
+    const VB = o.vb;
+    st.fit = () => {
+      const cv = st.canvas; if (!cv || !cv.isConnected) return; const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+      const d = DPR(), pw = Math.round(w * d), ph = Math.round(h * d); if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
+      st.sc = pw / VB.w; st.bg = document.createElement('canvas'); st.bg.width = pw; st.bg.height = ph; const b = st.bg.getContext('2d'); b.setTransform(st.sc, 0, 0, st.sc, -VB.x * st.sc, -VB.y * st.sc); o.bg(b); st.kick();
+    };
+    st.kick = () => { if (!st.raf && !st.dead) st.raf = requestAnimationFrame(st.frame); };
+    st.active = () => st.play || st.drag || st.thrust || st.kb.ch;
+    st.frame = now => {
+      st.raf = 0; const cv = st.canvas; if (!cv || !cv.isConnected || st.dead) return;
+      const c = st.ctx || (st.ctx = cv.getContext('2d')); if (!st.bg) { st.fit(); if (!st.bg) return; }
+      c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(st.bg, 0, 0); c.setTransform(st.sc, 0, 0, st.sc, -VB.x * st.sc, -VB.y * st.sc);
+      o.draw(c, now);
+      if (st.active()) st.kick();
+    };
+    st.toLogical = e => { const r = st.canvas.getBoundingClientRect(); let x = (e.clientX - r.left) / r.width * VB.w + VB.x, y = (e.clientY - r.top) / r.height * VB.h + VB.y; if (o.flip && o.flip()) { x = 100 - x; y = 100 - y; } return { x, y }; };
+    st.mount = (stage) => {
+      st.dead = false; cancelAnimationFrame(st.raf); st.raf = 0; st.play = null; st.drag = null; st.aim = null; st.thrust = null; st.place = null; st.seen = false; st.pw = 0; st.kb = { ang: null, ch: 0 };
+      st.canvas = stage.querySelector('canvas'); st.ctx = null; st.bg = null;
+      const cv = st.canvas; cv.style.touchAction = 'none';
+      cv.addEventListener('pointerdown', e => { if (!st.S || !st.S.turn || st.play || st.thrust) return; e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (x) {} const p = st.toLogical(e); st.drag = { x0: p.x, y0: p.y, x: p.x, y: p.y, moved: 0, px: e.clientX, py: e.clientY, id: e.pointerId }; o.onDown && o.onDown(p); st.kick(); });
+      cv.addEventListener('pointermove', e => { const d = st.drag; if (!d || d.id !== e.pointerId) return; const p = st.toLogical(e); d.x = p.x; d.y = p.y; d.moved = Math.max(d.moved, Math.hypot(e.clientX - d.px, e.clientY - d.py)); o.onMove && o.onMove(d); st.kick(); });
+      const up = e => { const d = st.drag; if (!d || d.id !== e.pointerId) return; st.drag = null; o.onUp && o.onUp(d); st.kick(); };
+      cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', e => { st.drag = null; st.kick(); });
+      cv.addEventListener('contextmenu', e => e.preventDefault());
+      if (typeof ResizeObserver !== 'undefined') { const ro = new ResizeObserver(() => st.fit()); ro.observe(cv.parentNode); st.ro = ro; }
+      st.fit();
+    };
+    st.unmount = () => { st.dead = true; cancelAnimationFrame(st.raf); if (st.ro) st.ro.disconnect(); };
+    return st;
+  }
+  const ease = k => k * k;                                       // accelerate into the hit
+  function runPlay(st, shot, nDisc, rad, W, H, pre, strikeSound, vol) {
+    st.play = { frames: shot.frames, t0: performance.now() + pre * 1000, pre, ev: analyze(shot.frames, nDisc, rad, W, H), ei: 0, strike: false, sound: strikeSound, vol };
+    st.kick();
+  }
+  function playState(st) {                                       // returns the frame position (float) or -1 while the cue/finger is still winding up
+    const p = st.play; if (!p) return -1; const t = (performance.now() - p.t0) / 1000;
+    if (t < 0) return -1;
+    if (!p.strike) { p.strike = true; Snd.p(p.sound, 0, p.vol); }
+    while (p.ei < p.ev.length && p.ev[p.ei].t <= t) { const e = p.ev[p.ei++]; Snd.p(st.pre + e.k, 0, e.v); }
+    const f = t * FPS; if (f >= p.frames.length - 1) { st.play = null; st.afterPlay && st.afterPlay(); return -2; } return f;
+  }
+  const lerpPos = (A, B, i, a) => { const ax = A[2 * i], bx = B[2 * i]; if (ax < 0 && bx < 0) return null; if (ax < 0) return { x: bx / 10, y: B[2 * i + 1] / 10, s: 1 }; const x = (ax + ((bx < 0 ? ax : bx) - ax) * a) / 10, y = (A[2 * i + 1] + ((bx < 0 ? A[2 * i + 1] : B[2 * i + 1]) - A[2 * i + 1]) * a) / 10; return { x, y, s: bx < 0 ? 1 - a : 1 }; };
+  const setPow = (id, v) => { const f = $(id + 'Fill'), t = $(id + 'V'); if (f) { f.style.width = Math.round(v * 100) + '%'; f.style.background = `hsl(${120 - v * 120},75%,48%)`; } if (t) t.textContent = Math.round(v * 100) + '%'; };
+  const pt = (c, x, y) => { c.beginPath(); c.arc(x, y, 0.35, 0, 7); c.fill(); };
 
   /* ===================== Pool ===================== */
-  const VB = { x: -4, y: -4, w: 108, h: 58 };
-  const poolSt = { aim: null, place: null, pw: 0.6, anim: null, seq: -1, timer: null, S: null };
-  function poolPositions(g) { if (poolSt.anim) { const f = poolSt.anim; return g.balls.map((b, i) => ({ id: b.id, alive: f[2 * i] >= 0, x: f[2 * i] / 10, y: f[2 * i + 1] / 10 })); } return g.balls; }
-  const poolPlay = player(poolSt, () => poolUI.draw());
+  const PV = { x: -4, y: -4, w: 108, h: 58 };
+  const BR = () => CUE.BR;
+  function poolBg(c) {
+    const wood = c.createLinearGradient(0, -4, 0, 54); wood.addColorStop(0, '#7a4a26'); wood.addColorStop(0.5, '#5a3418'); wood.addColorStop(1, '#3d2210');
+    c.fillStyle = wood; c.beginPath(); c.roundRect ? c.roundRect(-4, -4, 108, 58, 3) : c.rect(-4, -4, 108, 58); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 0.25; c.strokeRect(-3.7, -3.7, 107.4, 57.4);
+    c.fillStyle = '#e8d8a8'; for (let i = 1; i < 8; i++) { if (i === 4) continue; for (const y of [-2, 52]) { c.beginPath(); c.arc(i * 12.5, y, 0.4, 0, 7); c.fill(); } } for (let i = 1; i < 4; i++) for (const x of [-2, 102]) { c.beginPath(); c.arc(x, i * 12.5, 0.4, 0, 7); c.fill(); }
+    const felt = c.createRadialGradient(50, 25, 6, 50, 25, 62); felt.addColorStop(0, '#2a9a62'); felt.addColorStop(1, '#14603a'); c.fillStyle = felt; c.fillRect(0, 0, 100, 50);
+    c.globalAlpha = 0.05; c.strokeStyle = '#000'; c.lineWidth = 0.15; for (let x = 0; x < 100; x += 1.1) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 50); c.stroke(); } c.globalAlpha = 1;
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, 100, 1.1); c.fillRect(0, 48.9, 100, 1.1); c.fillRect(0, 0, 1.1, 50); c.fillRect(98.9, 0, 1.1, 50);
+    c.strokeStyle = 'rgba(255,255,255,.22)'; c.lineWidth = 0.25; c.beginPath(); c.moveTo(25, 1); c.lineTo(25, 49); c.stroke(); c.fillStyle = 'rgba(255,255,255,.4)'; pt(c, 25, 25); pt(c, 72, 25);
+    CUE.PT.pk.forEach(p => { const g = c.createRadialGradient(p.x, p.y, 0.5, p.x, p.y, p.r + 0.9); g.addColorStop(0, '#000'); g.addColorStop(0.8, '#05050a'); g.addColorStop(1, '#9a7a3a'); c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, p.r + 0.9, 0, 7); c.fill(); });
+  }
+  function drawBall(c, x, y, id, s) {
+    const r = CUE.BR * (s == null ? 1 : s); if (r <= 0.05) return;
+    c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(x + 0.5, y + 0.75, r, r * 0.92, 0, 0, 7); c.fill();
+    const base = colOf(id), stripe = id > 8, g = c.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+    g.addColorStop(0, '#fff'); g.addColorStop(0.35, stripe ? '#f4f1e8' : base); g.addColorStop(1, stripe ? '#b8b4a8' : 'rgba(0,0,0,.65)');
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+    if (stripe) { c.save(); c.beginPath(); c.arc(x, y, r, 0, 7); c.clip(); const g3 = c.createLinearGradient(x, y - r, x, y + r); g3.addColorStop(0, base); g3.addColorStop(0.5, base); g3.addColorStop(1, '#00000066'); c.fillStyle = g3; c.fillRect(x - r, y - r * 0.5, r * 2, r); c.restore(); }
+    if (id > 0) { c.fillStyle = '#fbf6ea'; c.beginPath(); c.arc(x, y, r * 0.42, 0, 7); c.fill(); c.fillStyle = '#111'; c.font = `700 ${r * 0.62}px sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(id), x, y + r * 0.04); }
+    c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.ellipse(x - r * 0.35, y - r * 0.4, r * 0.28, r * 0.17, -0.6, 0, 7); c.fill();
+  }
+  function cueStick(c, x, y, ang, gap) {
+    const dx = Math.cos(ang), dy = Math.sin(ang), L = 60, tip = CUE.BR + gap;
+    c.save(); c.translate(x - dx * tip, y - dy * tip); c.rotate(ang);
+    const draw = (ox, oy, shadow) => { c.save(); c.translate(ox, oy);
+      const poly = (x0, x1, w0, w1, fill) => { c.fillStyle = shadow ? 'rgba(0,0,0,.25)' : fill; c.beginPath(); c.moveTo(-x0, -w0 / 2); c.lineTo(-x1, -w1 / 2); c.lineTo(-x1, w1 / 2); c.lineTo(-x0, w0 / 2); c.closePath(); c.fill(); };
+      poly(0, 0.8, 0.62, 0.62, '#4aa0e8'); poly(0.8, 3.2, 0.62, 0.66, '#f2efe6'); poly(3.2, 36, 0.66, 1.1, '#e6c88f'); poly(36, 37, 1.1, 1.14, '#c9a56a'); poly(37, L, 1.14, 1.7, '#3a2216'); poly(44, 46, 1.34, 1.38, shadow ? '#000' : '#b08a3a'); c.restore(); };
+    draw(0.6, 0.9, true); draw(0, 0, false); c.restore();
+  }
+  function ghost(P, c, ang, R) {
+    const dx = Math.cos(ang), dy = Math.sin(ang); let best = null;
+    for (let i = 1; i < P.length; i++) { const b = P[i]; if (!b.alive) continue; const rx = b.x - c.x, ry = b.y - c.y, t = rx * dx + ry * dy; if (t <= 0) continue; const d2 = rx * rx + ry * ry - t * t; if (d2 > R * R) continue; const tc = t - Math.sqrt(R * R - d2); if (tc > 0 && (!best || tc < best.t)) best = { t: tc, b }; }
+    let wt = 1e9; if (dx > 0) wt = Math.min(wt, (100 - R - c.x) / dx); if (dx < 0) wt = Math.min(wt, (R - c.x) / dx); if (dy > 0) wt = Math.min(wt, (50 - R - c.y) / dy); if (dy < 0) wt = Math.min(wt, (R - c.y) / dy);
+    return { hit: best, len: best ? best.t : Math.max(2, wt) };
+  }
+  const poolSt = table({ vb: PV, bg: poolBg, draw: (c, now) => poolDraw(c, now), onMove: d => poolSt.upd(d), onUp: d => poolSt.release(d), onDown: () => { poolSt.aimNow = null; } });
+  poolSt.pre = 'b'; poolSt.aimNow = null;
+  const poolBalls = () => { const g = poolSt.S && poolSt.S.V.g; return g ? g.balls : []; };
+  poolSt.cueSpot = () => { const S = poolSt.S; if (!S || !S.turn) return null; const g = S.V.g, hand = S.turn.data.inHand; if (hand) return poolSt.place; const b = g.balls[0]; return b && b.alive ? b : null; };
+  poolSt.upd = d => { const c = poolSt.cueSpot(); if (!c) { poolSt.aim = null; return; } const px = d.x0 - d.x, py = d.y0 - d.y, len = Math.hypot(px, py); if (len < 0.6) { poolSt.aim = null; poolSt.pwNow = 0; setPow('plPow', 0); return; }
+    const ang = Math.atan2(py, px), pw = clamp((len - 1) / 26, 0, 1); poolSt.aim = { ang, pw }; poolSt.kb.ang = ang; setPow('plPow', pw); };
+  poolSt.release = d => {
+    const S = poolSt.S; if (!S || !S.turn) return; const hand = S.turn.data.inHand;
+    if (d.moved < 7) { if (hand) { const spot = { x: Math.round(d.x0 * 10) / 10, y: Math.round(d.y0 * 10) / 10 }; if (CUE.freeSpot(S.V.g.balls, spot.x, spot.y, 0)) { poolSt.place = spot; poolSt.aim = null; Snd.p('tap'); poolSt.refreshHint(); } } return; }
+    if (poolSt.aim && poolSt.aim.pw >= 0.05 && poolSt.cueSpot()) poolSt.fire(poolSt.aim.ang, poolSt.aim.pw);
+    else { poolSt.aim = null; setPow('plPow', 0); }
+  };
+  poolSt.fire = (ang, pw) => {
+    const S = poolSt.S, c = poolSt.cueSpot(); if (!S || !S.turn || !c || poolSt.thrust) return;
+    const hand = S.turn.data.inHand; if (hand && !poolSt.place) return;
+    poolSt.lastPw = pw; poolSt.thrust = { t0: performance.now(), from: 1.2 + pw * 9, ang, pw, c: { x: c.x, y: c.y }, send: { t: 'shot', x: c.x + Math.cos(ang) * 20, y: c.y + Math.sin(ang) * 20, p: Math.max(0.08, pw), place: hand ? poolSt.place : null }, S };
+    poolSt.kick();
+  };
+  poolSt.kbLoop = () => {                                         // keyboard: arrows turn the aim, hold Space to pull back, release to hit
+    const k = poolSt.kb; if (!k.ch) return; const S = poolSt.S; if (!S || !S.turn) { k.ch = 0; return; }
+    const t = (performance.now() - k.t0) / 1000, pw = clamp(t / 1.4, 0, 1); poolSt.aim = { ang: k.ang == null ? 0 : k.ang, pw: Math.max(pw, 0.02) }; setPow('plPow', pw);
+  };
+  function poolDraw(c, now) {
+    const S = poolSt.S; if (!S) return; const g = S.V.g, st = poolSt; poolSt.kbLoop();
+    // playback or resting positions
+    let P = g.balls.map(b => ({ id: b.id, x: b.x, y: b.y, s: b.alive ? 1 : 0 })), shooter = null;
+    const pre = st.play && now < st.play.t0;
+    if (st.play) {
+      const f = playState(st);
+      if (f >= 0) { const i0 = Math.floor(f), A = st.play.frames[i0], B = st.play.frames[Math.min(i0 + 1, st.play.frames.length - 1)], a = f - i0; P = g.balls.map((b, i) => { const q = lerpPos(A, B, i, a); return q ? { id: b.id, x: q.x, y: q.y, s: q.s } : { id: b.id, x: 0, y: 0, s: 0 }; }); }
+      else if (f === -1) { P = st.play.start.map(b => ({ id: b.id, x: b.x, y: b.y, s: b.alive ? 1 : 0 })); const u = clamp(1 - (st.play.t0 - now) / (st.play.pre * 1000), 0, 1); shooter = { x: P[0].x, y: P[0].y, ang: st.play.ang, gap: u < 0.65 ? 0.4 + (u / 0.65) * (1.2 + st.play.pw * 9) : (1.6 + st.play.pw * 8.6) * (1 - ease((u - 0.65) / 0.35)) + 0.0 }; }
+    }
+    const hand = S.turn && S.turn.data.inHand, place = hand ? st.place : null;
+    if (place && !st.play) { P[0] = { id: 0, x: place.x, y: place.y, s: 1 }; }
+    // aim helpers
+    let aimLine = null;
+    if (S.turn && !st.play && !(hand && !place)) {
+      const cs = st.cueSpot(), a = st.aim; if (cs && (a || st.thrust)) { const ang = a ? a.ang : st.thrust.ang; aimLine = { cs, ang, pw: a ? a.pw : st.thrust.pw }; }
+      else if (cs && !st.drag) { const tgt = g.balls.find(b => b.alive && b.id > 0), ang0 = st.kb.ang == null ? Math.atan2((tgt ? tgt.y : 25) - cs.y, (tgt ? tgt.x : 72) - cs.x) : st.kb.ang; aimLine = { cs, ang: ang0, pw: 0, idle: true }; if (st.kb.ang == null) st.kb.ang = ang0; }
+    }
+    if (aimLine) {
+      const { cs, ang } = aimLine, gh = ghost(P, cs, ang, 2 * CUE.BR), dx = Math.cos(ang), dy = Math.sin(ang);
+      c.save(); c.setLineDash([1.1, 0.9]); c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 0.32; c.beginPath(); c.moveTo(cs.x, cs.y); c.lineTo(cs.x + dx * gh.len, cs.y + dy * gh.len); c.stroke(); c.restore();
+      if (gh.hit) { const gx = cs.x + dx * gh.hit.t, gy = cs.y + dy * gh.hit.t, b = gh.hit.b, bx = b.x - gx, by = b.y - gy, bl = Math.hypot(bx, by) || 1;
+        c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 0.3; c.beginPath(); c.arc(gx, gy, CUE.BR, 0, 7); c.stroke(); c.strokeStyle = '#f2b441'; c.setLineDash([1, 0.8]); c.beginPath(); c.moveTo(b.x, b.y); c.lineTo(b.x + bx / bl * 12, b.y + by / bl * 12); c.stroke(); c.setLineDash([]); }
+    }
+    // balls (cue ball last so it sits on top)
+    for (let i = P.length - 1; i >= 0; i--) { const b = P[i]; if (b.s > 0.02) drawBall(c, b.x, b.y, b.id, b.s); }
+    // cue stick
+    if (shooter) cueStick(c, shooter.x, shooter.y, shooter.ang, shooter.gap);
+    else if (st.thrust) { const T = st.thrust, u = (performance.now() - T.t0) / 150, gap = T.from * (1 - ease(Math.min(1, u))) + 0.05; cueStick(c, T.c.x, T.c.y, T.ang, gap + 0.0); if (u >= 1) { const m = T.send; st.thrust = null; st.aim = null; setPow('plPow', 0); T.S.send(m); } }
+    else if (aimLine && !st.play) { const wob = aimLine.pw ? 0 : Math.sin(performance.now() / 420) * 0.25 + 0.5; cueStick(c, aimLine.cs.x, aimLine.cs.y, aimLine.ang, 1.2 + aimLine.pw * 9 + wob); }
+    if (hand && !place && !st.play) { c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(0, 0, 25, 50); c.fillStyle = '#fff'; c.font = '700 2.6px sans-serif'; c.textAlign = 'center'; c.fillText('Tap here to place the cue ball', 12.5, 25); }
+  }
   const poolUI = {
     st: poolSt,
-    tap(x, y) {
-      const S = poolSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; const g = S.V.g;
-      if (S.turn.data.inHand && !poolSt.place) { if (CUE.freeSpot(g.balls, x, y, 0)) poolSt.place = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 }; }
-      else poolSt.aim = { x, y };
-      poolUI.update(S);
-    },
-    draw() {
-      const S = poolSt.S; if (!S || !$('plSvg')) return; const g = S.V.g, P = poolPositions(g), my = S.turn;
-      let s = `<rect x="-4" y="-4" width="108" height="58" rx="3" fill="#5a3418"/><rect x="0" y="0" width="100" height="50" fill="#1f7a4a"/>` +
-        CUE.PT.pk.map(p => `<circle cx="${p.x}" cy="${p.y}" r="${p.r - 0.3}" fill="#0b0b0f"/>`).join('') +
-        `<line x1="25" y1="1" x2="25" y2="49" stroke="#fff" stroke-opacity=".12" stroke-width=".3"/>`;
-      const cue = P[0], place = my && my.data.inHand ? poolSt.place : null;
-      P.forEach((b, i) => {
-        if (!b.alive && !(i === 0 && place)) return; const x = i === 0 && place ? place.x : b.x, y = i === 0 && place ? place.y : b.y, id = b.id;
-        s += `<circle cx="${x}" cy="${y}" r="${CUE.BR}" fill="${id > 8 ? '#fbf6ea' : colOf(id)}" stroke="#000" stroke-opacity=".4" stroke-width=".2"/>`;
-        if (id > 8) s += `<rect x="${x - CUE.BR}" y="${y - 0.55}" width="${CUE.BR * 2}" height="1.1" fill="${colOf(id)}" clip-path="circle(${CUE.BR}px at ${CUE.BR}px 0.55px)"/>`;
-        if (id > 0) s += `<text x="${x}" y="${y + 0.45}" font-size="1.2" text-anchor="middle" fill="${id > 8 || id === 0 ? '#111' : '#fff'}" font-weight="700">${id}</text>`;
-      });
-      if (my && poolSt.aim && !(my.data.inHand && !poolSt.place) && cue) {
-        const c = place || cue, ang = Math.atan2(poolSt.aim.y - c.y, poolSt.aim.x - c.x), gh = ghostHit(P, c, ang, CUE.BR * 2), len = gh ? gh.t : 30;
-        s += `<line x1="${c.x}" y1="${c.y}" x2="${c.x + Math.cos(ang) * len}" y2="${c.y + Math.sin(ang) * len}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>`;
-        if (gh) { const bx = gh.b.x - gh.x, by = gh.b.y - gh.y, bl = Math.hypot(bx, by) || 1;
-          s += `<circle cx="${gh.x}" cy="${gh.y}" r="${CUE.BR}" fill="#fff" fill-opacity=".25" stroke="#fff" stroke-width=".3" stroke-dasharray=".8 .6"/><line x1="${gh.b.x}" y1="${gh.b.y}" x2="${gh.b.x + bx / bl * 9}" y2="${gh.b.y + by / bl * 9}" stroke="#f2b441" stroke-width=".4" stroke-dasharray="1 .8"/>`; }
-        s += stick2d(c, ang, CUE.BR + pullOf(poolSt, 1, 9));
-        AIMFX.loop(() => { if (!poolSt.aim || !poolSt.S || !poolSt.S.turn || !$('plSvg')) return false; poolUI.draw(); return true; });
-      }
-      $('plSvg').innerHTML = s;
-      if ($('plShoot')) $('plShoot').disabled = !(my && poolSt.aim && !(my.data.inHand && !poolSt.place));
-    },
     mount(stage, ctl) {
-      poolSt.aim = null; poolSt.place = null; poolSt.anim = null; poolSt.seq = -1; poolSt.th = 0; poolSt.firing = false; clearInterval(poolSt.timer);
-      stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="plSeats"></div><svg class="cue-svg" id="plSvg" viewBox="${VB.x} ${VB.y} ${VB.w} ${VB.h}" role="img" aria-label="Pool table"></svg><div class="pz-label" id="plMsg"></div><div class="banner" id="plBanner" aria-live="polite"></div></section>`;
-      ctl.innerHTML = `<div class="act" id="plAct" hidden><div class="betrow"><label class="hint" for="plPow">Power</label><input type="range" id="plPow" min="10" max="100" value="60"><span class="hint" id="plPowV">60%</span></div>
-        <div class="betrow"><button type="button" class="b gold" id="plShoot" disabled>Shoot</button><button type="button" class="ghost" id="plReset">Reset</button></div><p class="hint bt-hint" id="plHint"></p></div>`;
-      $('plSvg').onclick = e => { const p = pt($('plSvg'), e, VB); poolUI.tap(p.x, p.y); };
-      $('plPow').oninput = () => { poolSt.pw = +$('plPow').value / 100; $('plPowV').textContent = $('plPow').value + '%'; poolUI.draw(); };
-      $('plReset').onclick = () => { poolSt.aim = null; poolSt.place = null; if (poolSt.S) poolUI.update(poolSt.S); };
-      $('plShoot').onclick = () => { const S = poolSt.S; if (!S || !S.turn || !poolSt.aim) return; const m = { t: 'shot', x: poolSt.aim.x, y: poolSt.aim.y, p: poolSt.pw, place: S.turn.data.inHand ? poolSt.place : null }; poolSt.pw = poolSt.pw; fire(poolSt, () => { poolSt.aim = null; poolSt.place = null; S.send(m); }); };
+      stage.innerHTML = `<section class="table pz cuewrap"><div class="bt-opps" id="plSeats"></div><div class="cuebox pool"><canvas id="plCv" aria-label="Pool table"></canvas></div><div class="pz-label" id="plMsg"></div><div class="banner" id="plBanner" aria-live="polite"></div></section>`;
+      ctl.innerHTML = `<div class="act" id="plAct" hidden><div class="pwrow"><span class="hint">Power</span><div class="pwbar"><i id="plPowFill"></i></div><span class="hint" id="plPowV">0%</span></div><p class="hint bt-hint" id="plHint"></p></div>`;
+      poolSt.mount(stage); poolSt.S = null;
+      if (poolSt.kd) { window.removeEventListener('keydown', poolSt.kd); window.removeEventListener('keyup', poolSt.ku); }
+      window.addEventListener('keydown', poolSt.kd = e => { const S = poolSt.S; if (!S || !S.turn || !$('plCv') || poolSt.play || poolSt.thrust) return; if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+        const k = e.key; if (k === 'ArrowLeft' || k === 'ArrowRight') { e.preventDefault(); if (poolSt.kb.ang == null) poolSt.kb.ang = 0; poolSt.kb.ang += (k === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 0.002 : 0.012); poolSt.aim = poolSt.kb.ch ? poolSt.aim : null; poolSt.kick(); }
+        if (k === ' ' && !e.repeat && !(S.turn.data.inHand && !poolSt.place)) { e.preventDefault(); poolSt.kb.ch = 1; poolSt.kb.t0 = performance.now(); poolSt.kick(); } });
+      window.addEventListener('keyup', poolSt.ku = e => { if (e.key === ' ' && poolSt.kb.ch) { poolSt.kb.ch = 0; const a = poolSt.aim; if (a && a.pw >= 0.05) poolSt.fire(a.ang, a.pw); else { poolSt.aim = null; setPow('plPow', 0); } } });
+      poolSt.afterPlay = () => { poolSt.kick(); };
     },
     update(S) {
-      poolSt.S = S; const V = S.V, g = V.g; if (!S.turn) { poolSt.aim = null; poolSt.place = null; }
-      poolPlay(g.shot);
+      poolSt.S = S; const V = S.V, g = V.g; if (!S.turn) { poolSt.aim = null; poolSt.place = null; poolSt.kb.ch = 0; }
+      if (!poolSt.seen) { poolSt.seen = true; poolSt.seq = g.shot ? g.shot.seq : 0; }
+      else if (g.shot && g.shot.seq !== poolSt.seq) {
+        poolSt.seq = g.shot.seq; const f = g.shot.frames, mine = g.shot.p === S.me, a0 = f[0], a1 = f[Math.min(2, f.length - 1)];
+        const ang = Math.atan2(a1[1] - a0[1], a1[0] - a0[0]), pw = clamp(Math.hypot(a1[0] - a0[0], a1[1] - a0[1]) / 10 / (7.2 * CUE.VMAX), 0.1, 1);
+        const start = g.balls.map((b, i) => ({ id: b.id, alive: f[0][2 * i] >= 0, x: f[0][2 * i] / 10, y: f[0][2 * i + 1] / 10 }));
+        runPlay(poolSt, g.shot, g.balls.length, () => CUE.BR, 100, 50, mine ? 0 : 0.65, 'cuehit', mine && poolSt.lastPw ? poolSt.lastPw : pw);
+        Object.assign(poolSt.play, { start, ang, pw });
+      }
       const gn = i => (g.groups[i] === 'solid' ? 'Solids' : g.groups[i] === 'stripe' ? 'Stripes' : 'Open table');
       $('plSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Lining up…', extra: i => gn(i) });
       $('plMsg').textContent = g.over ? '' : g.msg;
       $('plBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
-      $('plAct').hidden = !S.turn;
-      if (S.turn) { const hand = S.turn.data.inHand;
-        $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball, then tap to aim.' : 'Tap the table to aim: the cue lines up behind the ball and a ghost ball shows where you will hit. Drag the Power slider to pull the cue back, then Shoot.'; }
-      poolUI.draw(); return '';
+      $('plAct').hidden = !S.turn; poolSt.refreshHint(); poolSt.kick(); return '';
     },
   };
+  poolSt.refreshHint = () => { const S = poolSt.S; if (!S || !S.turn || !$('plHint')) return; const hand = S.turn.data.inHand; $('plHint').textContent = hand && !poolSt.place ? 'Ball in hand: tap the left part of the table to place the cue ball.' : 'Drag back like pulling a cue (further = more power) and let go to hit. Keyboard: ← → to aim, hold Space then release.'; };
 
   /* ===================== Carrom ===================== */
-  const CVB = { x: -3, y: -3, w: 106, h: 106 };
-  const carSt = { aim: null, sx: 50, pw: 0.6, th: 0, firing: false, anim: null, seq: -1, timer: null, S: null };
-  const carPlay = player(carSt, () => carromUI.draw());
-  const carPositions = g => { if (carSt.anim) { const f = carSt.anim; return { coins: g.coins.map((c, i) => ({ t: c.t, id: c.id, alive: f[2 * i] >= 0, x: f[2 * i] / 10, y: f[2 * i + 1] / 10 })), st: f[2 * g.coins.length] >= 0 ? { x: f[2 * g.coins.length] / 10, y: f[2 * g.coins.length + 1] / 10 } : null }; } return { coins: g.coins, st: null }; };
-  const CC = { w: '#f7f0e1', b: '#2a2430', q: '#d6453d' };
+  const CV = { x: -3, y: -3, w: 106, h: 106 };
+  const CC = { w: '#f4ecd8', b: '#2a2430', q: '#d6453d' };
+  function carromBg(c) {
+    const fr = c.createLinearGradient(-3, -3, 103, 103); fr.addColorStop(0, '#7a4a26'); fr.addColorStop(1, '#4a2a12'); c.fillStyle = fr; c.beginPath(); c.roundRect ? c.roundRect(-3, -3, 106, 106, 3) : c.rect(-3, -3, 106, 106); c.fill();
+    const bd = c.createRadialGradient(50, 50, 5, 50, 50, 75); bd.addColorStop(0, '#f0cf92'); bd.addColorStop(1, '#d9b072'); c.fillStyle = bd; c.fillRect(0, 0, 100, 100);
+    c.globalAlpha = 0.06; c.strokeStyle = '#7a4a22'; c.lineWidth = 0.2; for (let y = 0; y < 100; y += 1.6) { c.beginPath(); c.moveTo(0, y); c.lineTo(100, y + (y % 3)); c.stroke(); } c.globalAlpha = 1;
+    c.strokeStyle = '#7a4a22'; c.lineWidth = 0.4; c.strokeRect(5.5, 5.5, 89, 89);
+    [16, 84].forEach(y => { c.beginPath(); c.moveTo(14, y); c.lineTo(86, y); c.stroke(); c.beginPath(); c.moveTo(14, y + (y < 50 ? 3.2 : -3.2)); c.lineTo(86, y + (y < 50 ? 3.2 : -3.2)); c.stroke(); }); [16, 84].forEach(x => { c.beginPath(); c.moveTo(x, 14); c.lineTo(x, 86); c.stroke(); c.beginPath(); c.moveTo(x + (x < 50 ? 3.2 : -3.2), 14); c.lineTo(x + (x < 50 ? 3.2 : -3.2), 86); c.stroke(); });
+    [[14, 16], [86, 16], [14, 84], [86, 84], [16, 14], [84, 14], [16, 86], [84, 86]].forEach(([x, y]) => { c.fillStyle = '#d6453d'; c.beginPath(); c.arc(x, y, 1.9, 0, 7); c.fill(); c.strokeStyle = '#7a4a22'; c.stroke(); });
+    c.beginPath(); c.arc(50, 50, 12, 0, 7); c.stroke(); c.beginPath(); c.arc(50, 50, 8, 0, 7); c.stroke(); c.fillStyle = 'rgba(214,69,61,.55)'; c.beginPath(); c.arc(50, 50, 2.4, 0, 7); c.fill();
+    c.lineWidth = 0.35; [[8, 8, 22, 22], [92, 8, 78, 22], [8, 92, 22, 78], [92, 92, 78, 78]].forEach(([a, b, x, y]) => { c.beginPath(); c.moveTo(a, b); c.lineTo(x, y); c.stroke(); });
+    CUE.CT.pk.forEach(p => { const x = p.x - 0.4 * Math.sign(p.x - 50), y = p.y - 0.4 * Math.sign(p.y - 50), g = c.createRadialGradient(x, y, 0.5, x, y, 4.2); g.addColorStop(0, '#000'); g.addColorStop(0.8, '#0c0905'); g.addColorStop(1, '#6a5030'); c.fillStyle = g; c.beginPath(); c.arc(x, y, 4.2, 0, 7); c.fill(); });
+  }
+  function drawCoin(c, x, y, col, r, s, striker) {
+    r = r * (s == null ? 1 : s); if (r <= 0.05) return;
+    c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(x + 0.45, y + 0.6, r, r * 0.95, 0, 0, 7); c.fill();
+    const g = c.createRadialGradient(x - r * 0.3, y - r * 0.35, r * 0.1, x, y, r); g.addColorStop(0, '#fff'); g.addColorStop(0.3, col); g.addColorStop(1, striker ? '#4a88b8' : 'rgba(0,0,0,.55)'); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+    c.strokeStyle = striker ? 'rgba(255,255,255,.8)' : 'rgba(0,0,0,.35)'; c.lineWidth = 0.22; c.beginPath(); c.arc(x, y, r * 0.72, 0, 7); c.stroke(); if (!striker) { c.beginPath(); c.arc(x, y, r * 0.4, 0, 7); c.stroke(); } else { c.beginPath(); c.arc(x, y, r * 0.4, 0, 7); c.stroke(); }
+    c.fillStyle = 'rgba(255,255,255,.45)'; c.beginPath(); c.ellipse(x - r * 0.33, y - r * 0.38, r * 0.24, r * 0.14, -0.6, 0, 7); c.fill();
+  }
+  function finger(c, x, y, ang, gap) {
+    c.save(); c.translate(x - Math.cos(ang) * (CUE.SR + gap), y - Math.sin(ang) * (CUE.SR + gap)); c.rotate(ang);
+    const shape = (ox, oy, a) => { c.fillStyle = `rgba(0,0,0,${a})`; c.beginPath(); c.ellipse(ox - 4.6, oy, 5.6, 2.4, 0, 0, 7); c.fill(); };
+    shape(0.6, 0.9, 0.22);
+    const g = c.createLinearGradient(0, -2.4, 0, 2.4); g.addColorStop(0, '#f6cfa6'); g.addColorStop(1, '#d19a70'); c.fillStyle = g; c.beginPath(); c.ellipse(-4.6, 0, 5.6, 2.4, 0, 0, 7); c.fill();
+    c.fillStyle = '#f2dccb'; c.beginPath(); c.ellipse(-0.9, 0, 1.9, 1.5, 0, 0, 7); c.fill(); c.strokeStyle = '#b57a52'; c.lineWidth = 0.18; c.stroke();
+    c.fillStyle = '#e4b088'; c.beginPath(); c.ellipse(-6.6, 2.1, 3.2, 1.2, 0.2, 0, 7); c.fill(); c.restore();
+  }
+  const carSt = table({ vb: CV, bg: carromBg, flip: () => !!(carSt.S && carSt.S.me === 1), draw: (c, now) => carDraw(c, now), onMove: d => carSt.upd(d), onUp: d => carSt.release(d) });
+  carSt.pre = 'c'; carSt.sx = 50;
+  carSt.base = () => { const S = carSt.S; return CUE.BASE[S && S.me === 1 ? 1 : 0]; };
+  carSt.upd = d => { const px = d.x0 - d.x, py = d.y0 - d.y, len = Math.hypot(px, py); if (len < 0.6) { carSt.aim = null; setPow('crPow', 0); return; } const ang = Math.atan2(py, px), pw = clamp((len - 1) / 24, 0, 1); carSt.aim = { ang, pw }; carSt.kb.ang = ang; setPow('crPow', pw); };
+  carSt.release = d => { if (d.moved < 7) { return; } if (carSt.aim && carSt.aim.pw >= 0.05) carSt.fire(carSt.aim.ang, carSt.aim.pw); else { carSt.aim = null; setPow('crPow', 0); } };
+  carSt.fire = (ang, pw) => {
+    const S = carSt.S; if (!S || !S.turn || carSt.thrust) return; const by = carSt.base(); if (!CUE.carromSpot(S.V.g.coins, carSt.sx, S.me === 1 ? 1 : 0)) { Snd.p('bad'); return; }
+    carSt.lastPw = pw; carSt.thrust = { t0: performance.now(), from: 0.8 + pw * 8, ang, pw, sx: carSt.sx, send: { t: 'shot', sx: carSt.sx, x: carSt.sx + Math.cos(ang) * 30, y: by + Math.sin(ang) * 30, p: Math.max(0.1, pw) }, S }; carSt.kick();
+  };
+  carSt.kbLoop = () => { const k = carSt.kb; if (!k.ch) return; const S = carSt.S; if (!S || !S.turn) { k.ch = 0; return; } const pw = clamp((performance.now() - k.t0) / 1000 / 1.3, 0, 1); carSt.aim = { ang: k.ang == null ? (S.me === 1 ? Math.PI / 2 : -Math.PI / 2) : k.ang, pw: Math.max(pw, 0.02) }; setPow('crPow', pw); };
+  function carDraw(c, now) {
+    const S = carSt.S; if (!S) return; const g = S.V.g, st = carSt, n = g.coins.length, me = S.me === 1 ? 1 : 0, by = CUE.BASE[me]; st.kbLoop();
+    c.save(); if (S.me === 1) { c.translate(100, 100); c.scale(-1, -1); }
+    let P = g.coins.map(k => ({ t: k.t, x: k.x, y: k.y, s: k.alive ? 1 : 0 })), SP = null, fing = null;
+    if (st.play) {
+      const f = playState(st);
+      if (f >= 0) { const i0 = Math.floor(f), A = st.play.frames[i0], B = st.play.frames[Math.min(i0 + 1, st.play.frames.length - 1)], a = f - i0; P = g.coins.map((k, i) => { const q = lerpPos(A, B, i, a); return q ? { t: k.t, x: q.x, y: q.y, s: q.s } : { t: k.t, x: 0, y: 0, s: 0 }; }); const q = lerpPos(A, B, n, a); SP = q ? { x: q.x, y: q.y, s: q.s } : null; }
+      else if (f === -1) { P = st.play.start.map(k => ({ t: k.t, x: k.x, y: k.y, s: k.alive ? 1 : 0 })); SP = { x: st.play.sx, y: CUE.BASE[st.play.p], s: 1 }; const u = clamp(1 - (st.play.t0 - now) / (st.play.pre * 1000), 0, 1); fing = { x: SP.x, y: SP.y, ang: st.play.ang, gap: u < 0.65 ? 0.3 + (u / 0.65) * (0.8 + st.play.pw * 8) : (1.1 + st.play.pw * 7.9) * (1 - ease((u - 0.65) / 0.35)) }; }
+    } else if (S.turn) SP = { x: st.sx, y: by, s: 1 };
+    const ok = !S.turn || CUE.carromSpot(g.coins, st.sx, me);
+    let aim = null; if (S.turn && !st.play) { const a = st.aim; if (a) aim = a; else if (st.thrust) aim = { ang: st.thrust.ang, pw: st.thrust.pw }; else { const ang0 = st.kb.ang == null ? Math.atan2(50 - by, 50 - st.sx) : st.kb.ang; aim = { ang: ang0, pw: 0, idle: true }; } }
+    if (aim && SP) { c.save(); c.setLineDash([1.1, 0.9]); c.strokeStyle = 'rgba(60,30,10,.7)'; c.lineWidth = 0.35; c.beginPath(); c.moveTo(st.sx, by); c.lineTo(st.sx + Math.cos(aim.ang) * 55, by + Math.sin(aim.ang) * 55); c.stroke(); c.restore(); }
+    P.forEach(k => { if (k.s > 0.02) drawCoin(c, k.x, k.y, CC[k.t], CUE.CR, k.s); });
+    if (SP && SP.s > 0.02) drawCoin(c, SP.x, SP.y, ok ? '#cfe8ff' : '#f0a0a0', CUE.SR, SP.s, true);
+    if (fing) finger(c, fing.x, fing.y, fing.ang, fing.gap);
+    else if (st.thrust) { const T = st.thrust, u = (performance.now() - T.t0) / 120; finger(c, T.sx, by, T.ang, T.from * (1 - ease(Math.min(1, u))) + 0.1); if (u >= 1) { const m = T.send; st.thrust = null; st.aim = null; setPow('crPow', 0); T.S.send(m); } }
+    else if (aim && S.turn && !st.play) finger(c, st.sx, by, aim.ang, 0.8 + aim.pw * 8 + (aim.pw ? 0 : Math.sin(performance.now() / 420) * 0.25 + 0.4));
+    c.restore();
+  }
   const carromUI = {
     st: carSt,
-    tap(x, y) { const S = carSt.S; if (!S || !S.turn || !isFinite(x) || !isFinite(y)) return; carSt.aim = { x, y }; carromUI.update(S); },
-    flip() { const S = carSt.S; return !!(S && S.me === 1); },
-    draw() {
-      const S = carSt.S; if (!S || !$('crSvg')) return; const g = S.V.g, P = carPositions(g), my = S.turn, me = S.me === 1 ? 1 : 0;
-      let s = `<g${carromUI.flip() ? ' transform="rotate(180 50 50)"' : ''}><rect x="-3" y="-3" width="106" height="106" rx="3" fill="#6b3d1a"/><rect x="0" y="0" width="100" height="100" fill="#e2bd7e"/>` +
-        `<circle cx="50" cy="50" r="12" fill="none" stroke="#7a4a22" stroke-width=".4"/><circle cx="50" cy="50" r="2" fill="#d6453d" fill-opacity=".5"/>` +
-        [16, 84].map(y => `<line x1="14" y1="${y}" x2="86" y2="${y}" stroke="#7a4a22" stroke-width=".35"/>`).join('') + [16, 84].map(x => `<line x1="${x}" y1="14" x2="${x}" y2="86" stroke="#7a4a22" stroke-width=".35"/>`).join('') +
-        CUE.CT.pk.map(p => `<circle cx="${p.x - 0.4 * Math.sign(p.x - 50)}" cy="${p.y - 0.4 * Math.sign(p.y - 50)}" r="3.2" fill="#14100c"/>`).join('');
-      P.coins.forEach(c => { if (!c.alive) return; s += `<circle cx="${c.x}" cy="${c.y}" r="${CUE.CR}" fill="${CC[c.t]}" stroke="#000" stroke-opacity=".5" stroke-width=".25"/>`; });
-      if (P.st) s += `<circle cx="${P.st.x}" cy="${P.st.y}" r="${CUE.SR}" fill="#9ac8f0" stroke="#fff" stroke-width=".4"/>`;
-      if (my) {
-        const by = CUE.BASE[me], ok = CUE.carromSpot(g.coins, carSt.sx, me);
-        s += `<circle cx="${carSt.sx}" cy="${by}" r="${CUE.SR}" fill="${ok ? '#9ac8f0' : '#e06060'}" stroke="#fff" stroke-width=".4"/>`;
-        if (carSt.aim) { const dx = carSt.aim.x - carSt.sx, dy = carSt.aim.y - by, l = Math.hypot(dx, dy) || 1, ux = dx / l, uy = dy / l, off = CUE.SR + 1.2 + pullOf(carSt, 0.5, 12);
-          s += `<line x1="${carSt.sx}" y1="${by}" x2="${carSt.sx + ux * 60}" y2="${by + uy * 60}" stroke="#fff" stroke-width=".4" stroke-dasharray="1.2 1"/>` +
-            `<g transform="translate(${carSt.sx - ux * off} ${by - uy * off}) rotate(${Math.atan2(uy, ux) * 180 / Math.PI})"><ellipse cx="-3" cy="0" rx="4.4" ry="1.9" fill="#e5b48a" stroke="#a9744a" stroke-width=".25"/><ellipse cx="-.4" cy="-.6" rx="1.7" ry=".8" fill="#f0c49c"/><ellipse cx="-.4" cy=".6" rx="1.7" ry=".8" fill="#f0c49c"/></g>`;
-          AIMFX.loop(() => { if (!carSt.aim || !carSt.S || !carSt.S.turn || !$('crSvg')) return false; carromUI.draw(); return true; }); }
-      }
-      $('crSvg').innerHTML = s + '</g>';
-      if ($('crShoot')) $('crShoot').disabled = !(my && carSt.aim && CUE.carromSpot(g.coins, carSt.sx, me));
-    },
     mount(stage, ctl) {
-      carSt.aim = null; carSt.sx = 50; carSt.anim = null; carSt.seq = -1; carSt.th = 0; carSt.firing = false; clearInterval(carSt.timer);
-      stage.innerHTML = `<section class="table pz"><div class="bt-opps" id="crSeats"></div><svg class="cue-svg carrom" id="crSvg" viewBox="${CVB.x} ${CVB.y} ${CVB.w} ${CVB.h}" role="img" aria-label="Carrom board"></svg><div class="pz-label" id="crMsg"></div><div class="banner" id="crBanner" aria-live="polite"></div></section>`;
-      ctl.innerHTML = `<div class="act" id="crAct" hidden><div class="betrow"><label class="hint" for="crSx">Striker</label><input type="range" id="crSx" min="20" max="80" value="50"></div>
-        <div class="betrow"><label class="hint" for="crPow">Power</label><input type="range" id="crPow" min="10" max="100" value="60"><span class="hint" id="crPowV">60%</span></div>
-        <div class="betrow"><button type="button" class="b gold" id="crShoot" disabled>Flick</button><button type="button" class="ghost" id="crReset">Reset</button></div><p class="hint bt-hint" id="crHint"></p></div>`;
-      $('crSvg').onclick = e => { const p = pt($('crSvg'), e, CVB); carromUI.tap(carromUI.flip() ? 100 - p.x : p.x, carromUI.flip() ? 100 - p.y : p.y); };
-      $('crSx').oninput = () => { carSt.sx = +$('crSx').value; carromUI.draw(); };
-      $('crPow').oninput = () => { carSt.pw = +$('crPow').value / 100; $('crPowV').textContent = $('crPow').value + '%'; carromUI.draw(); };
-      $('crReset').onclick = () => { carSt.aim = null; if (carSt.S) carromUI.update(carSt.S); };
-      $('crShoot').onclick = () => { const S = carSt.S; if (!S || !S.turn || !carSt.aim) return; const m = { t: 'shot', sx: carSt.sx, x: carSt.aim.x, y: carSt.aim.y, p: carSt.pw }; fire(carSt, () => { carSt.aim = null; S.send(m); }); };
+      stage.innerHTML = `<section class="table pz cuewrap"><div class="bt-opps" id="crSeats"></div><div class="cuebox carrom"><canvas id="crCv" aria-label="Carrom board"></canvas></div><div class="pz-label" id="crMsg"></div><div class="banner" id="crBanner" aria-live="polite"></div></section>`;
+      ctl.innerHTML = `<div class="act" id="crAct" hidden><div class="pwrow"><span class="hint">Striker</span><input type="range" id="crSx" min="20" max="80" value="50" aria-label="Slide the striker"></div><div class="pwrow"><span class="hint">Power</span><div class="pwbar"><i id="crPowFill"></i></div><span class="hint" id="crPowV">0%</span></div><p class="hint bt-hint" id="crHint"></p></div>`;
+      carSt.sx = 50; carSt.S = null; carSt.mount(stage);
+      $('crSx').oninput = () => { carSt.sx = +$('crSx').value; carSt.kick(); };
+      if (carSt.kd) { window.removeEventListener('keydown', carSt.kd); window.removeEventListener('keyup', carSt.ku); }
+      window.addEventListener('keydown', carSt.kd = e => { const S = carSt.S; if (!S || !S.turn || !$('crCv') || carSt.play || carSt.thrust) return; if (/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '') && document.activeElement.type !== 'range') return;
+        const k = e.key; if (k === 'a' || k === 'd') { carSt.sx = clamp(carSt.sx + (k === 'a' ? -1.5 : 1.5), 20, 80); $('crSx').value = carSt.sx; carSt.kick(); }
+        if (k === 'ArrowLeft' || k === 'ArrowRight') { e.preventDefault(); const sgn = S.me === 1 ? -1 : 1; if (carSt.kb.ang == null) carSt.kb.ang = S.me === 1 ? Math.PI / 2 : -Math.PI / 2; carSt.kb.ang += (k === 'ArrowLeft' ? -1 : 1) * sgn * (e.shiftKey ? 0.002 : 0.012); carSt.kick(); }
+        if (k === ' ' && !e.repeat) { e.preventDefault(); carSt.kb.ch = 1; carSt.kb.t0 = performance.now(); carSt.kick(); } });
+      window.addEventListener('keyup', carSt.ku = e => { if (e.key === ' ' && carSt.kb.ch) { carSt.kb.ch = 0; const a = carSt.aim; if (a && a.pw >= 0.05) carSt.fire(a.ang, a.pw); else { carSt.aim = null; setPow('crPow', 0); } } });
+      carSt.afterPlay = () => carSt.kick();
     },
     update(S) {
-      carSt.S = S; const V = S.V, g = V.g; if (!S.turn) carSt.aim = null;
-      carPlay(g.shot);
+      carSt.S = S; const V = S.V, g = V.g; if (!S.turn) { carSt.aim = null; carSt.kb.ch = 0; }
+      if (!carSt.seen) { carSt.seen = true; carSt.seq = g.shot ? g.shot.seq : 0; }
+      else if (g.shot && g.shot.seq !== carSt.seq) {
+        carSt.seq = g.shot.seq; const f = g.shot.frames, n = g.coins.length, mine = g.shot.p === S.me, a0 = [f[0][2 * n], f[0][2 * n + 1]], a1 = [f[Math.min(2, f.length - 1)][2 * n], f[Math.min(2, f.length - 1)][2 * n + 1]];
+        const ang = Math.atan2(a1[1] - a0[1], a1[0] - a0[0]), pw = clamp(Math.hypot(a1[0] - a0[0], a1[1] - a0[1]) / 10 / (7.2 * CUE.SV), 0.1, 1);
+        const start = g.coins.map((k, i) => ({ t: k.t, alive: f[0][2 * i] >= 0, x: f[0][2 * i] / 10, y: f[0][2 * i + 1] / 10 }));
+        runPlay(carSt, g.shot, n + 1, i => (i === n ? CUE.SR : CUE.CR), 100, 100, mine ? 0 : 0.6, 'cflick', mine && carSt.lastPw ? carSt.lastPw : pw);
+        Object.assign(carSt.play, { start, ang, pw, sx: g.shot.sx, p: g.shot.p });
+      }
       $('crSeats').innerHTML = plates(S, { turn: g.turn, delta: g.delta, dot: true, doing: 'Lining up…', extra: i => `${i === 0 ? 'White' : 'Black'} · ${CUE.carromScore(g.coins, i === 0 ? 'w' : 'b')} of 9` });
       $('crMsg').textContent = g.over ? '' : g.msg;
       $('crBanner').innerHTML = g.over && V.summary.length ? V.summary.map(e => `<span>${S.text(e)}</span>`).join('') + `<span>${esc(g.msg)}</span>` : '';
       $('crAct').hidden = !S.turn;
-      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker along your line, tap the board to aim, then drag Power to pull your finger back, and flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
-      carromUI.draw(); return '';
+      if (S.turn) $('crHint').textContent = `You play ${S.turn.data.colour === 'w' ? 'white' : 'black'}. Slide the striker, then drag back like pulling a finger (further = more power) and let go to flick.${S.turn.data.qPending ? ' Pot one of your coins now to keep the queen.' : ''}`;
+      carSt.kick(); return '';
     },
   };
-
-  /* ===================== 3D ===================== */
-  const TY = 2.5;
-  const numTex = (id) => T3.canvasTex(256, 128, (g, w, h) => {
-    const base = id > 8 ? '#fbf6ea' : colOf(id); g.fillStyle = base; g.fillRect(0, 0, w, h);
-    if (id > 8) { g.fillStyle = colOf(id); g.fillRect(0, h * 0.28, w, h * 0.44); }
-    if (id > 0) for (const cx of [w * 0.25, w * 0.75]) { g.fillStyle = '#fbf6ea'; g.beginPath(); g.arc(cx, h / 2, 26, 0, 7); g.fill(); g.fillStyle = '#111'; g.font = '700 34px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(id), cx, h / 2 + 2); }
-  });
-
-  /* common: person standing at the table, frame playback */
-  function setupPeople(s, sc, S0, spots) {
-    const people = [], tags = [];
-    const build = S => {
-      people.forEach(p => sc.remove(p)); people.length = 0; tags.length = 0;
-      S.V.seats.forEach((st, i) => {
-        const sp = spots[i % spots.length], pp = T3.person(i ? '#e0443c' : '#3f8be8', { idx: i + 1 }); pp.scale.setScalar(2.2); pp.position.set(sp[0], 0, sp[1]); pp.rotation.y = sp[2]; sc.add(pp); s.addPerson(pp); people.push(pp);
-        const lb = T3.label('', { scale: 3.6 }); lb.sprite.position.y = 3.0; lb.sprite.scale.multiplyScalar(1 / 2.2); pp.add(lb.sprite); tags.push(lb);
-      });
-    };
-    return { people, tags, build };
-  }
-
-  function pool3d(box, S0) {
-    const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.16;
-    T3.lounge(s, { w: 34, d: 28, lamps: [], ambient: 0.55, wall: '#1d2a38', bg: 0x0c1118 });
-    const key = new TH.SpotLight(0xfff0d0, 1.6, 44, 0.9, 0.55, 1.1); key.position.set(0, 13, 0); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
-    T3.mk(sc, new TH.CircleGeometry(12, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    const felt = T3.canvasTex(512, 256, T3.speckle('#1f7a4a', 36, 6000));
-    T3.mk(sc, T3.BOX(16.2, 0.2, 8.2), T3.mat('#fff', { map: felt, roughness: 1 }), 0, TY - 0.1, 0, { noCast: true });
-    const wood = T3.mat('#4a2a14', { roughness: 0.4 });
-    T3.mk(sc, T3.BOX(17.6, 0.5, 0.7), wood, 0, TY + 0.1, 4.45); T3.mk(sc, T3.BOX(17.6, 0.5, 0.7), wood, 0, TY + 0.1, -4.45); T3.mk(sc, T3.BOX(0.7, 0.5, 9.6), wood, 8.45, TY + 0.1, 0); T3.mk(sc, T3.BOX(0.7, 0.5, 9.6), wood, -8.45, TY + 0.1, 0);
-    T3.mk(sc, T3.BOX(17.6, 0.3, 9.6), wood, 0, TY - 0.4, 0);
-    for (const x of [-7, 7]) for (const z of [-3, 3]) T3.mk(sc, T3.BOX(0.7, TY - 0.5, 0.7), wood, x, (TY - 0.5) / 2, z);
-    const wx = x => (x - 50) * K, wz = y => (y - 25) * K;
-    CUE.PT.pk.forEach(p => T3.mk(sc, T3.CYL(p.r * K * 0.95, p.r * K * 0.95, 0.05, 20), new TH.MeshBasicMaterial({ color: 0x050507 }), wx(p.x), TY + 0.015, wz(p.y), { noCast: true }));
-    const balls = [], BRW = CUE.BR * K;
-    for (let i = 0; i < 16; i++) { const id = i === 0 ? 0 : -1; balls.push(null); }
-    const mkBall = id => { const m = new TH.Mesh(new TH.SphereGeometry(BRW, 24, 16), new TH.MeshStandardMaterial({ map: id === 0 ? null : numTex(id), color: id === 0 ? 0xfbf6ea : 0xffffff, roughness: 0.25, metalness: 0.05 })); m.castShadow = true; sc.add(m); return m; };
-    const plane = T3.mk(sc, new TH.PlaneGeometry(18, 10), new TH.MeshBasicMaterial({ visible: false }), 0, TY + BRW, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
-    const stick = new TH.Group(); T3.mk(stick, new TH.CylinderGeometry(0.03, 0.06, 3.6, 10), T3.mat('#d9b36b', { roughness: 0.5 }), 0, 0, 0).rotation.z = Math.PI / 2; T3.mk(stick, new TH.CylinderGeometry(0.032, 0.032, 0.1, 10), T3.mat('#3f8be8'), -1.8, 0, 0).rotation.z = Math.PI / 2; stick.visible = false; sc.add(stick);
-    const dots = []; for (let i = 0; i < 16; i++) dots.push(T3.mk(sc, T3.SPH(0.035, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + BRW, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
-    const ring = T3.mk(sc, new TH.TorusGeometry(BRW * 1.25, 0.03, 8, 24), new TH.MeshBasicMaterial({ color: 0x6ee09a }), 0, TY + 0.02, 0, { noCast: true }); ring.rotation.x = Math.PI / 2; ring.visible = false;
-    const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -3.4); sc.add(msg.sprite);
-    const spots = [[0, 6.4, Math.PI], [0, -6.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', cur = null, play = null, seq = -1, wasMine = false;
-    s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, 6.6], look: [0, 2.3, 0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, -1], fov: 42 }, end: { label: 'End', pos: [-11.5, 6.5, 2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true);
-    const place = (m, b) => { m.position.set(wx(b.x), TY + BRW, wz(b.y)); };
-    const setBall = (i, b, instant) => {
-      if (!balls[i]) { balls[i] = mkBall(b.id); }
-      const m = balls[i]; if (!b.alive) { m.visible = false; return; } m.visible = true;
-      if (instant) place(m, b);
-    };
-    const frameToBalls = f => SS.V.g.balls.map((b, i) => ({ id: b.id, alive: f[2 * i] >= 0, x: f[2 * i] / 10, y: f[2 * i + 1] / 10 }));
-    s.onTap(e => { const h = s.pick(e, [plane])[0]; if (!h) return; poolUI.tap(h.point.x / K + 50, h.point.z / K + 25); setTimeout(() => s.sync(SS), 20); });
-    s.on((dt, t) => {
-      const g = SS.V.g, st = poolSt;
-      if (play) {
-        play.t += dt; const kf = play.t / 0.066 - 7;     // short delay while the cue strikes
-        if (kf >= 0) {
-          const k0 = Math.min(play.f.length - 1, Math.floor(kf)), k1 = Math.min(play.f.length - 1, k0 + 1), a = kf - k0, A = play.f[k0], Bf = play.f[k1];
-          for (let i = 0; i < 16; i++) { const m = balls[i]; if (!m) continue; const ax = A[2 * i], bx = Bf[2 * i]; if (ax < 0 && bx < 0) { m.visible = false; continue; }
-            const x = (ax < 0 ? bx : ax + (bx - ax) * a) / 10, y = ((ax < 0 ? Bf[2 * i + 1] : A[2 * i + 1] + (Bf[2 * i + 1] - A[2 * i + 1]) * a)) / 10;
-            const nx = wx(x), nz = wz(y); const ddx = nx - m.position.x, ddz = nz - m.position.z, dd = Math.hypot(ddx, ddz); if (dd > 1e-4 && m.visible) m.rotateOnWorldAxis(new TH.Vector3(ddz, 0, -ddx).normalize(), dd / BRW);
-            m.visible = ax >= 0 || a < 0.5; m.position.set(nx, TY + BRW, nz); }
-        }
-        if (play.t > 0.5 && stick.visible) stick.visible = false;
-        if (play.stickT !== undefined && play.t < 0.55) { const u = play.t / 0.5, pull = u < 0.6 ? u / 0.6 : 1 - (u - 0.6) / 0.4 * 1.0; stick.position.set(play.c.x - Math.cos(play.ang) * (2.7 + 0.9 * Math.max(0, Math.min(1, pull)) - (u > 0.6 ? 0.9 : 0)), TY + BRW + 0.12, play.c.z - Math.sin(play.ang) * (2.7 + 0.9 * Math.max(0, Math.min(1, pull)) - (u > 0.6 ? 0.9 : 0))); }
-        if (kf > play.f.length + 1) { play = null; s.sync(SS); }
-        return;
-      }
-      // aiming overlay for my shot
-      const turn = SS.turn, cueB = g.balls[0]; ring.visible = false; stick.visible = false; dots.forEach(d => { d.visible = false; });
-      if (turn && cueB) {
-        const hand = turn.data.inHand, c = hand ? st.place : cueB;
-        if (hand && !st.place) { ring.visible = true; ring.position.set(0, TY + 0.02, 0); ring.visible = false; }
-        if (c && st.aim && !(hand && !st.place)) {
-          const ang = Math.atan2(st.aim.y - c.y, st.aim.x - c.x), px = wx(c.x), pz = wz(c.y);
-          stick.visible = true; stick.rotation.y = -ang; { const po = 1.85 + pullOf(st, 0.05, 1.8) * (1 - (st.th || 0)) + 0.1 * (st.th || 0); stick.position.set(px - Math.cos(ang) * po, TY + BRW + 0.12 + 0.18 * (1 - (st.th || 0)), pz - Math.sin(ang) * po); stick.rotation.z = 0.06; }
-          dots.forEach((d, k) => { d.visible = true; d.position.set(px + Math.cos(ang) * (0.5 + k * 0.5), TY + BRW, pz + Math.sin(ang) * (0.5 + k * 0.5)); });
-        }
-        if (hand && st.place) { const m = balls[0]; if (m) { m.visible = true; place(m, st.place); } }
-      }
-    });
-    s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
-    s.sync = S => {
-      SS = S; const g = S.V.g, inst = !cur;
-      const key = S.me + '|' + S.V.seats.length; if (key !== peopleKey) { peopleKey = key; pe.build(S); }
-      if (g.shot && g.shot.seq !== seq) {
-        const first = seq < 0; seq = g.shot.seq;
-        if (!first || false) { const f = g.shot.frames, a0 = f[0], a1 = f[Math.min(2, f.length - 1)], ang = Math.atan2((a1[1] - a0[1]), (a1[0] - a0[0])); const c0 = { x: wx(a0[0] / 10), z: wz(a0[1] / 10) };
-          play = { f, t: 0, ang: Math.atan2(wz(a1[1] / 10) - wz(a0[1] / 10), wx(a1[0] / 10) - wx(a0[0] / 10)), c: c0, stickT: 0 }; stick.visible = true; stick.rotation.y = -play.ang; ring.visible = false; dots.forEach(d => { d.visible = false; });
-          const shooter = pe.people[g.shot.p]; if (shooter) { const arms = shooter.userData.arms; if (arms) s.tween(600, (k, e) => { arms[1].rotation.x = -1.4 + Math.sin(Math.PI * e) * 0.9; }); } }
-      }
-      g.balls.forEach((b, i) => { if (!play) setBall(i, b, true); else if (!balls[i]) setBall(i, b, true); });
-      cur = true;
-      const me = S.me; S.V.seats.forEach((st, i) => { pe.tags[i] && pe.tags[i].set(`${S.nameOf(i)} · ${fmt(st.stack)}`, g.turn === i ? '#f2b441' : '#f7f0e1'); });
-      msg.set(g.over ? '' : g.msg, '#f7f0e1'); s.onView(s.view);
-      if (S.me === 1) { if (!s._flip) { s._flip = true; s.setViews({ seat: { label: 'Seat', pos: [0, 10.6, -6.6], look: [0, 2.3, -0.7], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 14.5, 0.01], look: [0, 2.5, 0], up: [0, 0, 1], fov: 42 }, end: { label: 'End', pos: [11.5, 6.5, -2.5], look: [0, 2.3, 0], fov: 42 } }, 'seat', true); } }
-      s.hint(S.turn ? (S.turn.data.inHand && !poolSt.place ? 'Ball in hand: tap the table to place the cue ball.' : 'Tap the table to aim, set power below, then Shoot.') : '');
-    };
-    return s;
-  }
-
-  function carrom3d(box, S0) {
-    const TH = THREE, s = T3.stage(box, { fov: 42 }), sc = s.scene, K = 0.11;
-    T3.lounge(s, { w: 30, d: 26, lamps: [], ambient: 0.62, wall: '#2a1d14', bg: 0x0d0a08 });
-    const key = new TH.SpotLight(0xfff0d0, 1.5, 40, 0.9, 0.55, 1.1); key.position.set(0, 13, 1); key.target.position.set(0, TY, 0); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0008; key.shadow.normalBias = 0.05; sc.add(key, key.target);
-    T3.mk(sc, new TH.CircleGeometry(11, 56), T3.mat('#3a2a1e', { roughness: 1 }), 0, 0.012, 0, { noCast: true }).rotation.x = -Math.PI / 2;
-    T3.mk(sc, T3.BOX(2.6, TY - 0.5, 2.6), T3.mat('#2a1810'), 0, (TY - 0.5) / 2, 0); T3.mk(sc, T3.BOX(13, 0.5, 13), T3.mat('#6b4423', { roughness: 0.5 }), 0, TY - 0.33, 0);
-    const tex = T3.canvasTex(1024, 1024, (g, w, h) => {
-      g.fillStyle = '#e2bd7e'; g.fillRect(0, 0, w, h); g.strokeStyle = '#7a4a22'; g.lineWidth = 4; const q = v => v * w / 100;
-      g.beginPath(); g.arc(q(50), q(50), q(12), 0, 7); g.stroke(); g.beginPath(); g.arc(q(50), q(50), q(2), 0, 7); g.fillStyle = 'rgba(214,69,61,.6)'; g.fill();
-      [16, 84].forEach(v => { g.beginPath(); g.moveTo(q(14), q(v)); g.lineTo(q(86), q(v)); g.stroke(); g.beginPath(); g.moveTo(q(v), q(14)); g.lineTo(q(v), q(86)); g.stroke(); });
-      [[16, 16], [84, 16], [16, 84], [84, 84]].forEach(([x, y]) => { g.beginPath(); g.arc(q(x), q(y), q(2.2), 0, 7); g.stroke(); });
-      g.strokeStyle = '#7a4a22'; g.lineWidth = 2; [[3.4, 3.4, 22, 22], [96.6, 3.4, 78, 22], [3.4, 96.6, 22, 78], [96.6, 96.6, 78, 78]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(q(a), q(b)); g.lineTo(q(c), q(d)); g.stroke(); });
-    });
-    T3.mk(sc, T3.BOX(11, 0.2, 11), T3.mat('#fff', { map: tex, roughness: 0.35 }), 0, TY - 0.1, 0, { noCast: true });
-    const rail = T3.mat('#5a3418', { roughness: 0.4 }); [[0, 5.75, 12.4, 0.8], [0, -5.75, 12.4, 0.8]].forEach(([x, z, w, d]) => T3.mk(sc, T3.BOX(w, 0.5, d), rail, x, TY + 0.1, z)); [[5.75, 0], [-5.75, 0]].forEach(([x, z]) => T3.mk(sc, T3.BOX(0.8, 0.5, 11), rail, x, TY + 0.1, z));
-    const wx = x => (x - 50) * K, wz = y => (y - 50) * K;
-    CUE.CT.pk.forEach(p => T3.mk(sc, T3.CYL(0.42, 0.42, 0.05, 20), new TH.MeshBasicMaterial({ color: 0x0a0806 }), wx(p.x - 0.4 * Math.sign(p.x - 50)), TY + 0.015, wz(p.y - 0.4 * Math.sign(p.y - 50)), { noCast: true }));
-    const CRW = CUE.CR * K, SRW = CUE.SR * K, coins = [], CH = 0.07;
-    const mkCoin = c => { const g = new TH.Group(); const col = c.t === 'w' ? '#f7f0e1' : c.t === 'b' ? '#2a2430' : '#d6453d'; T3.mk(g, T3.CYL(CRW, CRW, CH, 24), T3.mat(col, { roughness: 0.35 }), 0, CH / 2, 0); T3.mk(g, new TH.TorusGeometry(CRW * 0.6, 0.012, 6, 20), T3.mat(c.t === 'b' ? '#8a7aa0' : '#b09870'), 0, CH + 0.002, 0, { noCast: true }).rotation.x = Math.PI / 2; sc.add(g); return g; };
-    const striker = new TH.Group(); T3.mk(striker, T3.CYL(SRW, SRW, 0.1, 28), T3.mat('#9ac8f0', { roughness: 0.2 }), 0, 0.05, 0); T3.mk(striker, new TH.TorusGeometry(SRW * 0.7, 0.02, 6, 24), T3.mat('#fff'), 0, 0.102, 0, { noCast: true }).rotation.x = Math.PI / 2; sc.add(striker); striker.visible = false;
-    const plane = T3.mk(sc, new TH.PlaneGeometry(12, 12), new TH.MeshBasicMaterial({ visible: false }), 0, TY + 0.1, 0, { noCast: true }); plane.rotation.x = -Math.PI / 2;
-    const dots = []; for (let i = 0; i < 18; i++) dots.push(T3.mk(sc, T3.SPH(0.03, 6), new TH.MeshBasicMaterial({ color: 0xffffff }), 0, TY + 0.1, 0, { noCast: true })); dots.forEach(d => { d.visible = false; });
-    const msg = T3.label('', { scale: 3 }); msg.sprite.position.set(0, TY + 1.6, -2.6); sc.add(msg.sprite);
-    const finger = new TH.Group(); T3.mk(finger, new TH.CylinderGeometry(0.12, 0.16, 1.1, 10), T3.mat('#e5b48a', { roughness: 0.6 }), 0, 0, 0).rotation.z = Math.PI / 2; finger.visible = false; sc.add(finger);
-    const spots = [[0, 7.4, Math.PI], [0, -7.4, 0]], pe = setupPeople(s, sc, S0, spots); let SS = S0, peopleKey = '', play = null, seq = -1, flip = false, first = true; s.onView = nm => { pe.people.forEach((pp, i) => { pp.visible = !(nm === 'seat' && i === SS.me); }); };
-    const views = f => ({ seat: { label: 'Seat', pos: [0, 11.4, f ? -6.2 : 6.2], look: [0, 2.3, f ? -0.6 : 0.6], fov: 42, zoom: 0.08, sway: 0.008 }, top: { label: 'Top', pos: [0, 15, 0.01], look: [0, 2.5, 0], up: [0, 0, f ? 1 : -1], fov: 42 }, side: { label: 'Side', pos: [10.5, 6.5, 0], look: [0, 2.3, 0], fov: 42 } });
-    s.setViews(views(false), 'seat', true);
-    s.onTap(e => { const h = s.pick(e, [plane])[0]; if (!h) return; carromUI.tap(h.point.x / K + 50, h.point.z / K + 50); setTimeout(() => s.sync(SS), 20); });
-    const putCoins = g => { g.coins.forEach((c, i) => { if (!coins[i]) coins[i] = mkCoin(c); const m = coins[i]; m.visible = c.alive; m.position.set(wx(c.x), TY, wz(c.y)); }); };
-    s.on((dt, t) => {
-      const g = SS.V.g;
-      if (play) {
-        play.t += dt; const kf = play.t / 0.066, n = g.coins.length;
-        if (kf >= 0) {
-          const k0 = Math.min(play.f.length - 1, Math.floor(kf)), k1 = Math.min(play.f.length - 1, k0 + 1), a = kf - k0, A = play.f[k0], B = play.f[k1];
-          for (let i = 0; i <= n; i++) { const ax = A[2 * i], bx = B[2 * i]; const m = i === n ? striker : coins[i]; if (!m) continue; if (ax < 0 && bx < 0) { m.visible = false; continue; }
-            const x = (ax < 0 ? bx : ax + (bx - ax) * a) / 10, y = (ax < 0 ? B[2 * i + 1] : A[2 * i + 1] + (B[2 * i + 1] - A[2 * i + 1]) * a) / 10; m.visible = ax >= 0 || a < 0.5; m.position.set(wx(x), TY, wz(y)); }
-        }
-        if (kf > play.f.length + 1) { play = null; striker.visible = false; s.sync(SS); }
-        return;
-      }
-      dots.forEach(d => { d.visible = false; }); striker.visible = false; finger.visible = false;
-      if (SS.turn && SS.me >= 0) { const me = SS.me === 1 ? 1 : 0, by = CUE.BASE[me]; striker.visible = true; striker.position.set(wx(carSt.sx), TY, wz(by));
-        if (carSt.aim) { const ang = Math.atan2(carSt.aim.y - by, carSt.aim.x - carSt.sx); const fo = (SRW + 0.45 + pullOf(carSt, 0.5, 12) * K); finger.visible = true; finger.rotation.y = -ang; finger.position.set(wx(carSt.sx) - Math.cos(ang) * fo, TY + 0.14, wz(by) - Math.sin(ang) * fo); dots.forEach((d, k) => { d.visible = true; d.position.set(wx(carSt.sx) + Math.cos(ang) * (0.4 + k * 0.4), TY + 0.1, wz(by) + Math.sin(ang) * (0.4 + k * 0.4)); }); } }
-    });
-    s.sync = S => {
-      SS = S; const g = S.V.g; const key = S.me + '|' + S.V.seats.length; if (key !== peopleKey) { peopleKey = key; pe.build(S); }
-      const wantFlip = S.me === 1; if (wantFlip !== flip) { flip = wantFlip; s.setViews(views(flip), 'seat', true); }
-      if (g.shot && g.shot.seq !== seq) { const was = seq < 0; seq = g.shot.seq; if (!was) { play = { f: g.shot.frames, t: -0.3 }; striker.visible = true; } }
-      if (!play) putCoins(g); else g.coins.forEach((c, i) => { if (!coins[i]) coins[i] = mkCoin(c); });
-      S.V.seats.forEach((st, i) => { pe.tags[i] && pe.tags[i].set(`${S.nameOf(i)} · ${fmt(st.stack)}`, g.turn === i ? '#f2b441' : '#f7f0e1'); });
-      msg.set(g.over ? '' : g.msg, '#f7f0e1'); first = false; s.onView(s.view);
-      s.hint(S.turn ? 'Slide the striker below, tap the board to aim, set power, then Flick.' : '');
-    };
-    return s;
-  }
 
   /* ===================== register ===================== */
   Club.register({
@@ -308,21 +300,22 @@
     art: () => ['8', '●', '○'].map(c => `<div class="ltile">${c}</div>`).join(''),
     rules: `<p><b>Goal:</b> pot all the balls of your group, then sink the 8 ball.</p>
       <ol><li>Player 1 breaks. The table is <b>open</b> until someone pots a ball. The first ball potted decides your group: <b>solids</b> (1 to 7) or <b>stripes</b> (9 to 15).</li>
-      <li>Tap the table to aim, set the <b>power</b>, then press <b>Shoot</b>. Pot a ball of your group and you shoot again.</li>
-      <li>Your first contact must be a ball of your group (or the 8 once your group is gone). <b>A foul</b> is a scratch, a miss, or hitting the wrong ball first. After a foul your opponent gets <b>ball in hand</b>: tap to place the cue ball anywhere.</li>
+      <li><b>To shoot:</b> press on the table and <b>drag backwards</b>, like pulling a cue back. The cue pulls back with your finger, the dotted line shows where the ball will go, and the further you pull the harder the hit. <b>Let go</b> to strike. On a keyboard, press ← → to aim, hold <b>Space</b> to pull back, and release it to hit.</li>
+      <li>Pot a ball of your group and you shoot again.</li>
+      <li>Your first contact must be a ball of your group (or the 8 once your group is gone). <b>A foul</b> is a scratch, a miss, or hitting the wrong ball first. After a foul your opponent gets <b>ball in hand</b>: tap the table to place the cue ball.</li>
       <li>Sink the 8 ball after clearing your group to win. Sinking it too early loses the game.</li>
       <li>Each player puts in ${CUE.ANTE} free chips; the winner takes the pot. Chips have no cash value.</li></ol>`,
-    round: CUE.poolRound, view: CUE.poolView, ui: poolUI, ui3d: T3.wrapUi(poolUI, { slot: st => ({ before: st.querySelector('#plSvg'), hide: [st.querySelector('#plSvg')] }), make: pool3d }), _test: { CUE },
+    round: CUE.poolRound, view: CUE.poolView, ui: poolUI, _test: { CUE },
   });
   Club.register({
     id: 'carrom', cat: 'aim', name: 'Carrom', tag: 'Flick the striker and pot your coins. Clear all nine to win.', min: 2, max: 2, soloBots: 1, roundWord: 'Board',
     art: () => ['◎', '●', '○'].map(c => `<div class="ltile">${c}</div>`).join(''),
     rules: `<p><b>Goal:</b> pot all nine of your coins before your opponent does. Player 1 plays white, player 2 plays black.</p>
-      <ol><li>On your turn, <b>slide the striker</b> along your baseline, <b>tap the board</b> to aim, set the power and press <b>Flick</b>.</li>
+      <ol><li><b>To flick:</b> slide the striker along your baseline with the slider, then press on the board and <b>drag backwards</b>. A finger pulls back behind the striker and the dotted line shows its path. The further you pull, the harder the flick. <b>Let go</b> to strike. On a keyboard, use A and D to slide the striker, ← → to aim, hold <b>Space</b> and release to flick.</li>
       <li>Pot one of your own coins and you play again. Pot the other side’s coin and it counts for them.</li>
       <li>The red <b>queen</b> must be “covered”: pot one of your own coins right after it (or on the same flick). Otherwise the queen goes back to the centre.</li>
       <li>If the striker goes in the pocket, that is a <b>foul</b>: your turn ends and one of your potted coins returns to the centre.</li>
       <li>First to pot all nine of their coins wins the pot. Each player puts in ${CUE.ANTE} free chips; chips have no cash value.</li></ol>`,
-    round: CUE.carromRound, view: CUE.carromView, ui: carromUI, ui3d: T3.wrapUi(carromUI, { slot: st => ({ before: st.querySelector('#crSvg'), hide: [st.querySelector('#crSvg')] }), make: carrom3d }), _test: { CUE },
+    round: CUE.carromRound, view: CUE.carromView, ui: carromUI, _test: { CUE },
   });
 })();

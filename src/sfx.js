@@ -3,7 +3,7 @@ const Snd = (() => {
   const KEY = 'feltclub.snd';
   const st = Object.assign({ sfx: true, sv: 0.7, mus: true, mv: 0.35 }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })());
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} };
-  let ctx = null, sfxG, nbuf;
+  let ctx = null, sfxG, nbuf, vm = 1;
   const AC = window.AudioContext || window.webkitAudioContext;
   function init() {
     if (ctx || !AC) return !!ctx;
@@ -19,13 +19,13 @@ const Snd = (() => {
   const midi = m => 440 * Math.pow(2, (m - 69) / 12);
   function tone(f, t, d, o) {
     o = o || {}; const os = ctx.createOscillator(), g = ctx.createGain(); os.type = o.type || 'square'; os.frequency.setValueAtTime(f, t); if (o.to) os.frequency.exponentialRampToValueAtTime(o.to, t + d);
-    const v = o.vol == null ? 0.25 : o.vol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + (o.a || 0.006)); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    const v = (o.vol == null ? 0.25 : o.vol) * vm; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, v), t + (o.a || 0.006)); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
     os.connect(g); g.connect(o.dest || sfxG); os.start(t); os.stop(t + d + 0.03);
   }
   function noise(t, d, o) {
     o = o || {}; const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = nbuf; s.loop = true;
     f.type = o.type || 'bandpass'; f.frequency.setValueAtTime(o.f || 2000, t); if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t + d); f.Q.value = o.q || 1;
-    const v = o.vol == null ? 0.25 : o.vol; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    const v = (o.vol == null ? 0.25 : o.vol) * vm; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, v), t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
     s.connect(f); f.connect(g); g.connect(o.dest || sfxG); s.start(t, Math.random() * 0.5); s.stop(t + d + 0.03);
   }
   const R = (a, b) => a + Math.random() * (b - a);
@@ -39,12 +39,20 @@ const Snd = (() => {
     clack: t => { tone(R(640, 760), t, 0.07, { type: 'sine', vol: 0.3, to: 380 }); noise(t, 0.03, { f: 3500, vol: 0.2 }); },
     drop: t => { tone(700, t, 0.12, { type: 'sine', vol: 0.25, to: 260 }); noise(t + 0.1, 0.03, { f: 2500, vol: 0.18 }); },
     pop: t => { tone(480, t, 0.09, { type: 'sine', vol: 0.28, to: 900 }); },
-    pebble: t => { for (let i = 0; i < 5; i++) { const u = t + i * 0.12; tone(R(1100, 1700), u, 0.035, { type: 'sine', vol: 0.18, to: 700 }); noise(u, 0.03, { f: 3000, q: 3, vol: 0.12 }); } },
+    pebble: t => { tone(R(1500, 1900), t, 0.05, { type: 'sine', vol: 0.3, to: 900 }); noise(t, 0.035, { f: R(2600, 3400), q: 3, vol: 0.22 }); tone(R(300, 380), t, 0.06, { type: 'sine', vol: 0.18, to: 200 }); },
     thud: t => { tone(150, t, 0.12, { type: 'sine', vol: 0.5, to: 60 }); noise(t, 0.05, { f: 900, type: 'lowpass', vol: 0.3 }); },
     twang: t => { tone(330, t, 0.35, { type: 'sawtooth', vol: 0.1, to: 200 }); noise(t + 0.05, 0.25, { f: 2000, to: 6000, q: 0.5, vol: 0.12 }); },
     putt: t => { tone(240, t, 0.08, { type: 'triangle', vol: 0.4, to: 120 }); noise(t, 0.03, { f: 2800, vol: 0.22 }); },
     sink: t => { tone(880, t, 0.1, { type: 'sine', vol: 0.25, to: 440 }); tone(520, t + 0.12, 0.1, { type: 'sine', vol: 0.22, to: 260 }); tone(1046, t + 0.28, 0.25, { type: 'triangle', vol: 0.25 }); },
     pocket: t => { tone(180, t, 0.18, { type: 'sine', vol: 0.4, to: 70 }); noise(t + 0.05, 0.2, { f: 700, type: 'lowpass', vol: 0.2 }); },
+    cuehit: t => { tone(150, t, 0.09, { type: 'sine', vol: 0.5, to: 70 }); tone(R(900, 1100), t, 0.05, { type: 'sine', vol: 0.3, to: 450 }); noise(t, 0.03, { f: 2600, q: 2, vol: 0.3 }); },
+    bhit: t => { const k = R(0.94, 1.08); noise(t, 0.022, { f: 3400 * k, q: 3, vol: 0.4 }); tone(2350 * k, t, 0.07, { type: 'sine', vol: 0.3 }); tone(1420 * k, t, 0.1, { type: 'sine', vol: 0.2 }); tone(3900 * k, t, 0.03, { type: 'sine', vol: 0.12 }); },
+    bwall: t => { tone(210, t, 0.07, { type: 'sine', vol: 0.4, to: 120 }); noise(t, 0.05, { f: 700, type: 'lowpass', vol: 0.25 }); },
+    bpocket: t => { tone(130, t, 0.14, { type: 'sine', vol: 0.45, to: 60 }); noise(t + 0.02, 0.3, { f: 450, type: 'lowpass', vol: 0.25 }); for (let i = 0; i < 3; i++) { noise(t + 0.12 + i * 0.09, 0.03, { f: 1400, q: 2, vol: 0.12 }); } },
+    cflick: t => { noise(t, 0.014, { f: 5200, type: 'highpass', vol: 0.4 }); tone(R(1500, 1750), t, 0.035, { type: 'sine', vol: 0.3, to: 900 }); tone(210, t, 0.04, { type: 'sine', vol: 0.25, to: 130 }); },
+    chit: t => { const k = R(0.94, 1.08); tone(1880 * k, t, 0.05, { type: 'sine', vol: 0.32 }); tone(2860 * k, t, 0.03, { type: 'sine', vol: 0.2 }); noise(t, 0.016, { f: 4600 * k, q: 4, vol: 0.3 }); },
+    cwall: t => { tone(R(480, 560), t, 0.06, { type: 'sine', vol: 0.38, to: 340 }); noise(t, 0.04, { f: 1300, q: 1.5, vol: 0.22 }); },
+    cpocket: t => { tone(300, t, 0.1, { type: 'sine', vol: 0.3, to: 150 }); noise(t + 0.01, 0.2, { f: 900, type: 'lowpass', vol: 0.22 }); noise(t + 0.15, 0.03, { f: 3000, q: 3, vol: 0.12 }); },
     ding: t => { tone(988, t, 0.25, { type: 'sine', vol: 0.18 }); tone(1318, t + 0.08, 0.3, { type: 'sine', vol: 0.15 }); },
     good: t => { tone(660, t, 0.09, { type: 'square', vol: 0.12 }); tone(880, t + 0.08, 0.14, { type: 'square', vol: 0.12 }); },
     bad: t => { tone(300, t, 0.14, { type: 'sawtooth', vol: 0.14, to: 200 }); tone(220, t + 0.1, 0.2, { type: 'sawtooth', vol: 0.14, to: 130 }); },
@@ -53,9 +61,11 @@ const Snd = (() => {
     end: t => { [523, 440, 392].forEach((f, i) => tone(f, t + i * 0.14, 0.2, { type: 'triangle', vol: 0.2 })); },
     coin: t => { tone(988, t, 0.07, { type: 'square', vol: 0.12 }); tone(1318, t + 0.07, 0.25, { type: 'square', vol: 0.12 }); },
   };
-  function p(name, delay) {
+  function p(name, delay, vol) {
     if (!st.sfx || !FX[name] || !init()) return; if (ctx.state === 'suspended') ctx.resume();
+    vm = vol == null ? 1 : Math.max(0.05, Math.min(1.2, vol));
     try { FX[name](ctx.currentTime + 0.01 + (delay || 0)); } catch {}
+    vm = 1;
   }
 
   const gesture = () => { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); };
@@ -92,7 +102,7 @@ const Snd = (() => {
 
   /* ----- generic game hooks: react to the table log, turns and round end ----- */
   const BYCAT = { card: 'card', casino: 'chip', dice: 'dice', board: 'clack', mind: 'pop', word: 'pop', math: 'pop', group: 'pop' };
-  const BYGAME = { mancala: 'pebble', fourinrow: 'drop', chess: 'clack', checkers: 'clack', reversi: 'clack', gomoku: 'clack', tictactoe: 'pop', dotsboxes: 'pop', bluffdice: 'dice', dice: 'dice', poker: 'chip', blackjack: 'card', sudoku: 'pop', hangman: 'pop' };
+  const BYGAME = { fourinrow: 'drop', chess: 'clack', checkers: 'clack', reversi: 'clack', gomoku: 'clack', tictactoe: 'pop', dotsboxes: 'pop', bluffdice: 'dice', dice: 'dice', poker: 'chip', blackjack: 'card', sudoku: 'pop', hangman: 'pop' };
   const SPECIFIC = new Set(['darts', 'archery', 'minigolf', 'pool', 'carrom']);
   let memo = { id: '', logN: 0, lastTxt: '', seq: 0, done: false, round: 0 };
   function observe(c, V, me, turn, D) {
