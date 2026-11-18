@@ -197,9 +197,13 @@ function attachHost(c) {
 }
 
 /* ----- entering and leaving ----- */
-function show(which) { $('home').hidden = which !== 'home'; $('room').hidden = which !== 'room'; $('roundNo').textContent = ''; }
+function show(which) {
+  $('home').hidden = which !== 'home'; $('room').hidden = which !== 'room'; $('roundNo').textContent = '';
+  const rb = $('resumeBar'); if (rb) { rb.hidden = !(cur && which === 'home'); if (cur) $('resumeName').textContent = Club.games[cur.game].name; }
+}
 function stopHome() { if (homeUnsub) { try { homeUnsub(); } catch {} homeUnsub = null; } }
 function enterRoom(c) {
+  if (cur && cur !== c) leaveRoom();
   cur = c;
   $('stage').innerHTML = ''; $('gameCtl').innerHTML = ''; c.mounted = false;
   stopHome(); show('room');
@@ -507,6 +511,9 @@ async function answer(a) {
 /* ----- wiring ----- */
 $('nextBtn').onclick = () => { if (cur && cur.G && cur.G.nextResolve) cur.G.nextResolve(); };
 $('leaveBtn').onclick = leaveRoom;
+$('roomBackBtn').onclick = () => { if (!cur) return; selGame = cur.game; show('home'); renderHome(); try { location.hash = selGame; } catch {} window.scrollTo(0, 0); };
+$('resumeBtn').onclick = () => { if (!cur) return; show('room'); renderRoom(); setTimeout(() => window.dispatchEvent(new Event('resize')), 50); };
+$('resumeLeave').onclick = leaveRoom;
 $('viewBtn').onclick = () => { T3.setPref(!T3.on()); if (cur) { cur.mounted = false; renderRoom(); } };
 $('sitBtn').onclick = sit;
 $('addBot').onclick = () => {
@@ -587,7 +594,7 @@ $('invCopy').onclick = async () => {
   try { await navigator.clipboard.writeText(v); $('invCopy').textContent = 'Copied'; }
   catch { $('invLink').select(); try { document.execCommand('copy'); $('invCopy').textContent = 'Copied'; } catch { $('invCopy').textContent = 'Press Ctrl+C'; } }
 };
-window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
+window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur || !$('room').hidden === false) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
 
 (async function init() {
   const h = location.hash.slice(1);

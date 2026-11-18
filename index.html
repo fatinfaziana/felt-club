@@ -440,6 +440,9 @@ body { margin: 0; }
 .sndpanel input[type=range]{width:100%;accent-color:#f2b441}
 .snd-close{align-self:flex-end;margin-top:6px}
 .sndbtn{white-space:nowrap}
+.resume { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; padding: 10px 14px; margin: 0 auto 12px; max-width: 760px; background: var(--rail); border: 1px solid var(--gold); border-radius: 12px; font-size: 14px; }
+.resume[hidden] { display: none; }
+@media (max-width: 520px) { .rb-btns { flex-wrap: wrap; justify-content: flex-end; } }
 
 /* ----- Tai Ti and Colour Rush share a row of opponents and a hand of tappable cards ----- */
 .bt-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(8px, 2vw, 20px); }
@@ -905,6 +908,7 @@ body { margin: 0; }
 
   <!-- lobby -->
   <section id="home" class="home">
+    <div class="resume" id="resumeBar" hidden><span>You still have <b id="resumeName"></b> open.</span><button type="button" class="b gold" id="resumeBtn">Return to game</button><button type="button" class="ghost" id="resumeLeave">Leave table</button></div>
     <div id="browse">
       <p class="browse-lead" id="browseLead">Pick a category, then choose a game.</p>
       <div class="gamegrid" id="gameGrid"></div>
@@ -984,7 +988,7 @@ body { margin: 0; }
   <section id="room" hidden>
     <div class="roombar">
       <div><b id="roomName"></b><span id="roomSub"></span></div>
-      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="roomBackBtn">← Back</button><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
     </div>
     <div class="notice" id="notice" hidden></div>
     <div class="invite" id="invite" hidden>
@@ -1556,7 +1560,7 @@ const T3 = (() => {
     s.onTap = fn => {
       let d = null;
       cv.addEventListener('pointerdown', e => { d = { x: e.clientX, y: e.clientY }; });
-      cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) fn(e); d = null; });
+      cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 14) fn(e); d = null; });
     };
 
     const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); if (s.onResize) s.onResize(); };
@@ -5733,7 +5737,7 @@ function chess3d(box, S) {
     const dark = ((i >> 3) + (i & 7)) % 2 === 1, v = sqV(i);
     const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#7d4c28' : '#dcc08e', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
     const o = T3.mk(bd, new TH.PlaneGeometry(0.96, 0.96), new TH.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0, depthWrite: false }), v.x, 0.208, v.z, { noCast: true, noRecv: true }); o.rotation.x = -Math.PI / 2; ov.push(o);
-    const mkr = T3.mk(bd, new TH.CircleGeometry(0.17, 20), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.85, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
+    const mkr = T3.mk(bd, new TH.CircleGeometry(0.24, 24), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.9, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
   }
   const wood = T3.mat('#4a2a12', { roughness: 0.4 });
   for (const [x, z, w, d] of [[0, -4.35, 9.4, 0.7], [0, 4.35, 9.4, 0.7], [-4.35, 0, 0.7, 8], [4.35, 0, 0.7, 8]]) T3.mk(bd, T3.BOX(w, 0.26, d), wood, x, 0.13, z);
@@ -5751,7 +5755,7 @@ function chess3d(box, S) {
   // Camera distances are worked out from the screen shape so the whole board (and its edge) is always in view.
   const mkViews = side => {
     const a = s.camera.aspect || 1.5, fm = a >= 1.3 ? 1 : Math.min(1.9, 1.3 / a), vf = 40 * fm * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * a);
-    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.0;
+    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.15;
     return {
       seat: { label: 'Seat', pos: [0, 3 + Math.sin(e) * d, side * Math.cos(e) * d], look: [0, 3, 0], fov: 40, zoom: 0, sway: 0.006 },
       top: { label: 'Top', pos: [0, 3 + d, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 40, zoom: 0 },
@@ -5767,7 +5771,11 @@ function chess3d(box, S) {
     const g = SS.V.g;
     for (let i = 0; i < 2; i++) { const isWhite = i === g.white; const pp = people[i]; pp.position.set(0, 0, isWhite ? 7.6 : -7.6); pp.rotation.y = isWhite ? Math.PI : 0; }
   }
-  function build(v) { const p = { v, sq: 0, mesh: makePiece(v), used: false }; bd.add(p.mesh); return p; }
+  function build(v) {
+    const p = { v, sq: 0, mesh: makePiece(v), used: false };
+    const hit = new TH.Mesh(new TH.CylinderGeometry(0.47, 0.47, 1.5, 12), new TH.MeshBasicMaterial({ colorWrite: false, depthWrite: false })); hit.position.y = 0.75; hit.userData.proxy = 1; p.mesh.add(hit);
+    bd.add(p.mesh); return p;
+  }
   function put(p, sq) { const v = sqV(sq); p.sq = sq; p.mesh.position.copy(v); p.mesh.userData.sq = sq; }
   function move(p, sq) {
     const a = p.mesh.position.clone(), b = sqV(sq), long = Math.abs(p.v) === 2 ? 1.1 : 0.55; p.sq = sq; p.mesh.userData.sq = sq;
@@ -5794,7 +5802,9 @@ function chess3d(box, S) {
     for (let i = 0; i < 64; i++) {
       let c = 0, a = 0;
       if (g.last && (g.last.from === i || g.last.to === i)) { c = 0xffd34d; a = 0.32; }
-      if (movable.has(i) && sel !== i) { c = 0x5aa9ff; a = 0.22; }
+      if (movable.has(i) && sel !== i) { c = 0x5aa9ff; a = 0.13; }
+      if (dests.includes(i)) { c = g.b[i] ? 0xff6a3d : 0x38d37a; a = 0.4; }
+      if (hov === i && SS.turn) { c = 0xffffff; a = Math.max(a, 0.3); }
       if (sel === i) { c = 0x38d37a; a = 0.6; }
       if (ks === i) { c = 0xff3b30; a = 0.65; }
       ov[i].material.color.setHex(c || 0xffd34d); ov[i].material.opacity = a;
@@ -5802,6 +5812,9 @@ function chess3d(box, S) {
       marks[i].scale.setScalar(g.b[i] ? 2.1 : 1);
     }
   }
+  let hov = -1;
+  const cvEl = box.querySelector('canvas');
+  if (cvEl) cvEl.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || e.buttons) return; const hh = s.pick(e, [...pick, ...pcs.map(p => p.mesh)]); let o = hh.length ? hh[0].object : null; while (o && o.userData.sq === undefined) o = o.parent; const n = o ? o.userData.sq : -1; if (n !== hov) { hov = n; paint(); cvEl.style.cursor = n >= 0 && SS.turn ? 'pointer' : ''; } });
   s.onTap(e => {
     const hits = s.pick(e, [...pick, ...pcs.map(p => p.mesh)]); if (!hits.length) return;
     let o = hits[0].object; while (o && o.userData.sq === undefined) o = o.parent; if (!o) return;
@@ -10069,9 +10082,13 @@ function attachHost(c) {
 }
 
 /* ----- entering and leaving ----- */
-function show(which) { $('home').hidden = which !== 'home'; $('room').hidden = which !== 'room'; $('roundNo').textContent = ''; }
+function show(which) {
+  $('home').hidden = which !== 'home'; $('room').hidden = which !== 'room'; $('roundNo').textContent = '';
+  const rb = $('resumeBar'); if (rb) { rb.hidden = !(cur && which === 'home'); if (cur) $('resumeName').textContent = Club.games[cur.game].name; }
+}
 function stopHome() { if (homeUnsub) { try { homeUnsub(); } catch {} homeUnsub = null; } }
 function enterRoom(c) {
+  if (cur && cur !== c) leaveRoom();
   cur = c;
   $('stage').innerHTML = ''; $('gameCtl').innerHTML = ''; c.mounted = false;
   stopHome(); show('room');
@@ -10379,6 +10396,9 @@ async function answer(a) {
 /* ----- wiring ----- */
 $('nextBtn').onclick = () => { if (cur && cur.G && cur.G.nextResolve) cur.G.nextResolve(); };
 $('leaveBtn').onclick = leaveRoom;
+$('roomBackBtn').onclick = () => { if (!cur) return; selGame = cur.game; show('home'); renderHome(); try { location.hash = selGame; } catch {} window.scrollTo(0, 0); };
+$('resumeBtn').onclick = () => { if (!cur) return; show('room'); renderRoom(); setTimeout(() => window.dispatchEvent(new Event('resize')), 50); };
+$('resumeLeave').onclick = leaveRoom;
 $('viewBtn').onclick = () => { T3.setPref(!T3.on()); if (cur) { cur.mounted = false; renderRoom(); } };
 $('sitBtn').onclick = sit;
 $('addBot').onclick = () => {
@@ -10459,7 +10479,7 @@ $('invCopy').onclick = async () => {
   try { await navigator.clipboard.writeText(v); $('invCopy').textContent = 'Copied'; }
   catch { $('invLink').select(); try { document.execCommand('copy'); $('invCopy').textContent = 'Copied'; } catch { $('invCopy').textContent = 'Press Ctrl+C'; } }
 };
-window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
+window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur || !$('room').hidden === false) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
 
 (async function init() {
   const h = location.hash.slice(1);

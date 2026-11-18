@@ -10,6 +10,7 @@
 
   <!-- lobby -->
   <section id="home" class="home">
+    <div class="resume" id="resumeBar" hidden><span>You still have <b id="resumeName"></b> open.</span><button type="button" class="b gold" id="resumeBtn">Return to game</button><button type="button" class="ghost" id="resumeLeave">Leave table</button></div>
     <div id="browse">
       <p class="browse-lead" id="browseLead">Pick a category, then choose a game.</p>
       <div class="gamegrid" id="gameGrid"></div>
@@ -89,7 +90,7 @@
   <section id="room" hidden>
     <div class="roombar">
       <div><b id="roomName"></b><span id="roomSub"></span></div>
-      <div class="rb-btns"><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
+      <div class="rb-btns"><button type="button" class="ghost" id="roomBackBtn">← Back</button><button type="button" class="ghost" id="viewBtn" hidden>Switch to 2D</button><button type="button" class="ghost sndbtn" aria-label="Sound settings">♪ Sound</button><button type="button" class="ghost" id="infoBtn">Info</button><button type="button" class="ghost" id="guideBtn2">Guide</button><button type="button" class="ghost" id="leaveBtn">Leave table</button></div>
     </div>
     <div class="notice" id="notice" hidden></div>
     <div class="invite" id="invite" hidden>

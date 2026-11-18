@@ -199,7 +199,7 @@ const T3 = (() => {
     s.onTap = fn => {
       let d = null;
       cv.addEventListener('pointerdown', e => { d = { x: e.clientX, y: e.clientY }; });
-      cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) fn(e); d = null; });
+      cv.addEventListener('pointerup', e => { if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 14) fn(e); d = null; });
     };
 
     const rs = () => { const w = wrap.clientWidth, h = wrap.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; fovMul = camera.aspect >= 1.3 ? 1 : Math.min(1.9, 1.3 / camera.aspect); camera.fov = tgt.fov * fovMul; camera.updateProjectionMatrix(); if (s.onResize) s.onResize(); };

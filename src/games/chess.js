@@ -264,7 +264,7 @@ function chess3d(box, S) {
     const dark = ((i >> 3) + (i & 7)) % 2 === 1, v = sqV(i);
     const q = T3.mk(bd, T3.BOX(1, 0.2, 1), T3.mat(dark ? '#7d4c28' : '#dcc08e', { roughness: 0.45 }), v.x, 0.1, v.z, { noCast: true }); q.userData.sq = i; sqs.push(q); pick.push(q);
     const o = T3.mk(bd, new TH.PlaneGeometry(0.96, 0.96), new TH.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0, depthWrite: false }), v.x, 0.208, v.z, { noCast: true, noRecv: true }); o.rotation.x = -Math.PI / 2; ov.push(o);
-    const mkr = T3.mk(bd, new TH.CircleGeometry(0.17, 20), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.85, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
+    const mkr = T3.mk(bd, new TH.CircleGeometry(0.24, 24), new TH.MeshBasicMaterial({ color: 0x38d37a, transparent: true, opacity: 0.9, depthWrite: false }), v.x, 0.212, v.z, { noCast: true, noRecv: true }); mkr.rotation.x = -Math.PI / 2; mkr.visible = false; marks.push(mkr);
   }
   const wood = T3.mat('#4a2a12', { roughness: 0.4 });
   for (const [x, z, w, d] of [[0, -4.35, 9.4, 0.7], [0, 4.35, 9.4, 0.7], [-4.35, 0, 0.7, 8], [4.35, 0, 0.7, 8]]) T3.mk(bd, T3.BOX(w, 0.26, d), wood, x, 0.13, z);
@@ -282,7 +282,7 @@ function chess3d(box, S) {
   // Camera distances are worked out from the screen shape so the whole board (and its edge) is always in view.
   const mkViews = side => {
     const a = s.camera.aspect || 1.5, fm = a >= 1.3 ? 1 : Math.min(1.9, 1.3 / a), vf = 40 * fm * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * a);
-    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.0;
+    const d = 5.7 / Math.tan(Math.min(vf, hf) / 2), e = 1.15;
     return {
       seat: { label: 'Seat', pos: [0, 3 + Math.sin(e) * d, side * Math.cos(e) * d], look: [0, 3, 0], fov: 40, zoom: 0, sway: 0.006 },
       top: { label: 'Top', pos: [0, 3 + d, side * 0.01], look: [0, 3, 0], up: [0, 0, -side], fov: 40, zoom: 0 },
@@ -298,7 +298,11 @@ function chess3d(box, S) {
     const g = SS.V.g;
     for (let i = 0; i < 2; i++) { const isWhite = i === g.white; const pp = people[i]; pp.position.set(0, 0, isWhite ? 7.6 : -7.6); pp.rotation.y = isWhite ? Math.PI : 0; }
   }
-  function build(v) { const p = { v, sq: 0, mesh: makePiece(v), used: false }; bd.add(p.mesh); return p; }
+  function build(v) {
+    const p = { v, sq: 0, mesh: makePiece(v), used: false };
+    const hit = new TH.Mesh(new TH.CylinderGeometry(0.47, 0.47, 1.5, 12), new TH.MeshBasicMaterial({ colorWrite: false, depthWrite: false })); hit.position.y = 0.75; hit.userData.proxy = 1; p.mesh.add(hit);
+    bd.add(p.mesh); return p;
+  }
   function put(p, sq) { const v = sqV(sq); p.sq = sq; p.mesh.position.copy(v); p.mesh.userData.sq = sq; }
   function move(p, sq) {
     const a = p.mesh.position.clone(), b = sqV(sq), long = Math.abs(p.v) === 2 ? 1.1 : 0.55; p.sq = sq; p.mesh.userData.sq = sq;
@@ -325,7 +329,9 @@ function chess3d(box, S) {
     for (let i = 0; i < 64; i++) {
       let c = 0, a = 0;
       if (g.last && (g.last.from === i || g.last.to === i)) { c = 0xffd34d; a = 0.32; }
-      if (movable.has(i) && sel !== i) { c = 0x5aa9ff; a = 0.22; }
+      if (movable.has(i) && sel !== i) { c = 0x5aa9ff; a = 0.13; }
+      if (dests.includes(i)) { c = g.b[i] ? 0xff6a3d : 0x38d37a; a = 0.4; }
+      if (hov === i && SS.turn) { c = 0xffffff; a = Math.max(a, 0.3); }
       if (sel === i) { c = 0x38d37a; a = 0.6; }
       if (ks === i) { c = 0xff3b30; a = 0.65; }
       ov[i].material.color.setHex(c || 0xffd34d); ov[i].material.opacity = a;
@@ -333,6 +339,9 @@ function chess3d(box, S) {
       marks[i].scale.setScalar(g.b[i] ? 2.1 : 1);
     }
   }
+  let hov = -1;
+  const cvEl = box.querySelector('canvas');
+  if (cvEl) cvEl.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || e.buttons) return; const hh = s.pick(e, [...pick, ...pcs.map(p => p.mesh)]); let o = hh.length ? hh[0].object : null; while (o && o.userData.sq === undefined) o = o.parent; const n = o ? o.userData.sq : -1; if (n !== hov) { hov = n; paint(); cvEl.style.cursor = n >= 0 && SS.turn ? 'pointer' : ''; } });
   s.onTap(e => {
     const hits = s.pick(e, [...pick, ...pcs.map(p => p.mesh)]); if (!hits.length) return;
     let o = hits[0].object; while (o && o.userData.sq === undefined) o = o.parent; if (!o) return;
