@@ -7,10 +7,10 @@ src = root / "src"
 rd = lambda p: (src / p).read_text()
 
 css = rd("css/club.css") + "\n" + rd("css/games.css")
-games = ["poker", "bigtwo", "rush", "blackjack", "puzzle", "hangman", "fourinrow", "checkers", "ladders", "tictactoe", "memory", "codebreaker", "numberhunt", "bluffdice", "nim", "rps", "patternmem", "sealed", "hilo", "quiz", "reversi", "gomoku", "mancala","g2048","cards2","scrabble", "dotsboxes", "chess", "sudoku", "dice", "chipgames", "aim", "monopoly", "arcade", "arcade2", "arcade3", "casino", "casino2", "golf", "cue", "cueui", "modes"]
+games = ["poker", "bigtwo", "rush", "blackjack", "puzzle", "hangman", "fourinrow", "checkers", "ladders", "tictactoe", "memory", "codebreaker", "numberhunt", "bluffdice", "nim", "rps", "patternmem", "sealed", "hilo", "quiz", "reversi", "gomoku", "mancala","g2048","cards2","scrabble", "dotsboxes", "chess", "sudoku", "dice", "chipgames", "aim", "monopoly", "arcade", "arcade2", "arcade3", "arcade4", "casino", "casino2", "golf", "cue", "cueui", "modes"]
 js = rd("lib.js") + "\n" + rd("covers.js") + "\n" + rd("sfx.js") + "\n" + rd("dict.js") + "\n" + rd("three3d.js") + "\n" + "\n".join(rd(f"games/{g}.js") for g in games) + "\n" + rd("core.js")
 
-page = f"""<title>Felt Club</title>
+page = f"""<title>Game Hub</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
 <style>
@@ -33,11 +33,11 @@ standalone = f"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14241d">
-<meta name="description" content="Felt Club: free card, board, dice and casino-style games with play chips only. Play against the computer on any device.">
-<title>Felt Club</title>
+<meta name="description" content="Game Hub: free card, board, dice, puzzle and arcade games with play chips only. Play against the computer or with friends on any device.">
+<title>Game Hub</title>
 </head>
 <body>
-""" + page.replace('<title>Felt Club</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n', "") + """
+""" + page.replace('<title>Game Hub</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n', "") + """
 </body>
 </html>
 """
