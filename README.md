@@ -2,7 +2,7 @@
 
 **Play it now: https://fatinfaziana.github.io/game-hub/**
 
-A free collection of 95+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
+A free collection of 105+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
 
 Works on laptops, tablets and phones, in any modern browser.
 
@@ -26,7 +26,9 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Moto Rider, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch, Block Stack, Table Tennis, Asteroids, Road Crossing, Quick Draw, Sliding Puzzle, Lights Out, Tower Stack Sky Hopper, Desert Runner, Basket Catch (keyboard, mouse and touch)
 - **Sports:** Basketball Shots, Penalty Kicks, Bowling, Gone Fishing, 100m Sprint, Keepie Uppie
 - **Puzzle:** Maze Runner, Colour Flood, Gem Swap, Tower of Hanoi
-- **Word, math and mind:** Word Search, Math Dash, Colour Clash, Odd Tile Out
+- **Word, math and mind:** Crossword, Word Builder, Word Search, Math Dash, Colour Clash, Odd Tile Out
+- **Dice and party:** Yacht Dice, Farkle, Stop the Clock, Fast Fingers, Steady Hand, Quick Count
+- **More arcade:** Bubble Pop
 - **Trivia:** Capital Cities, Name the Animal, Famous Places, Chemical Elements
 - Most games have **Easy, Medium and Hard** levels.
 
