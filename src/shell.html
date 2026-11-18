@@ -72,8 +72,8 @@
         <h3>Create a table</h3>
         <form class="hostform" id="createForm" autocomplete="off">
           <div class="field"><label for="tName">Table name</label><input id="tName" maxlength="28" value="Friday night"></div>
-          <div class="field"><label for="hMin">Fewest players</label><select id="hMin"></select></div>
-          <div class="field"><label for="hMax">Most players</label><select id="hMax"></select></div>
+          <div class="field"><label for="hCount">How many players?</label><input id="hCount" type="number" inputmode="numeric" min="1" max="99" value="4"></div>
+          <p class="hint" id="hLimit" style="grid-column:1/-1;margin:0"></p>
           <button type="submit" class="b gold big" id="createBtn">Create table</button>
         </form>
         <p class="hint" id="createNote"></p>

@@ -18,7 +18,8 @@ const randomNick = () => `${NICK_A[rnd(NICK_A.length)]} ${NICK_B[rnd(NICK_B.leng
 let myNick = (() => { const n = cleanNick(store.load().nick); return n.length >= 2 ? n : randomNick(); })();
 const ART_URL = 'https://claude.ai/artifact/EaRJWhzwZYkgtYboEXHiHB';
 const codeOf = id => String(id).slice(1, 6).toUpperCase();
-const inviteLink = id => `${ART_URL}#join=${codeOf(id)}`;
+const P2PMODE = !(window.claude && window.claude.use);
+const inviteLink = id => `${P2PMODE ? location.href.split('#')[0] : ART_URL}#join=${codeOf(id)}`;
 let pendingCode = '', pendingTimer = 0;
 const seatName = s => s.nm || nameOf(s.u);
 const hostName = V => { const s = V.seats.find(x => x.u === V.hostId); return (s && s.nm) || nameOf(V.hostId); };
@@ -231,7 +232,9 @@ async function createTable(gid, opt) {
   opt = opt || {};
   const name = (opt.name || $('tName').value.trim() || 'Card night').slice(0, 28);
   const id = 't' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
-  const mx = opt.max || +$('hMax').value || Club.games[gid].max, mn = Math.min(mx, opt.min || +$('hMin').value || Club.games[gid].min);
+  const gm = Club.games[gid];
+  const want = Math.max(1, Math.min(99, Math.floor(+$('hCount').value) || gm.max));
+  const mx = opt.max || Math.min(want, gm.max), mn = Math.min(mx, opt.min || gm.min);
   const G = makeGame({ id, name, game: gid, hostId: myUid, bots: 0, status: 'waiting', min: mn, max: mx, inv: opt.inv || [], level: gpLevel });
   G.mode = 'host';
   const ref = DB.doc('tables/' + id);
@@ -306,6 +309,7 @@ async function leaveRoom() {
     } else if (c.mode === 'guest' && c.joined) {
       await DB.doc(`tables/${c.id}/join/${myUid}`).delete();
     }
+    if (P2PMODE && c.mode === 'guest') setTimeout(() => P2P.disconnect(), 300);
   } catch {}
 }
 
@@ -364,11 +368,11 @@ function renderHome() {
     const fl = getFriends(); frPick = new Set([...frPick].filter(x => fl.includes(x)));
     $('frList').innerHTML = fl.length ? fl.map(f => `<span class="frchip${frPick.has(f) ? ' on' : ''}"><button type="button" class="cp${frPick.has(f) ? ' on' : ''}" data-fr="${esc(f)}" aria-pressed="${frPick.has(f)}">${esc(f)}</button><button type="button" class="frx" data-frx="${esc(f)}" aria-label="Remove ${esc(f)}">&times;</button></span>`).join('') : '<p class="empty">No friends added yet. Type a friend’s username above (they can see it in the top corner of their screen).</p>';
     const room = D.max - 1, ns = Math.min(frPick.size, room);
-    const hm = $('hMax');
+    const hm = $('hCount');
     if (hm.dataset.g !== selGame) {
       hm.dataset.g = selGame;
-      const opts = (a, b, sl) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sl ? ' selected' : ''}>${k}</option>`).join('');
-      $('hMin').innerHTML = opts(D.min, D.max, D.min); hm.innerHTML = opts(D.min, D.max, D.max);
+      $('hCount').value = Math.min(4, D.max);
+      $('hLimit').textContent = `Reminder: ${D.name} is played by ${D.min === D.max ? D.min : D.min + ' to ' + D.max} players.`;
     }
     $('lvlRow').hidden = !D.levels; $('lvlChips').innerHTML = chipsHTML([0, 1, 2], gpLevel, v => LEVELS[v]);
     $('gpCover').outerHTML = coverHTML(selGame).replace('class="cover"', 'class="cover big" id="gpCover" aria-hidden="true"');
@@ -378,7 +382,8 @@ function renderHome() {
     $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite || !frPick.size;
     $('friendBtn').textContent = frPick.size ? `Invite ${frPick.size} friend${frPick.size === 1 ? '' : 's'} to ${D.name}` : 'Tick a friend to invite';
     const offline = !online ? 'Playing with friends needs the shared-data feature, which is not available here. You can still play solo with computers.' : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.' : '';
-    $('createNote').textContent = offline || 'Friends find your table in the list and join from their own screen.';
+    document.querySelector('#modes [data-mode="friends"]').hidden = P2PMODE; if (P2PMODE && gpMode === 'friends') gpMode = 'create';
+    $('createNote').textContent = offline || (P2PMODE ? 'After you create the table you get a link. Send it to everyone; they open it and take a seat. Keep this page open while you play.' : 'Friends find your table in the list and join from their own screen.');
     $('friendNote').textContent = offline || (frPick.size > room ? `${D.name} seats ${D.max}, so only the first ${room} ticked friend${room === 1 ? '' : 's'} will be invited.` : 'Only the friends you invite can see this table in their list. You also get a code and link to send.');
     (gpMode === 'friends' ? $('joinSlot') : $('browse')).appendChild(jw);
   } else { $('browse').appendChild(jw); }
@@ -460,7 +465,7 @@ function renderRoom() {
     const host = c.mode === 'host';
     $('hostBtns').hidden = !host;
     const mn = V.min || D.min, rng = mn === V.max ? `${mn} players` : `${mn} to ${V.max} players`;
-    $('waitHint').textContent = (host ? 'Friends can join with the table code or from the table list. Start when everyone is seated. ' : 'Waiting for the host to start the game. ') + `This table takes ${rng}.`;
+    $('waitHint').textContent = (host ? (P2PMODE ? 'Send the link above. Friends open it and take a seat. Start when everyone is seated. ' : 'Friends can join with the table code or from the table list. Start when everyone is seated. ') : 'Waiting for the host to start the game. ') + `This table takes ${rng}.`;
     $('startBtn').disabled = n < (V.min || D.min); $('addBot').disabled = n >= V.max; $('delBot').disabled = !V.seats.some(s => !s.u);
   }
   const canTake = n < V.max || V.seats.some(s => !s.u);
@@ -576,6 +581,9 @@ function joinByCode(raw, quiet) {
   pendingCode = code; clearTimeout(pendingTimer);
   if (!online) { $('codeNote').textContent = 'Joining a friend needs the shared-data feature, which is not available in this view.'; pendingCode = ''; return; }
   $('codeNote').textContent = 'Looking for the table…';
+  if (P2PMODE) {
+    P2P.connect(code.toLowerCase()).then(() => { stopHome(); startHome(); }).catch(() => { if (pendingCode) { pendingCode = ''; clearTimeout(pendingTimer); $('codeNote').textContent = 'Could not reach that room. Check the link or code, and make sure the host still has the page open.'; } });
+  }
   pendingTimer = setTimeout(() => { if (pendingCode) { pendingCode = ''; $('codeNote').textContent = 'No open table has that code. Check it with your friend, and make sure they are still online.'; } }, 12000);
   tryPending();
 }
@@ -602,7 +610,12 @@ window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur |
   renderHome();
   USER = await use('user');
   DB = await use('db');
-  if (USER) {
+  if (P2PMODE) {
+    DB = P2P.db; canWrite = true;
+    const sv = store.load(); if (!sv.uid) { sv.uid = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); store.save(sv); }
+    myUid = sv.uid; P2P.setUid(myUid);
+    document.body.classList.add('p2p'); $('tableList').parentElement.hidden = true;
+  } else if (USER) {
     const id = await USER.id();
     if (id) myUid = id;
     try { canWrite = (await USER.can('data.write')) !== false; } catch {}
@@ -708,8 +721,6 @@ $('dmPause').onclick = () => { if (!demo || !cur) return; demo.paused = !demo.pa
 $('dmPrev').onclick = () => { if (demo && demo.i > 0) { demo.i--; drawDemo(); } };
 $('dmNext').onclick = () => { if (demo && demo.i < demo.steps.length - 1) { demo.i++; drawDemo(); } };
 $('dmPlay').onclick = () => { if (!demo) return; const g = demo.gid; leaveRoom(); startSolo(g, +$('soloN').value || undefined); };
-$('hMin').onchange = () => { if (+$('hMin').value > +$('hMax').value) $('hMax').value = $('hMin').value; };
-$('hMax').onchange = () => { if (+$('hMax').value < +$('hMin').value) $('hMin').value = $('hMax').value; };
 
 // Info panel (round log + rules): beside the table on wide screens, a pop-over on small ones.
 $('infoBtn').onclick = () => $('room').classList.add('showinfo');
