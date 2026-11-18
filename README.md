@@ -2,7 +2,7 @@
 
 **Play it now: https://fatinfaziana.github.io/game-hub/**
 
-A free collection of card, board, dice, puzzle and casino-style games with a 3D table for each one. Everything uses **play chips only — no real money, no accounts, no ads.**
+A free collection of 95+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
 
 Works on laptops, tablets and phones, in any modern browser.
 
@@ -23,7 +23,11 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Word:** Scrabble, Hangman, Word Scramble
 - **Maths:** 2048, Make 24, Quick Sums, Number Patterns
 - **Mind:** Sudoku, Mastermind, Memory, Simon, Nim, Trivia Quiz
-- **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Moto Rider, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch, Block Stack, Table Tennis, Asteroids, Road Crossing, Quick Draw, Sliding Puzzle, Lights Out, Tower Stack (keyboard, mouse and touch)
+- **Arcade:** Hit the Mice, Zombie Hunt, Street Racer, Moto Rider, Dance Floor, Space Ships, Pac-Man, Minesweeper, Sea Battle, Brick Breaker, Snake, Flappy Chick, Fruit Catch, Block Stack, Table Tennis, Asteroids, Road Crossing, Quick Draw, Sliding Puzzle, Lights Out, Tower Stack Sky Hopper, Desert Runner, Basket Catch (keyboard, mouse and touch)
+- **Sports:** Basketball Shots, Penalty Kicks, Bowling, Gone Fishing, 100m Sprint, Keepie Uppie
+- **Puzzle:** Maze Runner, Colour Flood, Gem Swap, Tower of Hanoi
+- **Word, math and mind:** Word Search, Math Dash, Colour Clash, Odd Tile Out
+- **Trivia:** Capital Cities, Name the Animal, Famous Places, Chemical Elements
 - Most games have **Easy, Medium and Hard** levels.
 
 ## Run locally

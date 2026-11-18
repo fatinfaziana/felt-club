@@ -82,7 +82,7 @@ function register(def) {
   }
   window.addEventListener('keydown', e => { if (e.key === 'Enter' && S0 && S0.turn && !running && $('arOver') && !$('arOver').hidden && document.activeElement && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); start(); } });
   Club.register({
-    id: def.id, cat: 'arcade', name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Game', levels: true,
+    id: def.id, cat: def.cat || 'arcade', name: def.name, tag: def.tag, min: 1, max: 6, soloBots: 2, roundWord: 'Game', levels: true,
     art: () => `<div class="ltile big">${def.icon}</div>`,
     rules: `<p><b>Goal:</b> ${def.goal}</p><ol><li>${def.how}</li><li>Everyone plays one go, one after another. The highest score wins.</li><li>Pick <b>Easy, Medium or Hard</b> on the game page before you start.</li><li>Each player puts in ${ANTE} chips and the best score takes the pot.</li></ol>`,
     round, view, ui, _test: { make: def.make },

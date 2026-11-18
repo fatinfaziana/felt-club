@@ -324,7 +324,7 @@ function selectGame(gid) {
   try { if (location.hash.slice(1) !== (selGame || '')) location.hash = selGame || ''; } catch {}
   renderHome();
 }
-const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games'], ['arcade', 'Arcade']];
+const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games'], ['sports', 'Sports games'], ['arcade', 'Arcade'], ['puzzle', 'Puzzle games'], ['trivia', 'Trivia']];
 let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(id, c))) || [null])[0];
 function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
 const inCat = inCatEarly;
