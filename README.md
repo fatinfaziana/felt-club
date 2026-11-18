@@ -1,6 +1,6 @@
 # Game Hub
 
-**Play it now: https://fatinfaziana.github.io/felt-club/**
+**Play it now: https://fatinfaziana.github.io/game-hub/**
 
 A free collection of card, board, dice, puzzle and casino-style games with a 3D table for each one. Everything uses **play chips only — no real money, no accounts, no ads.**
 
