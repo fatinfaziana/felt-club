@@ -10,52 +10,73 @@
 
   <!-- lobby -->
   <section id="home" class="home">
-    <div class="gamegrid" id="gameGrid"></div>
-
-    <section class="panel gamepanel" id="gamePanel" hidden>
-      <div class="gp-head">
-        <h2 id="gpName"></h2>
-        <p class="hint" id="gpTag"></p>
+    <div id="browse">
+      <p class="browse-lead" id="browseLead">Pick a category, then choose a game.</p>
+      <div class="gamegrid" id="gameGrid"></div>
+      <div id="joinWrap" class="joinwrap">
+        <section class="panel">
+          <h2>Join a friend</h2>
+          <form class="codeform" id="codeForm" autocomplete="off">
+            <div class="field"><label for="codeIn">Table code from your friend</label><input id="codeIn" maxlength="8" placeholder="For example K3F9A" style="text-transform:uppercase"></div>
+            <button type="submit" class="b small gold">Join</button>
+          </form>
+          <p class="hint" id="codeNote" aria-live="polite"></p>
+        </section>
+        <section class="panel">
+          <h2 id="listTitle">Open tables</h2>
+          <div id="tableList"></div>
+        </section>
       </div>
-      <div class="gp-actions">
-        <div class="solo">
-          <div class="field">
-            <label for="soloN">Players at the table</label>
-            <select id="soloN"></select>
-          </div>
-          <button type="button" class="b gold" id="soloBtn">Play vs computer</button>
-          <span class="kbhint">or press <kbd>Enter</kbd></span>
+    </div>
+
+    <section class="gpage" id="gamePanel" hidden>
+      <button type="button" class="ghost back" id="backBtn">&larr; All games</button>
+      <div class="gp-hero">
+        <div class="cover big" id="gpCover" aria-hidden="true"></div>
+        <div class="gp-info">
+          <h2 id="gpName"></h2>
+          <p class="hint" id="gpTag"></p>
+          <p class="gp-pl" id="gpPl"></p>
+          <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
         </div>
+      </div>
+
+      <div class="modes" id="modes" role="group" aria-label="How do you want to play?">
+        <button type="button" class="mode" data-mode="solo" aria-pressed="true"><b>Solo</b><span>Play with computers</span></button>
+        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite or join</span></button>
+        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Choose the size</span></button>
+      </div>
+
+      <div class="modebody" id="mSolo">
+        <h3>How many computers?</h3>
+        <div class="chips-pick" id="soloChips" role="group" aria-label="Number of computers"></div>
+        <select id="soloN" hidden aria-hidden="true"></select>
+        <div class="goRow"><button type="button" class="b gold big" id="soloBtn">Play now</button><span class="kbhint">or press <kbd>Enter</kbd></span></div>
+      </div>
+
+      <div class="modebody" id="mFriends" hidden>
+        <h3>How many friends are joining?</h3>
+        <div class="chips-pick" id="frChips" role="group" aria-label="Number of friends"></div>
+        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Create a table for friends</button></div>
+        <p class="hint" id="friendNote"></p>
+        <div id="joinSlot"></div>
+      </div>
+
+      <div class="modebody" id="mCreate" hidden>
+        <h3>Create a table</h3>
         <form class="hostform" id="createForm" autocomplete="off">
-          <div class="field">
-            <label for="tName">Host a table for friends</label>
-            <input id="tName" maxlength="28" value="Friday night">
-          </div>
+          <div class="field"><label for="tName">Table name</label><input id="tName" maxlength="28" value="Friday night"></div>
           <div class="field"><label for="hMin">Fewest players</label><select id="hMin"></select></div>
           <div class="field"><label for="hMax">Most players</label><select id="hMax"></select></div>
-          <button type="submit" class="b small" id="createBtn">Create table</button>
+          <button type="submit" class="b gold big" id="createBtn">Create table</button>
         </form>
+        <p class="hint" id="createNote"></p>
       </div>
-      <p class="hint" id="createNote"></p>
-      <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
-      <details class="rules">
+
+      <details class="rules panel">
         <summary>All the rules on one page</summary>
         <div id="gpRules"></div>
       </details>
-    </section>
-
-    <section class="panel">
-      <h2>Join a friend</h2>
-      <form class="codeform" id="codeForm" autocomplete="off">
-        <div class="field"><label for="codeIn">Table code from your friend</label><input id="codeIn" maxlength="8" placeholder="For example K3F9A" style="text-transform:uppercase"></div>
-        <button type="submit" class="b small gold">Join</button>
-      </form>
-      <p class="hint" id="codeNote" aria-live="polite"></p>
-    </section>
-
-    <section class="panel">
-      <h2 id="listTitle">Open tables</h2>
-      <div id="tableList"></div>
     </section>
   </section>
 

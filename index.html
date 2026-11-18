@@ -311,26 +311,50 @@ body { overflow-x: hidden; }
 button, .gtile { touch-action: manipulation; }
 
 /* ================= one-screen layout ================= */
-/* Home: games on the left, the play card on the right (wide screens); on small screens the play card floats at the bottom. */
-@media (min-width: 900px) {
-  .wrap { max-width: 1280px; }
-  .home { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 16px 20px; align-items: start; }
-  .home .gamegrid { grid-column: 1; grid-row: 1 / span 4; }
-  .home > .panel { grid-column: 2; }
-  .home .gamepanel { position: sticky; top: 12px; max-height: calc(100dvh - 24px); overflow: auto; z-index: 5; border-color: var(--gold); background: var(--room); box-shadow: 0 10px 30px rgba(0,0,0,.45); }
-  .gp-actions { flex-direction: column; align-items: stretch; }
-  .gp-actions .solo { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-  .gp-actions .hostform { display: flex; flex-wrap: wrap; gap: 8px; }
-}
-@media (max-width: 899px) {
-  .home .gamepanel { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 30; max-height: 48dvh; overflow: auto; background: var(--room); border-color: var(--gold); box-shadow: 0 -6px 28px rgba(0,0,0,.6); padding: 10px 12px; }
-  .home:has(.gamepanel:not([hidden])) { padding-bottom: 46dvh; }
-  .gp-head h2 { font-size: 18px; }
-  .gp-actions .hostform, #createNote { display: none; }
-  .gp-actions .solo { display: flex; gap: 10px; align-items: flex-end; }
-  .gp-actions .solo .b { flex: 1; }
-}
-.gp-close { display: none; }
+/* Home: one layout on every device. Browse = categories + picture grid. Game page = hero + how-do-you-want-to-play. */
+.wrap { max-width: 1100px; }
+.browse-lead { color: var(--muted); font-size: 14px; }
+.catbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.catbtn.open { border-color: var(--gold); color: var(--gold); }
+.catmenu { margin-top: 12px; background: var(--rail); border: 2px solid var(--rail-hi); }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.gtile { padding: 0; overflow: hidden; display: flex; flex-direction: column; background: var(--room); border: 2px solid var(--rail-hi); border-radius: 16px; text-align: left; cursor: pointer; color: var(--text); transition: transform .15s ease, border-color .15s ease; }
+.gtile:hover, .gtile:focus-visible { transform: translateY(-3px); border-color: var(--gold); }
+.gt-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 2px; }
+.gt-body b { font-family: var(--display); font-size: 16px; line-height: 1.15; }
+.cover { aspect-ratio: 16 / 10; display: grid; place-items: center; background: radial-gradient(90% 90% at 30% 20%, rgba(255,255,255,.22), transparent 60%), linear-gradient(135deg, var(--c1), var(--c2)); position: relative; overflow: hidden; }
+.cover::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 2px, transparent 2px 12px); }
+.cover span { position: relative; z-index: 1; font-size: clamp(34px, 8vw, 52px); font-weight: 800; font-family: var(--display); color: #fff; text-shadow: 0 3px 10px rgba(0,0,0,.45); line-height: 1; letter-spacing: -.02em; }
+.cover.big { width: 200px; flex: none; border-radius: 18px; aspect-ratio: 4 / 3; border: 2px solid var(--rail-hi); }
+.cover.big span { font-size: 64px; }
+
+.gpage { max-width: 760px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.back { align-self: flex-start; }
+.gp-hero { display: flex; gap: 16px; align-items: center; }
+.gp-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.gp-info h2 { font-size: 26px; }
+.gp-pl { color: var(--gold); font-size: 13px; font-weight: 600; }
+.modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.mode { background: var(--rail); border: 2px solid var(--rail); border-radius: 14px; padding: 10px 8px; color: var(--text); cursor: pointer; display: flex; flex-direction: column; gap: 2px; text-align: center; font-family: var(--body); }
+.mode b { font-family: var(--display); font-size: 16px; } .mode span { font-size: 12px; color: var(--muted); }
+.mode[aria-pressed="true"] { border-color: var(--gold); background: var(--room); }
+.mode:hover { border-color: var(--rail-hi); }
+.modebody { background: var(--rail); border: 1.5px solid var(--rail-hi); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.modebody h3 { margin: 0; font-family: var(--display); font-size: 17px; }
+.chips-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.cp { font: 600 15px var(--body); color: var(--text); background: var(--room); border: 2px solid var(--rail-hi); border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+.cp.on { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+.goRow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.b.big { padding: 14px 28px; font-size: 18px; }
+.modebody .hostform { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.modebody .hostform .field:first-child { grid-column: 1 / -1; } .modebody .hostform .b { grid-column: 1 / -1; }
+.modebody .field input, .modebody .field select { width: 100%; max-width: none; }
+.joinwrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 18px; }
+#joinSlot .joinwrap { margin-top: 6px; }
+#gamePanel .rules { margin-top: 2px; }
+@media (max-width: 520px) { .gp-hero { flex-direction: column; align-items: stretch; } .cover.big { width: 100%; aspect-ratio: 16 / 7; } .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mode span { display: none; } }
+.kbhint { display: none; }
+@media (hover: hover) and (pointer: fine) { .kbhint { display: inline; } }
 
 /* Room: everything inside one screen. Table fills the space, controls sit in a slim bar, notes sit beside (or behind a button). */
 body:has(#room:not([hidden])) .top, body:has(#room:not([hidden])) footer { display: none; }
@@ -403,6 +427,7 @@ body { margin: 0; }
 .seat.hero .cards, #pkHcards { --cw: clamp(54px, 11vw, 84px); gap: 8px; }
 .board { --cw: clamp(48px, 9.5vw, 76px); gap: 6px; }
 .vp-card { transition: transform .14s ease; } .vp-card.held { transform: translateY(-16px); } .vp-card.held .card { box-shadow: 0 0 0 3px var(--gold), 0 10px 16px rgba(0, 0, 0, .5); }
+@media (max-width: 520px) { .catbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .catbtn { justify-content: space-between; padding: 9px 10px; font-size: 14px; } }
 
 /* ----- Tai Ti and Colour Rush share a row of opponents and a hand of tappable cards ----- */
 .bt-opps { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(8px, 2vw, 20px); }
@@ -744,52 +769,73 @@ body { margin: 0; }
 
   <!-- lobby -->
   <section id="home" class="home">
-    <div class="gamegrid" id="gameGrid"></div>
-
-    <section class="panel gamepanel" id="gamePanel" hidden>
-      <div class="gp-head">
-        <h2 id="gpName"></h2>
-        <p class="hint" id="gpTag"></p>
+    <div id="browse">
+      <p class="browse-lead" id="browseLead">Pick a category, then choose a game.</p>
+      <div class="gamegrid" id="gameGrid"></div>
+      <div id="joinWrap" class="joinwrap">
+        <section class="panel">
+          <h2>Join a friend</h2>
+          <form class="codeform" id="codeForm" autocomplete="off">
+            <div class="field"><label for="codeIn">Table code from your friend</label><input id="codeIn" maxlength="8" placeholder="For example K3F9A" style="text-transform:uppercase"></div>
+            <button type="submit" class="b small gold">Join</button>
+          </form>
+          <p class="hint" id="codeNote" aria-live="polite"></p>
+        </section>
+        <section class="panel">
+          <h2 id="listTitle">Open tables</h2>
+          <div id="tableList"></div>
+        </section>
       </div>
-      <div class="gp-actions">
-        <div class="solo">
-          <div class="field">
-            <label for="soloN">Players at the table</label>
-            <select id="soloN"></select>
-          </div>
-          <button type="button" class="b gold" id="soloBtn">Play vs computer</button>
-          <span class="kbhint">or press <kbd>Enter</kbd></span>
+    </div>
+
+    <section class="gpage" id="gamePanel" hidden>
+      <button type="button" class="ghost back" id="backBtn">&larr; All games</button>
+      <div class="gp-hero">
+        <div class="cover big" id="gpCover" aria-hidden="true"></div>
+        <div class="gp-info">
+          <h2 id="gpName"></h2>
+          <p class="hint" id="gpTag"></p>
+          <p class="gp-pl" id="gpPl"></p>
+          <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
         </div>
+      </div>
+
+      <div class="modes" id="modes" role="group" aria-label="How do you want to play?">
+        <button type="button" class="mode" data-mode="solo" aria-pressed="true"><b>Solo</b><span>Play with computers</span></button>
+        <button type="button" class="mode" data-mode="friends" aria-pressed="false"><b>With friends</b><span>Invite or join</span></button>
+        <button type="button" class="mode" data-mode="create" aria-pressed="false"><b>Create a table</b><span>Choose the size</span></button>
+      </div>
+
+      <div class="modebody" id="mSolo">
+        <h3>How many computers?</h3>
+        <div class="chips-pick" id="soloChips" role="group" aria-label="Number of computers"></div>
+        <select id="soloN" hidden aria-hidden="true"></select>
+        <div class="goRow"><button type="button" class="b gold big" id="soloBtn">Play now</button><span class="kbhint">or press <kbd>Enter</kbd></span></div>
+      </div>
+
+      <div class="modebody" id="mFriends" hidden>
+        <h3>How many friends are joining?</h3>
+        <div class="chips-pick" id="frChips" role="group" aria-label="Number of friends"></div>
+        <div class="goRow"><button type="button" class="b gold big" id="friendBtn">Create a table for friends</button></div>
+        <p class="hint" id="friendNote"></p>
+        <div id="joinSlot"></div>
+      </div>
+
+      <div class="modebody" id="mCreate" hidden>
+        <h3>Create a table</h3>
         <form class="hostform" id="createForm" autocomplete="off">
-          <div class="field">
-            <label for="tName">Host a table for friends</label>
-            <input id="tName" maxlength="28" value="Friday night">
-          </div>
+          <div class="field"><label for="tName">Table name</label><input id="tName" maxlength="28" value="Friday night"></div>
           <div class="field"><label for="hMin">Fewest players</label><select id="hMin"></select></div>
           <div class="field"><label for="hMax">Most players</label><select id="hMax"></select></div>
-          <button type="submit" class="b small" id="createBtn">Create table</button>
+          <button type="submit" class="b gold big" id="createBtn">Create table</button>
         </form>
+        <p class="hint" id="createNote"></p>
       </div>
-      <p class="hint" id="createNote"></p>
-      <div class="gp-guide"><button type="button" class="ghost" id="guideBtn">Step-by-step guide</button><button type="button" class="ghost" id="demoBtn">Watch a demo</button></div>
-      <details class="rules">
+
+      <details class="rules panel">
         <summary>All the rules on one page</summary>
         <div id="gpRules"></div>
       </details>
-    </section>
-
-    <section class="panel">
-      <h2>Join a friend</h2>
-      <form class="codeform" id="codeForm" autocomplete="off">
-        <div class="field"><label for="codeIn">Table code from your friend</label><input id="codeIn" maxlength="8" placeholder="For example K3F9A" style="text-transform:uppercase"></div>
-        <button type="submit" class="b small gold">Join</button>
-      </form>
-      <p class="hint" id="codeNote" aria-live="polite"></p>
-    </section>
-
-    <section class="panel">
-      <h2 id="listTitle">Open tables</h2>
-      <div id="tableList"></div>
     </section>
   </section>
 
@@ -986,6 +1032,21 @@ function plates(S, o) {
       <span class="style">${esc(S.tag(i))}</span><span class="stack">${nc ? (s.w || 0) + ' win' + ((s.w || 0) === 1 ? '' : 's') : fmt(s.stack)}</span></div>${tag}</div>`;
   }).join('');
 }
+
+/* Picture covers for the game tiles: a big symbol on a colour wash. */
+const COVERS = {
+  poker: ['A♠', '#1f7a4a', '#0b3a24'], bigtwo: ['2♠', '#7a3fa0', '#2d1245'], rush: ['🌈', '#2f6fd6', '#13265e'], blackjack: ['21', '#1b8a55', '#0a3a26'],
+  puzzle: ['🔤', '#d98a2b', '#5a3010'], scramble: ['🔤', '#d98a2b', '#5a3010'], make24: ['24', '#c4372e', '#4a1411'], pattern: ['🧩', '#3f8be8', '#16305e'], sums: ['➕', '#2aa58a', '#0d3b33'],
+  hangman: ['🪢', '#9a6b3a', '#3a2412'], fourinrow: ['🔴🟡', '#2f55c4', '#142560'], checkers: ['⚫🔴', '#8d5a2f', '#3a220f'], ladders: ['🪜', '#3a9a4a', '#143d1b'], tictactoe: ['❌⭕', '#6a5acd', '#262060'],
+  memory: ['🧠', '#e0709a', '#5a1a38'], codebreaker: ['🔐', '#6b7a8a', '#222c38'], numberhunt: ['🔢', '#3aa0c8', '#123a4f'], bluffdice: ['🎲', '#b04a5a', '#4a1822'], nim: ['🥢', '#c89a3a', '#4a3410'],
+  rps: ['✊✋✌️', '#d8703a', '#5a2410'], patternmem: ['🎹', '#8a5ad8', '#321a66'], sealed: ['🤫', '#5a6ad8', '#1a2060'], lowunique: ['🤫', '#5a6ad8', '#1a2060'], twothirds: ['⅔', '#4a8ad8', '#14305e'],
+  hilo: ['↕️', '#c8503a', '#4a1a10'], quiz: ['❓', '#e0a02a', '#5a3a08'], reversi: ['⚪⚫', '#2f8a5a', '#0e3a24'], gomoku: ['⭕', '#9a7a3a', '#3a2c10'], mancala: ['🪨', '#a8683a', '#3f2210'],
+  dotsboxes: ['▦', '#4a7ad8', '#142a5e'], chess: ['♞', '#8d5a2f', '#2e1c0e'], sudoku: ['9', '#5a8a9a', '#1a3a46'], pig: ['🐷', '#e08aa0', '#5a2234'], shutbox: ['📦', '#a07a4a', '#3a2a14'], bankroll: ['💰', '#c8a02a', '#4a3a08'],
+  threecard: ['3♥', '#1f6a52', '#0b3326'], caribbean: ['🏝️', '#2aa5c8', '#0d3f4f'], letitride: ['🏇', '#3a8a4a', '#123d1b'], reddog: ['🐕', '#c4503a', '#4a1a10'], baccarat: ['9♦', '#8a1f2a', '#380a10'], videopoker: ['📟', '#3a5ad8', '#101e5e'],
+  roulette: ['🎡', '#1a6b3a', '#0a2c18'], sicbo: ['🎲', '#8a1f2a', '#380a10'], craps: ['🎲', '#1f6a52', '#0b3326'], slots: ['🎰', '#7a2fd8', '#2a1060'], keno: ['🎱', '#2b3a6a', '#0f1630'],
+  darts: ['🎯', '#c4372e', '#3a1210'], archery: ['🏹', '#3a8a3a', '#10381a'], minigolf: ['⛳', '#3aa04a', '#10401a'], pool: ['🎱', '#1f7a4a', '#0a3220'], carrom: ['🟤', '#d6b05a', '#5a3f10'],
+};
+const coverHTML = id => { const c = COVERS[id] || ['🎮', '#4a3a6a', '#1a1230']; return `<div class="cover" style="--c1:${c[1]};--c2:${c[2]}"><span>${c[0]}</span></div>`; };
 
 /* ---------- 3D layer (Three.js r128). Every 3D scene is built from these parts ---------- */
 const T3 = (() => {
@@ -7714,46 +7775,57 @@ function startHome() {
 }
 function selectGame(gid) {
   selGame = gid && Club.games[gid] ? gid : null;
+  if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; }
   try { if (location.hash.slice(1) !== (selGame || '')) location.hash = selGame || ''; } catch {}
   renderHome();
 }
 const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games']];
-let openCat = null;
-const inCat = (id, c) => { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); };
+let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(id, c))) || [null])[0];
+function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
+const inCat = inCatEarly;
+let gpMode = 'solo', frN = 0, soloC = -1;
+const playersTxt = D => (D.min === D.max ? D.min : D.min + ' to ' + D.max) + ' players';
+function chipsHTML(vals, sel, label) { return vals.map(v => `<button type="button" class="cp${v === sel ? ' on' : ''}" data-v="${v}" aria-pressed="${v === sel}">${label(v)}</button>`).join(''); }
 function renderHome() {
   const tile = id => {
     const D = Club.games[id];
-    return `<button type="button" class="gtile" data-g="${id}" aria-pressed="${selGame === id}">
-      <div class="art">${D.art()}</div><b>${esc(D.name)}</b><span class="tg">${esc(D.tag)}</span>
-      <span class="pl">${D.min === D.max ? D.min : D.min + ' to ' + D.max} players</span></button>`;
+    return `<button type="button" class="gtile" data-g="${id}">${coverHTML(id)}<div class="gt-body"><b>${esc(D.name)}</b><span class="pl">${playersTxt(D)}</span></div></button>`;
   };
-  const selCat = selGame && Club.games[selGame] ? (CATS.find(([c]) => inCat(selGame, c)) || [null])[0] : null;
   const cats = CATS.filter(([c]) => Club.order.some(id => inCat(id, c)));
   $('gameGrid').innerHTML = `<div class="catbar" role="group" aria-label="Game categories">${cats.map(([c, label]) => {
     const n = Club.order.filter(id => inCat(id, c)).length;
-    return `<button type="button" class="catbtn${selCat === c ? ' has' : ''}" data-cat="${c}" aria-expanded="${openCat === c}" aria-controls="catMenu">${label}<small>${n}</small><i aria-hidden="true">${openCat === c ? '▴' : '▾'}</i></button>`;
+    return `<button type="button" class="catbtn${openCat === c ? ' open' : ''}" data-cat="${c}" aria-expanded="${openCat === c}" aria-controls="catMenu">${label}<small>${n}</small><i aria-hidden="true">${openCat === c ? '&#9652;' : '&#9662;'}</i></button>`;
   }).join('')}</div>` + (openCat ? `<div class="catmenu" id="catMenu"><div class="tiles">${Club.order.filter(id => inCat(id, openCat)).map(tile).join('')}</div></div>` : '');
   const D = selGame && Club.games[selGame];
-  $('gamePanel').hidden = !D;
+  $('browse').hidden = !!D; $('gamePanel').hidden = !D;
+  const jw = $('joinWrap');
   if (D) {
+    const lo = Math.max(D.min, 1), totals = Array.from({ length: D.max - lo + 1 }, (_, k) => lo + k);
     const sel = $('soloN');
-    if (sel.dataset.g !== selGame) {
-      sel.dataset.g = selGame;
-      const lo = Math.max(D.min, 1), start = D.soloBots + 1;
-      sel.innerHTML = Array.from({ length: D.max - lo + 1 }, (_, k) => lo + k).map(k => `<option value="${k}"${k === start ? ' selected' : ''}>${k === 1 ? '1 player (just you)' : k + ' players (you + ' + (k - 1) + ' computer' + (k > 2 ? 's' : '') + ')'}</option>`).join('');
-    }
+    if (sel.dataset.g !== selGame) { sel.dataset.g = selGame; soloC = D.soloBots; frN = Math.min(Math.max(D.min - 1, 1), D.max - 1) === 0 ? 1 : Math.min(3, D.max - 1); gpMode = 'solo'; }
+    if (!totals.includes(soloC + 1)) soloC = Math.max(0, lo - 1);
+    sel.innerHTML = totals.map(k => `<option value="${k}"${k === soloC + 1 ? ' selected' : ''}>${k}</option>`).join('');
+    $('soloChips').innerHTML = chipsHTML(totals.map(k => k - 1), soloC, c => (c === 0 ? 'None (just me)' : c + (c === 1 ? ' computer' : ' computers')));
+    const frs = Array.from({ length: D.max - 1 }, (_, k) => k + 1).filter(f => f + 1 >= Math.max(2, D.min));
+    if (!frs.includes(frN)) frN = frs[Math.min(frs.length - 1, 1)] || frs[0] || 1;
+    $('frChips').innerHTML = chipsHTML(frs, frN, f => f + (f === 1 ? ' friend' : ' friends'));
     const hm = $('hMax');
     if (hm.dataset.g !== selGame) {
       hm.dataset.g = selGame;
-      const opts = (a, b, sel) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sel ? ' selected' : ''}>${k}</option>`).join('');
+      const opts = (a, b, sl) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sl ? ' selected' : ''}>${k}</option>`).join('');
       $('hMin').innerHTML = opts(D.min, D.max, D.min); hm.innerHTML = opts(D.min, D.max, D.max);
     }
-    $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpRules').innerHTML = D.rules;
-    $('createBtn').disabled = !online || !canWrite;
-    $('createNote').textContent = !online ? 'Hosted tables need the shared-data feature, which is not available in this view. You can still play against the computer.'
-      : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.'
-      : 'Friends find your table in the list below and join from their own screen.';
-  }
+    $('gpCover').outerHTML = coverHTML(selGame).replace('class="cover"', 'class="cover big" id="gpCover" aria-hidden="true"');
+    $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
+    document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
+    $('mSolo').hidden = gpMode !== 'solo'; $('mFriends').hidden = gpMode !== 'friends'; $('mCreate').hidden = gpMode !== 'create';
+    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite;
+    $('friendBtn').textContent = `Create a table for ${frN} friend${frN === 1 ? '' : 's'}`;
+    const offline = !online ? 'Playing with friends needs the shared-data feature, which is not available here. You can still play solo with computers.' : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.' : '';
+    $('createNote').textContent = offline || 'Friends find your table in the list and join from their own screen.';
+    $('friendNote').textContent = offline || 'You get a code and a link to send. Friends can also find the table in the list below.';
+    (gpMode === 'friends' ? $('joinSlot') : $('browse')).appendChild(jw);
+  } else { $('browse').appendChild(jw); }
   $('listTitle').textContent = D ? `Open ${D.name} tables` : 'Open tables';
   const el = $('tableList');
   if (!online) { el.innerHTML = '<p class="empty">Open tables appear here when this page is opened from claude.ai with access to its shared data.</p>'; return; }
@@ -7897,12 +7969,22 @@ $('startBtn').onclick = () => {
   if (G.startResolve) G.startResolve();
 };
 $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value); };
+$('backBtn').onclick = () => selectGame(null);
+$('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
+$('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
+$('frChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { frN = +b.dataset.v; renderHome(); } };
+$('friendBtn').onclick = () => {
+  if (!(online && canWrite && selGame)) return;
+  const D = Club.games[selGame]; $('tName').value = `${myNick}'s table`.slice(0, 28);
+  $('hMax').value = String(Math.min(D.max, frN + 1)); $('hMin').value = String(Math.min(Math.max(D.min, 2), Math.min(D.max, frN + 1)));
+  createTable(selGame);
+};
 $('createForm').onsubmit = e => { e.preventDefault(); if (online && canWrite && selGame) createTable(selGame); };
 $('gameGrid').onclick = e => {
   const c = e.target.closest('button[data-cat]');
   if (c) { openCat = openCat === c.dataset.cat ? null : c.dataset.cat; renderHome(); return; }
   const b = e.target.closest('button[data-g]');
-  if (b) { openCat = null; selectGame(b.dataset.g === selGame ? null : b.dataset.g); }
+  if (b) selectGame(b.dataset.g);
 };
 $('brandLink').onclick = e => { e.preventDefault(); if (cur) leaveRoom(); else selectGame(null); };
 $('tableList').onclick = e => {
@@ -7937,11 +8019,11 @@ $('invCopy').onclick = async () => {
   try { await navigator.clipboard.writeText(v); $('invCopy').textContent = 'Copied'; }
   catch { $('invLink').select(); try { document.execCommand('copy'); $('invCopy').textContent = 'Copied'; } catch { $('invCopy').textContent = 'Press Ctrl+C'; } }
 };
-window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; renderHome(); } });
+window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
 
 (async function init() {
   const h = location.hash.slice(1);
-  if (Club.games[h]) selGame = h;
+  if (Club.games[h]) { selGame = h; const c = CATS.find(([k]) => inCat(h, k)); if (c) openCat = c[0]; }
   renderHome();
   USER = await use('user');
   DB = await use('db');
@@ -7999,7 +8081,7 @@ document.addEventListener('keydown', e => {
   const t = e.target, tag = t && t.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || (t && t.isContentEditable)) return;
   if ((tag === 'BUTTON' || tag === 'A') && !(t.classList && t.classList.contains('gtile') && t.dataset.g === selGame)) return;
-  const b = $('soloBtn'); if (b && !b.disabled && !$('gamePanel').hidden) { e.preventDefault(); b.click(); }
+  const b = $('soloBtn'); if (b && !b.disabled && !$('gamePanel').hidden && gpMode === 'solo') { e.preventDefault(); b.click(); }
 });
 
 

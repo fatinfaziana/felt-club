@@ -319,46 +319,57 @@ function startHome() {
 }
 function selectGame(gid) {
   selGame = gid && Club.games[gid] ? gid : null;
+  if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; }
   try { if (location.hash.slice(1) !== (selGame || '')) location.hash = selGame || ''; } catch {}
   renderHome();
 }
 const CATS = [['card', 'Card games'], ['board', 'Board games'], ['mind', 'Mind games'], ['word', 'Word games'], ['math', 'Math games'], ['dice', 'Dice games'], ['group', 'Group games'], ['casino', 'Casino games'], ['aim', 'Aiming games']];
-let openCat = null;
-const inCat = (id, c) => { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); };
+let openCat = (CATS.find(([c]) => Object.keys(Club.games).some(id => inCatEarly(id, c))) || [null])[0];
+function inCatEarly(id, c) { const D = Club.games[id]; return D.cat === c || (D.cats || []).includes(c); }
+const inCat = inCatEarly;
+let gpMode = 'solo', frN = 0, soloC = -1;
+const playersTxt = D => (D.min === D.max ? D.min : D.min + ' to ' + D.max) + ' players';
+function chipsHTML(vals, sel, label) { return vals.map(v => `<button type="button" class="cp${v === sel ? ' on' : ''}" data-v="${v}" aria-pressed="${v === sel}">${label(v)}</button>`).join(''); }
 function renderHome() {
   const tile = id => {
     const D = Club.games[id];
-    return `<button type="button" class="gtile" data-g="${id}" aria-pressed="${selGame === id}">
-      <div class="art">${D.art()}</div><b>${esc(D.name)}</b><span class="tg">${esc(D.tag)}</span>
-      <span class="pl">${D.min === D.max ? D.min : D.min + ' to ' + D.max} players</span></button>`;
+    return `<button type="button" class="gtile" data-g="${id}">${coverHTML(id)}<div class="gt-body"><b>${esc(D.name)}</b><span class="pl">${playersTxt(D)}</span></div></button>`;
   };
-  const selCat = selGame && Club.games[selGame] ? (CATS.find(([c]) => inCat(selGame, c)) || [null])[0] : null;
   const cats = CATS.filter(([c]) => Club.order.some(id => inCat(id, c)));
   $('gameGrid').innerHTML = `<div class="catbar" role="group" aria-label="Game categories">${cats.map(([c, label]) => {
     const n = Club.order.filter(id => inCat(id, c)).length;
-    return `<button type="button" class="catbtn${selCat === c ? ' has' : ''}" data-cat="${c}" aria-expanded="${openCat === c}" aria-controls="catMenu">${label}<small>${n}</small><i aria-hidden="true">${openCat === c ? '▴' : '▾'}</i></button>`;
+    return `<button type="button" class="catbtn${openCat === c ? ' open' : ''}" data-cat="${c}" aria-expanded="${openCat === c}" aria-controls="catMenu">${label}<small>${n}</small><i aria-hidden="true">${openCat === c ? '&#9652;' : '&#9662;'}</i></button>`;
   }).join('')}</div>` + (openCat ? `<div class="catmenu" id="catMenu"><div class="tiles">${Club.order.filter(id => inCat(id, openCat)).map(tile).join('')}</div></div>` : '');
   const D = selGame && Club.games[selGame];
-  $('gamePanel').hidden = !D;
+  $('browse').hidden = !!D; $('gamePanel').hidden = !D;
+  const jw = $('joinWrap');
   if (D) {
+    const lo = Math.max(D.min, 1), totals = Array.from({ length: D.max - lo + 1 }, (_, k) => lo + k);
     const sel = $('soloN');
-    if (sel.dataset.g !== selGame) {
-      sel.dataset.g = selGame;
-      const lo = Math.max(D.min, 1), start = D.soloBots + 1;
-      sel.innerHTML = Array.from({ length: D.max - lo + 1 }, (_, k) => lo + k).map(k => `<option value="${k}"${k === start ? ' selected' : ''}>${k === 1 ? '1 player (just you)' : k + ' players (you + ' + (k - 1) + ' computer' + (k > 2 ? 's' : '') + ')'}</option>`).join('');
-    }
+    if (sel.dataset.g !== selGame) { sel.dataset.g = selGame; soloC = D.soloBots; frN = Math.min(Math.max(D.min - 1, 1), D.max - 1) === 0 ? 1 : Math.min(3, D.max - 1); gpMode = 'solo'; }
+    if (!totals.includes(soloC + 1)) soloC = Math.max(0, lo - 1);
+    sel.innerHTML = totals.map(k => `<option value="${k}"${k === soloC + 1 ? ' selected' : ''}>${k}</option>`).join('');
+    $('soloChips').innerHTML = chipsHTML(totals.map(k => k - 1), soloC, c => (c === 0 ? 'None (just me)' : c + (c === 1 ? ' computer' : ' computers')));
+    const frs = Array.from({ length: D.max - 1 }, (_, k) => k + 1).filter(f => f + 1 >= Math.max(2, D.min));
+    if (!frs.includes(frN)) frN = frs[Math.min(frs.length - 1, 1)] || frs[0] || 1;
+    $('frChips').innerHTML = chipsHTML(frs, frN, f => f + (f === 1 ? ' friend' : ' friends'));
     const hm = $('hMax');
     if (hm.dataset.g !== selGame) {
       hm.dataset.g = selGame;
-      const opts = (a, b, sel) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sel ? ' selected' : ''}>${k}</option>`).join('');
+      const opts = (a, b, sl) => Array.from({ length: b - a + 1 }, (_, k) => a + k).map(k => `<option value="${k}"${k === sl ? ' selected' : ''}>${k}</option>`).join('');
       $('hMin').innerHTML = opts(D.min, D.max, D.min); hm.innerHTML = opts(D.min, D.max, D.max);
     }
-    $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpRules').innerHTML = D.rules;
-    $('createBtn').disabled = !online || !canWrite;
-    $('createNote').textContent = !online ? 'Hosted tables need the shared-data feature, which is not available in this view. You can still play against the computer.'
-      : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.'
-      : 'Friends find your table in the list below and join from their own screen.';
-  }
+    $('gpCover').outerHTML = coverHTML(selGame).replace('class="cover"', 'class="cover big" id="gpCover" aria-hidden="true"');
+    $('gpName').textContent = D.name; $('gpTag').textContent = D.tag; $('gpPl').textContent = playersTxt(D); $('gpRules').innerHTML = D.rules;
+    document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === gpMode));
+    $('mSolo').hidden = gpMode !== 'solo'; $('mFriends').hidden = gpMode !== 'friends'; $('mCreate').hidden = gpMode !== 'create';
+    $('createBtn').disabled = !online || !canWrite; $('friendBtn').disabled = !online || !canWrite;
+    $('friendBtn').textContent = `Create a table for ${frN} friend${frN === 1 ? '' : 's'}`;
+    const offline = !online ? 'Playing with friends needs the shared-data feature, which is not available here. You can still play solo with computers.' : !canWrite ? 'You can watch tables here. To host or join one, ask the page owner for Contributor access.' : '';
+    $('createNote').textContent = offline || 'Friends find your table in the list and join from their own screen.';
+    $('friendNote').textContent = offline || 'You get a code and a link to send. Friends can also find the table in the list below.';
+    (gpMode === 'friends' ? $('joinSlot') : $('browse')).appendChild(jw);
+  } else { $('browse').appendChild(jw); }
   $('listTitle').textContent = D ? `Open ${D.name} tables` : 'Open tables';
   const el = $('tableList');
   if (!online) { el.innerHTML = '<p class="empty">Open tables appear here when this page is opened from claude.ai with access to its shared data.</p>'; return; }
@@ -502,12 +513,22 @@ $('startBtn').onclick = () => {
   if (G.startResolve) G.startResolve();
 };
 $('soloBtn').onclick = () => { if (selGame) startSolo(selGame, +$('soloN').value); };
+$('backBtn').onclick = () => selectGame(null);
+$('modes').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { gpMode = b.dataset.mode; renderHome(); } };
+$('soloChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { soloC = +b.dataset.v; renderHome(); } };
+$('frChips').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { frN = +b.dataset.v; renderHome(); } };
+$('friendBtn').onclick = () => {
+  if (!(online && canWrite && selGame)) return;
+  const D = Club.games[selGame]; $('tName').value = `${myNick}'s table`.slice(0, 28);
+  $('hMax').value = String(Math.min(D.max, frN + 1)); $('hMin').value = String(Math.min(Math.max(D.min, 2), Math.min(D.max, frN + 1)));
+  createTable(selGame);
+};
 $('createForm').onsubmit = e => { e.preventDefault(); if (online && canWrite && selGame) createTable(selGame); };
 $('gameGrid').onclick = e => {
   const c = e.target.closest('button[data-cat]');
   if (c) { openCat = openCat === c.dataset.cat ? null : c.dataset.cat; renderHome(); return; }
   const b = e.target.closest('button[data-g]');
-  if (b) { openCat = null; selectGame(b.dataset.g === selGame ? null : b.dataset.g); }
+  if (b) selectGame(b.dataset.g);
 };
 $('brandLink').onclick = e => { e.preventDefault(); if (cur) leaveRoom(); else selectGame(null); };
 $('tableList').onclick = e => {
@@ -542,11 +563,11 @@ $('invCopy').onclick = async () => {
   try { await navigator.clipboard.writeText(v); $('invCopy').textContent = 'Copied'; }
   catch { $('invLink').select(); try { document.execCommand('copy'); $('invCopy').textContent = 'Copied'; } catch { $('invCopy').textContent = 'Press Ctrl+C'; } }
 };
-window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; renderHome(); } });
+window.addEventListener('hashchange', () => { if (hashJoin()) return; if (!cur) { const h = location.hash.slice(1); selGame = Club.games[h] ? h : null; if (selGame) { const c = CATS.find(([k]) => inCat(selGame, k)); if (c) openCat = c[0]; } renderHome(); } });
 
 (async function init() {
   const h = location.hash.slice(1);
-  if (Club.games[h]) selGame = h;
+  if (Club.games[h]) { selGame = h; const c = CATS.find(([k]) => inCat(h, k)); if (c) openCat = c[0]; }
   renderHome();
   USER = await use('user');
   DB = await use('db');
@@ -604,7 +625,7 @@ document.addEventListener('keydown', e => {
   const t = e.target, tag = t && t.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || (t && t.isContentEditable)) return;
   if ((tag === 'BUTTON' || tag === 'A') && !(t.classList && t.classList.contains('gtile') && t.dataset.g === selGame)) return;
-  const b = $('soloBtn'); if (b && !b.disabled && !$('gamePanel').hidden) { e.preventDefault(); b.click(); }
+  const b = $('soloBtn'); if (b && !b.disabled && !$('gamePanel').hidden && gpMode === 'solo') { e.preventDefault(); b.click(); }
 });
 
 
