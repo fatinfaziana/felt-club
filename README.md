@@ -2,7 +2,7 @@
 
 **Play it now: https://fatinfaziana.github.io/game-hub/**
 
-A free collection of 105+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
+A free collection of 110+ card, board, dice, puzzle, sports, arcade, trivia and casino-style games in one place. Everything uses **play chips only — no real money, no accounts, no ads.**
 
 Works on laptops, tablets and phones, in any modern browser.
 
@@ -28,7 +28,8 @@ Works on laptops, tablets and phones, in any modern browser.
 - **Puzzle:** Maze Runner, Colour Flood, Gem Swap, Tower of Hanoi
 - **Word, math and mind:** Crossword, Word Builder, Word Search, Math Dash, Colour Clash, Odd Tile Out
 - **Dice and party:** Yacht Dice, Farkle, Stop the Clock, Fast Fingers, Steady Hand, Quick Count
-- **More arcade:** Bubble Pop
+- **More arcade:** Bubble Pop, Tap Tiles, Gold Miner, Balloon Cannon
+- **Also:** Solitaire (cards), Dominoes (board), Air Hockey (sports)
 - **Trivia:** Capital Cities, Name the Animal, Famous Places, Chemical Elements
 - Most games have **Easy, Medium and Hard** levels.
 
