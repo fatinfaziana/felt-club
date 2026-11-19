@@ -6,6 +6,17 @@ A free collection of 115+ card, board, dice, puzzle, sports, arcade, trivia and 
 
 Works on laptops, tablets and phones, in any modern browser.
 
+## Share this link
+
+**https://fatinfaziana.github.io/game-hub/**
+
+- **Free:** 115+ games, play chips only, no real money, no sign-up, no ads.
+- **Any device:** laptop, tablet or phone, in any modern browser. Nothing to install.
+- **Solo:** pick a game and play against the computer (Easy, Medium or Hard on skill games).
+- **With friends:** pick a game, choose *Create a table*, type how many players, then send the link you get. Friends open it and take a seat. Keep the host's page open.
+- **Game nights:** the 🎉 *Events* button keeps a leaderboard across games, shows it on a big screen and gives a QR code for people to scan.
+- **Privacy:** your name and chips stay in your own browser.
+
 ## How to play
 
 - **Laptop / desktop:** pick a game, then press **Enter** to start against the computer.
