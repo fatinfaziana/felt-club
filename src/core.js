@@ -725,3 +725,34 @@ $('dmPlay').onclick = () => { if (!demo) return; const g = demo.gid; leaveRoom()
 // Info panel (round log + rules): beside the table on wide screens, a pop-over on small ones.
 $('infoBtn').onclick = () => $('room').classList.add('showinfo');
 $('infoClose').onclick = () => $('room').classList.remove('showinfo');
+
+/* ----- fit every game inside the screen: if the table is taller than the space it has, scale it down (no scrolling) ----- */
+let fitBusy = false, fitQueued = 0;
+function fitStage() {
+  fitQueued = 0;
+  const st = $('stage'), room = $('room');
+  if (!st || !room || room.hidden) return;
+  const c = st.firstElementChild; if (!c) return;
+  fitBusy = true;
+  c.style.transform = ''; c.style.width = ''; c.style.transformOrigin = ''; c.style.flex = ''; c.style.marginBottom = '';
+  const avail = st.clientHeight;
+  let z = 1;
+  if (avail > 40) {
+    let h = Math.max(c.scrollHeight, c.getBoundingClientRect().height);
+    for (let k = 0; k < 6 && h > avail + 0.5; k++) {
+      z = Math.max(0.4, k === 0 ? avail / h : z * (avail / h) * 0.995);
+      c.style.width = (100 / z) + '%'; c.style.transformOrigin = 'top left'; c.style.transform = `scale(${z})`; c.style.flex = '0 0 auto';
+      h = c.getBoundingClientRect().height;
+      if (z <= 0.4) break;
+    }
+    if (z < 1) c.style.marginBottom = (-(c.offsetHeight * (1 - z))) + 'px';
+  }
+  st.style.overflow = z < 1 ? 'hidden' : '';
+  fitBusy = false;
+}
+const queueFit = () => { if (!fitBusy && !fitQueued) fitQueued = requestAnimationFrame(fitStage); };
+new MutationObserver(queueFit).observe($('stage'), { childList: true, subtree: true, characterData: true });
+new MutationObserver(queueFit).observe($('gameCtl'), { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+new MutationObserver(queueFit).observe($('room'), { attributes: true, attributeFilter: ['hidden', 'class'] });
+window.addEventListener('resize', queueFit); window.addEventListener('orientationchange', () => setTimeout(queueFit, 200));
+if (window.ResizeObserver) { const ro = new ResizeObserver(queueFit); ro.observe($('stage')); ro.observe(document.querySelector('.controls')); }
